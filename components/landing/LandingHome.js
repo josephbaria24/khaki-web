@@ -108,8 +108,8 @@ export default function LandingHome() {
 
   return (
     <div className="landing-page w-full min-w-0">
-      <section className="overflow-x-clip bg-[#FBF8F1] px-3.5 pb-3 pt-3 min-[380px]:px-4 sm:px-6 sm:pt-5 md:px-8 md:py-6 lg:px-[6vw] lg:py-8">
-        <div className="hero-mobile-card relative mx-auto w-full min-w-0 max-w-[min(26rem,calc(100vw-1.75rem))] overflow-hidden rounded-[1.75rem] bg-[#163044] text-white shadow-[0_22px_50px_rgba(22,48,68,0.28)] min-[380px]:rounded-[1.85rem] md:max-w-5xl md:rounded-[2.15rem] lg:max-w-none">
+      <section className="overflow-x-clip bg-[#FBF8F1] px-0 pb-3 pt-3 sm:pt-5 md:px-8 md:py-6 lg:px-[6vw] lg:py-8">
+        <div className="hero-mobile-card relative mx-auto w-[95%] min-w-0 overflow-hidden rounded-[1.75rem] bg-[#163044] text-white shadow-[0_22px_50px_rgba(22,48,68,0.28)] min-[380px]:rounded-[1.85rem] md:w-full md:max-w-5xl md:rounded-[2.15rem] lg:max-w-none">
           <div
             className="pointer-events-none absolute inset-x-8 top-8 h-36 rounded-full bg-[#3E7498]/45 blur-3xl md:hidden"
             aria-hidden
@@ -118,13 +118,13 @@ export default function LandingHome() {
           <img
             src="/images/transparent-hero-protrait.png"
             alt=""
-            className="hero-art-float relative z-[1] mx-auto block h-[min(88vw,20rem)] w-full max-w-full object-cover object-[center_61%] min-[400px]:h-[min(78vw,22rem)] sm:h-[min(62vw,24rem)] md:hidden"
+            className="hero-art-float relative z-[1] mx-auto block h-[min(105vw,24rem)] w-full max-w-full object-cover object-[center_44%] min-[400px]:h-[min(92vw,26rem)] sm:h-[min(72vw,28rem)] lg:hidden"
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/transparent-hero.png"
             alt=""
-            className="hero-art-float relative z-[1] hidden aspect-[16/9] w-full object-cover object-[center_46%] md:block lg:aspect-[2/1]"
+            className="hero-art-float relative z-[1] hidden aspect-[16/9] w-full object-cover object-[center_46%] lg:block lg:aspect-[2/1]"
           />
           <div className="stagger-children relative z-[1] min-w-0 px-4 pb-6 pt-1 text-center min-[380px]:px-5 min-[380px]:pb-7 sm:px-8 sm:pb-9 md:px-12 md:pb-12 md:pt-2 lg:px-16">
             <h1 className="mx-auto max-w-full text-[1.7rem] font-black uppercase leading-[0.9] tracking-[-0.045em] text-white min-[360px]:text-[2rem] min-[400px]:text-[2.2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.4rem]">
