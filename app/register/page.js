@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "@/components/icons";
 import AuthShell from "@/components/AuthShell";
 import PasswordInput from "@/components/PasswordInput";
@@ -11,22 +11,16 @@ import { homePathFor } from "@/lib/roles";
 import { toast } from "@/lib/toast";
 
 export default function RegisterPage() {
-  return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">Loading…</div>}>
-      <RegisterForm />
-    </Suspense>
-  );
+  return <RegisterForm />;
 }
 
 function RegisterForm() {
   const { register, verifySignupOtp, resendSignupOtp } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [role, setRole] = useState(searchParams.get("role") === "tasker" ? "tasker" : "poster");
   const [posterType, setPosterType] = useState("individual");
   const [companyName, setCompanyName] = useState("");
   const [age, setAge] = useState(false);
@@ -62,7 +56,7 @@ function RegisterForm() {
       toast.error("Accept the Terms and Privacy Policy");
       return;
     }
-    if (role === "poster" && posterType === "company" && !companyName.trim()) {
+    if (posterType === "company" && !companyName.trim()) {
       setError("Company name is required");
       toast.error("Company name is required");
       return;
@@ -73,7 +67,7 @@ function RegisterForm() {
         email,
         password,
         full_name: fullName,
-        role,
+        role: "poster",
         poster_type: posterType,
         company_name: companyName,
       });
@@ -167,7 +161,7 @@ function RegisterForm() {
   return (
     <AuthShell
       title="Create your account"
-        subtitle="One account, two modes — Poster at Tasker. Verification unlocks posting and bidding."
+        subtitle="One account for posting and taking gawain. Switch Poster or Tasker anytime after you sign in."
       footer={
         <>
           Already have an account?{" "}
@@ -177,44 +171,24 @@ function RegisterForm() {
     >
       {error && <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
       <form onSubmit={onSubmit} className="space-y-3">
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => setRole("poster")}
-            className={`rounded-xl border px-3 py-3 text-left text-sm text-foreground ${role === "poster" ? "border-primary bg-primary/10 font-bold" : "border-input bg-background"}`}
-          >
-            Poster
-            <span className="mt-0.5 block text-xs font-normal text-muted-foreground">Start by posting. I-toggle to Tasker anytime — one account.</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setRole("tasker")}
-            className={`rounded-xl border px-3 py-3 text-left text-sm text-foreground ${role === "tasker" ? "border-primary bg-primary/10 font-bold" : "border-input bg-background"}`}
-          >
-            Tasker
-            <span className="mt-0.5 block text-xs font-normal text-muted-foreground">Start by finding jobs. I-toggle to Poster anytime — one account.</span>
-          </button>
-        </div>
-        {role === "poster" && (
-          <div className="space-y-2 rounded-xl bg-muted/60 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Poster type</p>
-            <div className="flex gap-3 text-sm text-foreground">
-              <label className="flex items-center gap-2">
-                <input type="radio" name="poster_type" checked={posterType === "individual"} onChange={() => setPosterType("individual")} />
-                Individual
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="radio" name="poster_type" checked={posterType === "company"} onChange={() => setPosterType("company")} />
-                Company
-              </label>
-            </div>
-            {posterType === "company" && (
-              <input className="auth-field h-11" placeholder="Company name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
-            )}
+        <div className="space-y-2 rounded-xl bg-muted/60 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account type</p>
+          <div className="flex gap-3 text-sm text-foreground">
+            <label className="flex items-center gap-2">
+              <input type="radio" name="poster_type" checked={posterType === "individual"} onChange={() => setPosterType("individual")} />
+              Individual
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="radio" name="poster_type" checked={posterType === "company"} onChange={() => setPosterType("company")} />
+              Company
+            </label>
           </div>
-        )}
+          {posterType === "company" && (
+            <input className="auth-field h-11" placeholder="Company name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+          )}
+        </div>
         <p className="rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">
-          After signup, i-submit ang government ID once. Admin verifies it before you can post or accept gawain. Same account, both modes.
+          After signup, i-submit ang government ID once. Admin verifies it before you can post or accept gawain. Switch Poster or Tasker anytime.
         </p>
         <input className="auth-field" placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
         <input className="auth-field" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />

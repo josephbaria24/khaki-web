@@ -25,7 +25,7 @@ export default function SiteHeader({ landing: _landing = false }) {
     <header
       className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1]"
     >
-      <Container className="flex h-16 items-center justify-between gap-4 lg:h-[72px]">
+      <Container className="flex h-16 min-w-0 items-center justify-between gap-2 lg:h-[72px] lg:gap-4">
         <Logo />
         <nav className="hidden items-center gap-1 md:flex">
           {LINKS.map((link) => (
@@ -60,9 +60,9 @@ export default function SiteHeader({ landing: _landing = false }) {
             </>
           )}
         </div>
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex shrink-0 items-center gap-2 md:hidden">
           {!isAuthenticated && (
-            <Link href="/register" className="btn-olive inline-flex h-9 items-center px-3 text-[11px]">
+            <Link href="/register" className="btn-olive hidden h-9 items-center px-3 text-[11px] min-[380px]:inline-flex">
               Post a task
             </Link>
           )}

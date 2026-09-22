@@ -11,7 +11,6 @@ import {
   LANDING_DISCLAIMER,
   LANDING_EARN_POINTS,
   LANDING_FAQS,
-  LANDING_STATS,
   LANDING_STEPS,
   LANDING_TASK_TABS,
   LANDING_TASKERS,
@@ -108,44 +107,59 @@ export default function LandingHome() {
   const visibleTasks = useMemo(() => LANDING_TASKS.filter((t) => t.tab === tab), [tab]);
 
   return (
-    <div className="landing-page">
-      <section className="relative overflow-hidden bg-[#C9B896] text-[#2A3F4D]">
-        <picture className="contents">
-          <source media="(min-width: 1024px)" srcSet="/images/cards/bluekhaki.png" />
+    <div className="landing-page w-full min-w-0">
+      <section className="overflow-x-clip bg-[#FBF8F1] px-3.5 pb-3 pt-3 min-[380px]:px-4 sm:px-6 sm:pt-5 md:px-8 md:py-6 lg:px-[6vw] lg:py-8">
+        <div className="hero-mobile-card relative mx-auto w-full min-w-0 max-w-[min(26rem,calc(100vw-1.75rem))] overflow-hidden rounded-[1.75rem] bg-[#163044] text-white shadow-[0_22px_50px_rgba(22,48,68,0.28)] min-[380px]:rounded-[1.85rem] md:max-w-5xl md:rounded-[2.15rem] lg:max-w-none">
+          <div
+            className="pointer-events-none absolute inset-x-8 top-8 h-36 rounded-full bg-[#3E7498]/45 blur-3xl md:hidden"
+            aria-hidden
+          />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/cards/bluekghaki.png"
+            src="/images/transparent-hero-protrait.png"
             alt=""
-            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center"
+            className="hero-art-float relative z-[1] mx-auto block h-[min(88vw,20rem)] w-full max-w-full object-cover object-[center_61%] min-[400px]:h-[min(78vw,22rem)] sm:h-[min(62vw,24rem)] md:hidden"
           />
-        </picture>
-        <div className="relative z-10 mx-auto flex min-h-[44rem] w-full items-center justify-center px-8 py-32 sm:min-h-[48rem] sm:px-12 sm:py-36 lg:min-h-[36rem] lg:px-[28%] lg:py-24">
-          <div className="w-full max-w-md text-center lg:max-w-lg">
-            <h1 className="text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-[3.5rem]">
-              Get anything done
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/transparent-hero.png"
+            alt=""
+            className="hero-art-float relative z-[1] hidden aspect-[16/9] w-full object-cover object-[center_46%] md:block lg:aspect-[2/1]"
+          />
+          <div className="stagger-children relative z-[1] min-w-0 px-4 pb-6 pt-1 text-center min-[380px]:px-5 min-[380px]:pb-7 sm:px-8 sm:pb-9 md:px-12 md:pb-12 md:pt-2 lg:px-16">
+            <h1 className="mx-auto max-w-full text-[1.7rem] font-black uppercase leading-[0.9] tracking-[-0.045em] text-white min-[360px]:text-[2rem] min-[400px]:text-[2.2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.4rem]">
+              Get anything
+              <br />
+              done
             </h1>
-            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-[#2A3F4D]/80 sm:text-lg">
+            <p className="mx-auto mt-3 max-w-[16.5rem] text-[13.5px] font-medium leading-snug text-white/80 min-[380px]:mt-4 min-[380px]:text-[15px] sm:max-w-xs sm:text-base md:max-w-md md:text-lg">
               Post any task. Pick a trusted Palawan local. Get it done.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href={postHref} className="btn-olive inline-flex h-12 items-center justify-center px-7 text-sm">
+            <div className="mx-auto mt-5 flex w-full flex-col gap-2.5 min-[380px]:mt-6 md:mt-7 md:max-w-xl md:flex-row md:justify-center">
+              <Link
+                href={postHref}
+                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#2F8AD4] px-4 text-[13.5px] font-bold text-white shadow-[0_10px_24px_rgba(47,138,212,0.38)] transition-transform duration-200 active:scale-[0.98] min-[380px]:h-[3.25rem] min-[380px]:text-[15px] md:flex-1"
+              >
                 Post your task for free
               </Link>
               <Link
                 href={earnHref}
-                className="inline-flex h-12 items-center justify-center rounded-full border-2 border-[#2A3F4D] px-7 text-sm font-bold text-[#2A3F4D] transition-all duration-200 hover:bg-[#2A3F4D]/10"
+                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-4 text-[13.5px] font-bold text-[#163044] transition-transform duration-200 active:scale-[0.98] min-[380px]:h-[3.25rem] min-[380px]:text-[15px] md:flex-1"
               >
                 Earn money as a Tasker
               </Link>
             </div>
-            <dl className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-3">
-              {LANDING_STATS.map((stat) => (
-                <div key={stat.value} className="border-t border-[#2A3F4D]/20 pt-4">
-                  <dt className="text-lg font-black">{stat.value}</dt>
-                  <dd className="mt-1 text-sm text-[#2A3F4D]/70">{stat.label}</dd>
-                </div>
-              ))}
-            </dl>
+            <div className="mt-6 flex items-center justify-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10" aria-hidden>
+                <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="currentColor">
+                  <path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6.2-.4a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2ZM4.2 18.2c.4-2.3 2.4-3.7 4.8-3.7s4.4 1.4 4.8 3.7c.1.5-.3.8-.8.8H5c-.5 0-.9-.3-.8-.8Zm8.3-.2c-.2-1.5.2-2.8 1.2-3.7.4-.3.9-.5 1.4-.6 1.9.2 3.4 1.5 3.7 3.6.1.5-.3.9-.8.9h-4.8c-.3 0-.6-.1-.7-.2Z" />
+                </svg>
+              </span>
+              <div className="text-left">
+                <p className="text-sm font-bold leading-none text-white">Palawan-wide</p>
+                <p className="mt-1 text-[11px] font-medium leading-none text-white/65">Every town · 2% until Feb 2027</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

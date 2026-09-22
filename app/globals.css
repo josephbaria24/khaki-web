@@ -427,6 +427,48 @@
     }
   }
 
+  @keyframes hero-card-rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes hero-art-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes hero-bg-settle {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  .hero-mobile-card {
+    animation: hero-card-rise 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero-art-float {
+    animation: hero-art-float 4.6s ease-in-out 0.55s infinite;
+  }
+
+  .hero-desktop-bg {
+    animation: hero-bg-settle 1.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   @keyframes nav-slide-up {
     from {
       opacity: 0;
@@ -615,6 +657,9 @@
     .animate-fade-in-up,
     .animate-fade-in,
     .animate-post-pop,
+    .hero-mobile-card,
+    .hero-art-float,
+    .hero-desktop-bg,
     .mode-switch-overlay,
     .mode-switch-card,
     .stagger-children > *,
