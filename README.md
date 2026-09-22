@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Khaki Web (Next.js)
 
-## Getting Started
+Next.js App Router version of Khaki, the Palawan jobs & services marketplace.
 
-First, run the development server:
+## Run
 
 ```bash
+cd web
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Auth and marketplace data come from Supabase. Create an account on **Register** — there are no demo logins.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.env.local` (already used):
 
-## Learn More
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
 
-To learn more about Next.js, take a look at the following resources:
+Also run `../supabase/rpcs.sql` in the SQL Editor so posting a task records the 2% posting fee.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Khaki does not hold the task payment. Poster and tasker settle that themselves. There is no in-app wallet or GCash withdraw — only the posting fee record.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If signup asks for a code, keep **Confirm email** on in Authentication → Providers.
 
-## Deploy on Vercel
+In **Authentication → Email Templates → Confirm signup**, send a 6-digit OTP instead of a link:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+<h2>Your Khaki code</h2>
+<p>Enter this code to finish creating your account:</p>
+<p><strong>{{ .Token }}</strong></p>
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To make someone admin after they register:
+
+```sql
+update public.profiles
+set role = 'admin'
+where id = '<auth user uuid>';
+```
+
+PayMongo keys stay on the server only (Next.js Route Handlers). Never put `PAYMONGO_SECRET_KEY` in this frontend.
