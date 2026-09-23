@@ -7,7 +7,7 @@ import { ChevronLeft } from "@/components/icons";
 import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
 import { useAuth } from "@/lib/AuthContext";
-import { CATEGORIES, LOCATIONS, SCHEDULE_LABELS, formatPHP, postingFee } from "@/lib/khaki";
+import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, formatPHP, postingFee, serviceByKey } from "@/lib/khaki";
 import { getBarangays } from "@/lib/palawanLocations";
 import { canOpenPost, canPostTask } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -18,7 +18,8 @@ export default function PostPage() {
   const { user } = useAuth();
   const [form, setForm] = useState({
     title: "",
-    category: CATEGORIES[0],
+    categoryKey: SERVICE_CATEGORIES[0].key,
+    groupTitle: "",
     location_area: LOCATIONS[0],
     barangay: "",
     location_detail: "",
@@ -35,7 +36,13 @@ export default function PostPage() {
     e.preventDefault();
     setError("");
     try {
-      const task = await api.tasks.create(form);
+      const { categoryKey, groupTitle, details, ...rest } = form;
+      const service = serviceByKey(categoryKey);
+      const task = await api.tasks.create({
+        ...rest,
+        category: service.enumValue,
+        details: groupTitle && details ? `${groupTitle}\n\n${details}` : groupTitle || details,
+      });
       toast.success("Gawain posted");
       router.push(`/task/${task.id}`);
     } catch (err) {
@@ -45,6 +52,7 @@ export default function PostPage() {
     }
   };
 
+  const service = serviceByKey(form.categoryKey);
   const barangays = getBarangays(form.location_area);
 
   if (!canOpenPost(user)) {
@@ -92,12 +100,42 @@ export default function PostPage() {
             {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
             <input className="h-12 w-full rounded-xl border px-3" placeholder="What needs to be done?" value={form.title} onChange={(e) => set("title", e.target.value)} required minLength={4} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <select className="h-12 w-full rounded-xl border px-3" value={form.category} onChange={(e) => set("category", e.target.value)}>
-                {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+              <select
+                className="h-12 w-full rounded-xl border px-3"
+                value={form.categoryKey}
+                onChange={(e) => {
+                  set("categoryKey", e.target.value);
+                  set("groupTitle", "");
+                }}
+              >
+                {SERVICE_CATEGORIES.map((c) => (
+                  <option key={c.key} value={c.key}>{c.title}</option>
+                ))}
               </select>
               <select className="h-12 w-full rounded-xl border px-3" value={form.schedule_type} onChange={(e) => set("schedule_type", e.target.value)}>
                 {Object.entries(SCHEDULE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
+            </div>
+            <div>
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">What kind of {service.title.toLowerCase()}?</p>
+              <div className="flex flex-wrap gap-1.5">
+                {service.groups.map((group) => {
+                  const on = form.groupTitle === group.title;
+                  return (
+                    <button
+                      key={group.title}
+                      type="button"
+                      onClick={() => set("groupTitle", on ? "" : group.title)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-bold ${on ? "bg-primary text-white" : "bg-[#F3EFE3] text-foreground"}`}
+                    >
+                      {group.title}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
+                {(service.groups.find((g) => g.title === form.groupTitle) || {}).desc || service.desc}
+              </p>
             </div>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_remote} onChange={(e) => set("is_remote", e.target.checked)} /> Remote task (any town in Palawan)</label>
             {!form.is_remote && (

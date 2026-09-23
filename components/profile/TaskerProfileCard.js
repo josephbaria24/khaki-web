@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MapPin, ShieldCheck } from "@/components/icons";
-import { CATEGORIES, LOCATIONS } from "@/lib/khaki";
+import { LOCATIONS, SERVICE_CATEGORIES, hasServiceSkill, toggleServiceSkill } from "@/lib/khaki";
 import { LANDING } from "@/lib/landingContent";
 import { Collapse, Stagger } from "@/components/ui/motion";
-import { buildTaskerCard, PRICE_TYPES, pricingModelLabel, skillLabel } from "@/lib/taskerProfile";
+import { buildTaskerCard, PRICE_TYPES, pricingModelLabel } from "@/lib/taskerProfile";
 
 const OLIVE = LANDING.olive;
 const OLIVE_DEEP = LANDING.oliveDeep;
@@ -176,11 +176,8 @@ export default function TaskerProfileCard({
     }
   };
 
-  const toggleSkill = (skill) => {
-    setSkillsForm((prev) => {
-      const has = prev.skills.includes(skill);
-      return { ...prev, skills: has ? prev.skills.filter((s) => s !== skill) : [...prev.skills, skill] };
-    });
+  const toggleSkill = (service) => {
+    setSkillsForm((prev) => ({ ...prev, skills: toggleServiceSkill(prev.skills, service) }));
   };
 
   return (
@@ -380,17 +377,17 @@ export default function TaskerProfileCard({
           <div className="space-y-3">
             <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Set your own categories</p>
             <div className="flex flex-wrap gap-1.5">
-              {CATEGORIES.map((cat) => {
-                const on = skillsForm.skills.includes(cat);
+              {SERVICE_CATEGORIES.map((cat) => {
+                const on = hasServiceSkill(skillsForm.skills, cat);
                 return (
                   <button
-                    key={cat}
+                    key={cat.key}
                     type="button"
                     onClick={() => toggleSkill(cat)}
                     className={`rounded-full px-3 py-1.5 text-[11px] font-bold transition-all duration-200 hover:scale-105 active:scale-95 ${on ? "text-white" : "bg-[#F3EFE3] text-foreground"}`}
                     style={on ? { background: OLIVE } : undefined}
                   >
-                    {skillLabel(cat)}
+                    {cat.title}
                   </button>
                 );
               })}

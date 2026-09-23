@@ -6,7 +6,7 @@ import Image from "next/image";
 import AppShell from "@/components/AppShell";
 import PublicShell from "@/components/PublicShell";
 import { FadeIn, Stagger } from "@/components/ui/motion";
-import { CHIP_CATEGORIES, graphicForTask, shortCategory } from "@/lib/catalog";
+import { CHIP_CATEGORIES, graphicForTask, shortCategory, taskMatchesChip } from "@/lib/catalog";
 import { cn, formatPHP } from "@/lib/khaki";
 import { LANDING } from "@/lib/landingContent";
 import { useAuth } from "@/lib/AuthContext";
@@ -80,7 +80,7 @@ function BrowseBody() {
 
   const filtered = tasks.filter((task) => {
     if (search && !`${task.title} ${task.details}`.toLowerCase().includes(search.toLowerCase())) return false;
-    if (category !== "All" && task.category !== category) return false;
+    if (!taskMatchesChip(task.category, category)) return false;
     return true;
   });
 

@@ -9,9 +9,9 @@ import SearchPill from "@/components/ui/SearchPill";
 import DashboardShortcuts from "@/components/DashboardShortcuts";
 import PostedJobCard from "@/components/PostedJobCard";
 import { FadeIn } from "@/components/ui/motion";
-import { CHIP_CATEGORIES } from "@/lib/catalog";
+import { CHIP_CATEGORIES, taskMatchesChip } from "@/lib/catalog";
 import { LANDING, LANDING_CATEGORIES } from "@/lib/landingContent";
-import { formatPHP } from "@/lib/khaki";
+import { displayCategory, formatPHP } from "@/lib/khaki";
 import { useAuth } from "@/lib/AuthContext";
 import { canOpenPost, isPosterMode, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -91,7 +91,7 @@ export default function DashboardPage() {
 
   const filtered = openTasks.filter((task) => {
     if (search && !`${task.title} ${task.details}`.toLowerCase().includes(search.toLowerCase())) return false;
-    if (category !== "All" && task.category !== category) return false;
+    if (!taskMatchesChip(task.category, category)) return false;
     return true;
   }).slice(0, 8);
 
@@ -239,7 +239,7 @@ export default function DashboardPage() {
                       className="w-[min(78vw,280px)] shrink-0 snap-start rounded-[1.35rem] bg-card p-5 shadow-card transition hover:-translate-y-0.5 sm:w-[260px]"
                     >
                       <p className="text-xs font-bold uppercase tracking-wide" style={{ color: LANDING.olive }}>
-                        {task.category?.replace(/\s*\(.*\)/, "")}
+                        {displayCategory(task.category)}
                       </p>
                       <p className="mt-2 min-h-[48px] text-[15px] font-bold leading-snug text-foreground">{task.title}</p>
                       <div className="mt-4 flex items-end justify-between gap-3">

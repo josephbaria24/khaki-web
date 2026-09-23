@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ShieldCheck, Wallet } from "@/components/icons";
 import CategoryCard from "@/components/landing/CategoryCard";
+import CategoryBreakdown from "@/components/landing/CategoryBreakdown";
 import { formatPHP } from "@/lib/khaki";
 import {
   LANDING,
@@ -228,8 +229,9 @@ export default function LandingHome() {
             <CategoryCard key={cat.key} cat={cat} compact />
           ))}
         </div>
-        <div className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-          <Link href="/#how-it-works" className="text-sm font-bold underline-offset-4 hover:underline" style={{ color: LANDING.olive }}>
+        <div className="mx-auto mt-4 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+          <CategoryBreakdown />
+          <Link href="/#how-it-works" className="mt-8 inline-block text-sm font-bold underline-offset-4 hover:underline" style={{ color: LANDING.olive }}>
             Learn how Khaki works
           </Link>
         </div>

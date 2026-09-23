@@ -9,7 +9,7 @@ import Container from "@/components/Container";
 import StatusPill from "@/components/StatusPill";
 import StarRating from "@/components/StarRating";
 import { useAuth } from "@/lib/AuthContext";
-import { CATEGORIES, LOCATIONS, SCHEDULE_LABELS, formatPHP, postingFee } from "@/lib/khaki";
+import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, displayCategory, formatPHP, postingFee, serviceByKey, serviceForTaskCategory } from "@/lib/khaki";
 import { LANDING } from "@/lib/landingContent";
 import { canAcceptJobs, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -210,7 +210,7 @@ export default function TaskDetailPage() {
             <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <StatusPill status={task.status} />
-                <span className="text-xs font-semibold text-muted-foreground">{task.category}</span>
+                <span className="text-xs font-semibold text-muted-foreground">{displayCategory(task.category)}</span>
               </div>
               <h1 className="text-2xl font-black sm:text-3xl">{task.title}</h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{task.details}</p>
@@ -249,8 +249,14 @@ export default function TaskDetailPage() {
               <form id="edit" onSubmit={saveEdit} className="space-y-3 rounded-2xl border bg-card p-6">
                 <h2 className="text-lg font-black">I-edit ang gawain</h2>
                 <input className="h-11 w-full rounded-xl border px-3" value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} required />
-                <select className="h-11 w-full rounded-xl border px-3" value={edit.category} onChange={(e) => setEdit({ ...edit, category: e.target.value })}>
-                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                <select
+                  className="h-11 w-full rounded-xl border px-3"
+                  value={(serviceForTaskCategory(edit.category) || SERVICE_CATEGORIES[0]).key}
+                  onChange={(e) => setEdit({ ...edit, category: serviceByKey(e.target.value).enumValue })}
+                >
+                  {SERVICE_CATEGORIES.map((c) => (
+                    <option key={c.key} value={c.key}>{c.title}</option>
+                  ))}
                 </select>
                 <select className="h-11 w-full rounded-xl border px-3" value={edit.schedule_type} onChange={(e) => setEdit({ ...edit, schedule_type: e.target.value })}>
                   {Object.entries(SCHEDULE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}

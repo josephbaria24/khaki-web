@@ -1,13 +1,7 @@
 import Link from "next/link";
 import Container from "@/components/Container";
 import Logo from "@/components/Logo";
-
-const CATEGORIES = [
-  { href: "/browse", label: "Pabili errands" },
-  { href: "/browse", label: "Local transport" },
-  { href: "/browse", label: "Tourism & tours" },
-  { href: "/browse", label: "Home repair" },
-];
+import { SERVICE_CATEGORIES } from "@/lib/khaki";
 
 const LOCATIONS = ["Puerto Princesa", "El Nido", "Coron", "San Vicente"];
 
@@ -33,8 +27,8 @@ export default function SiteFooter() {
         <div>
           <p className="text-sm font-bold">Popular categories</p>
           <div className="mt-3 space-y-2 text-sm text-[#F7F4EC]/70">
-            {CATEGORIES.map((item) => (
-              <Link key={item.label} href={item.href} className="block hover:text-[#F7F4EC]">{item.label}</Link>
+            {SERVICE_CATEGORIES.map((item) => (
+              <Link key={item.key} href={item.key === "other" ? "/post" : "/browse"} className="block hover:text-[#F7F4EC]">{item.title}</Link>
             ))}
           </div>
         </div>

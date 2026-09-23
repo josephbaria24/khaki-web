@@ -3,7 +3,7 @@
 import Link from "next/link";
 import StatusPill from "@/components/StatusPill";
 import StarRating from "@/components/StarRating";
-import { formatPHP } from "@/lib/khaki";
+import { displayCategory, formatPHP } from "@/lib/khaki";
 import { LANDING } from "@/lib/landingContent";
 
 export default function PostedJobCard({ task, tasker, review, onCancel }) {
@@ -19,7 +19,7 @@ export default function PostedJobCard({ task, tasker, review, onCancel }) {
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill status={task.status} />
             <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: LANDING.olive }}>
-              {task.category?.replace(/\s*\(.*\)/, "")}
+              {displayCategory(task.category)}
             </span>
           </div>
           <h3 className="mt-2 text-lg font-black leading-snug text-foreground">{task.title}</h3>
