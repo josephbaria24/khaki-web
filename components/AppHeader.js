@@ -24,23 +24,9 @@ export default function AppHeader() {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    if (!user) return;
-    let live = true;
-    const pull = () => {
-      api.notifications.unreadCount()
-        .then((count) => {
-          if (!live) return;
-          setUnread(count);
-        })
-        .catch(() => {});
-    };
-    pull();
-    const timer = setInterval(pull, 15000);
-    return () => {
-      live = false;
-      clearInterval(timer);
-    };
-  }, [user, pathname]);
+    if (!user?.id) return undefined;
+    return api.notifications.subscribeUnread(setUnread);
+  }, [user?.id]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1]">

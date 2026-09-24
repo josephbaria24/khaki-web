@@ -14,17 +14,14 @@ export default function NotificationsPage() {
   const [notes, setNotes] = useState([]);
 
   useEffect(() => {
-    let live = true;
-    (async () => {
-      try {
-        const list = await api.notifications.list();
-        if (live) setNotes(list);
-        await api.notifications.markAllRead();
-      } catch {
-        if (live) setNotes([]);
-      }
-    })();
-    return () => { live = false; };
+    let marked = false;
+    const stop = api.notifications.subscribe((list) => {
+      setNotes(list);
+      if (marked) return;
+      marked = true;
+      api.notifications.markAllRead().catch(() => {});
+    });
+    return stop;
   }, []);
 
   const feed = mergeNotificationFeed(user, notes);

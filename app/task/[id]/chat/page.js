@@ -37,7 +37,10 @@ export default function TaskChatPage() {
     setError("");
     setSending(true);
     try {
-      await api.messages.send(id, text.trim());
+      const row = await api.messages.send(id, text.trim());
+      if (row) {
+        setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
+      }
       setText("");
     } catch (err) {
       const msg = err.message || "Hindi ma-send ang message.";

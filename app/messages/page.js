@@ -10,15 +10,7 @@ import { api } from "@/lib/store";
 export default function MessagesPage() {
   const [threads, setThreads] = useState([]);
 
-  const load = () => {
-    api.messages.threads().then(setThreads).catch(() => setThreads([]));
-  };
-
-  useEffect(() => {
-    load();
-    const timer = setInterval(load, 12000);
-    return () => clearInterval(timer);
-  }, []);
+  useEffect(() => api.messages.subscribeThreads(setThreads), []);
 
   return (
     <AppShell>
