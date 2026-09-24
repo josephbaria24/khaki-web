@@ -21,7 +21,7 @@ function tabActive(pathname, href) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function BottomNav() {
+export default function BottomNav({ hidden = false }) {
   const pathname = usePathname();
   const { user } = useAuth();
   const barRef = useRef(null);
@@ -69,7 +69,17 @@ export default function BottomNav() {
   }, [pathname, activeIndex]);
 
   return (
-    <nav className="fixed bottom-4 left-4 right-4 z-40 lg:hidden">
+    <nav
+      className={cn(
+        "fixed bottom-4 left-4 right-4 z-40 lg:hidden",
+        "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+        hidden
+          ? "pointer-events-none translate-y-[calc(100%+1.5rem)] opacity-0"
+          : "translate-y-0 opacity-100"
+      )}
+      aria-hidden={hidden}
+      inert={hidden || undefined}
+    >
       <div className="relative mx-auto max-w-md pt-3">
         <div ref={barRef} className="float-nav float-nav-notch relative flex h-14 items-center justify-around px-2">
           <span

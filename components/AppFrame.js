@@ -5,6 +5,7 @@ import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import ModeSwitchOverlay from "@/components/ModeSwitchOverlay";
 import { useAuth } from "@/lib/AuthContext";
+import { cn, isConversationPath } from "@/lib/khaki";
 
 const PUBLIC_EXACT = new Set(["/", "/about", "/privacy", "/terms", "/jobs"]);
 
@@ -21,14 +22,24 @@ export default function AppFrame({ children }) {
   const { ready, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const showChrome = ready && isAuthenticated && !isPublicPath(pathname);
+  const hideNav = isConversationPath(pathname);
 
   if (!showChrome) return children;
 
   return (
-    <div className="min-h-screen khaki-landing pb-[4.5rem] lg:pb-0">
-      <AppHeader />
-      {children}
-      <BottomNav />
+    <div
+      className={cn(
+        "khaki-landing flex h-dvh max-h-dvh flex-col overflow-hidden transition-[padding-bottom] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:pb-0",
+        hideNav ? "pb-0" : "pb-[4.5rem]"
+      )}
+    >
+      <div className="shrink-0">
+        <AppHeader />
+      </div>
+      <div className={cn("relative min-h-0 flex-1", hideNav ? "overflow-hidden" : "overflow-y-auto")}>
+        {children}
+      </div>
+      <BottomNav hidden={hideNav} />
       <ModeSwitchOverlay />
     </div>
   );

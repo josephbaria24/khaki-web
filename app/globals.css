@@ -439,6 +439,10 @@
     display: none;
   }
 
+  .animate-pulse {
+    animation: khaki-pulse 1.4s ease-in-out infinite;
+  }
+
   .landing-marquee-track {
     display: flex;
     width: max-content;
@@ -465,6 +469,11 @@
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
+  }
+
+  @keyframes khaki-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
   }
 
   @keyframes landing-scroll {
@@ -825,6 +834,10 @@
     .site-menu-icon {
       transition: none !important;
       transform: none !important;
+    }
+
+    .khaki-landing {
+      transition: none !important;
     }
 
     .profile-collapse-inner > * {

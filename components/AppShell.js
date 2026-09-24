@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { PageEnter } from "@/components/ui/motion";
+import { isFillPage } from "@/lib/khaki";
 
 export default function AppShell({ children }) {
   const { ready, isAuthenticated } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const seenAuth = useRef(false);
   if (isAuthenticated) seenAuth.current = true;
 
@@ -23,5 +25,13 @@ export default function AppShell({ children }) {
     );
   }
 
-  return <PageEnter>{children}</PageEnter>;
+  return (
+    <PageEnter
+      className={
+        isFillPage(pathname) ? "flex h-full min-h-0 flex-col overflow-hidden" : "min-h-full"
+      }
+    >
+      {children}
+    </PageEnter>
+  );
 }

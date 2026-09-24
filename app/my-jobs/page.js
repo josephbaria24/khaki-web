@@ -5,6 +5,7 @@ import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
 import PostedJobCard from "@/components/PostedJobCard";
 import TaskCard from "@/components/TaskCard";
+import { JobSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/AuthContext";
 import { isPosterMode } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -13,15 +14,19 @@ import { toast } from "@/lib/toast";
 export default function MyJobsPage() {
   const { user } = useAuth();
   const poster = isPosterMode(user);
-  const [tasks, setTasks] = useState([]);
+  const cached = api.tasks.peek();
+  const [tasks, setTasks] = useState(() => cached || []);
+  const [ready, setReady] = useState(() => cached != null);
   const [people, setPeople] = useState({});
   const [reviews, setReviews] = useState({});
 
-  const [tick, setTick] = useState(0);
-
   useEffect(() => {
-    api.tasks.list().then(setTasks).catch(() => setTasks([]));
-  }, [user?.active_mode, tick]);
+    const stop = api.tasks.subscribeMine((list) => {
+      setTasks(list);
+      setReady(true);
+    });
+    return stop;
+  }, [user?.active_mode]);
 
   const posted = tasks.filter((t) => t.client_id === user?.id);
   const working = tasks.filter((t) => t.accepted_tasker_id === user?.id);
@@ -46,7 +51,7 @@ export default function MyJobsPage() {
   const cancelPosted = async (task) => {
     try {
       await api.tasks.cancel(task.id);
-      setTick((n) => n + 1);
+      setTasks((prev) => prev.map((row) => (row.id === task.id ? { ...row, status: "cancelled" } : row)));
       toast.success("Gawain cancelled");
     } catch (err) {
       toast.error(err.message || "Could not cancel gawain");
@@ -66,6 +71,14 @@ export default function MyJobsPage() {
         </div>
         {poster ? (
           <section>
+            {!ready ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <JobSkeleton />
+                <JobSkeleton />
+                <JobSkeleton />
+              </div>
+            ) : (
+              <>
             <div className="grid gap-4 md:grid-cols-2">
               {posted.map((t) => (
                 <PostedJobCard
@@ -82,10 +95,19 @@ export default function MyJobsPage() {
                 Wala ka pang naka-post. Mag-post ng gawain.
               </p>
             )}
+              </>
+            )}
           </section>
         ) : (
           <section>
             <h2 className="mb-4 text-lg font-black">Jobs na tinatapos mo</h2>
+            {!ready ? (
+              <div className="grid gap-4">
+                <JobSkeleton />
+                <JobSkeleton />
+              </div>
+            ) : (
+              <>
             <div className="grid gap-4">
               {working.map((t) => <TaskCard key={t.id} task={t} />)}
             </div>
@@ -110,6 +132,8 @@ export default function MyJobsPage() {
                 </div>
               </div>
             ) : null}
+              </>
+            )}
           </section>
         )}
       </Container>

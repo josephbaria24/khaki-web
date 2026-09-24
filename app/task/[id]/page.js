@@ -201,9 +201,19 @@ export default function TaskDetailPage() {
   return (
     <AppShell>
       <Container className="py-6 lg:py-10">
-        <button onClick={() => router.back()} className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground">
-          <ChevronLeft className="h-4 w-4" /> Back
-        </button>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <button onClick={() => router.back()} className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground">
+            <ChevronLeft className="h-4 w-4" /> Back
+          </button>
+          {(isClient || isHiredTasker || task.status !== "open") ? (
+            <Link
+              href={`/task/${task.id}/chat`}
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-[#FFFCF7] px-3.5 text-sm font-bold text-[#2A3F4D] shadow-card"
+            >
+              <MessageSquare className="h-4 w-4" color="#2A3F4D" /> Chat
+            </Link>
+          ) : null}
+        </div>
         {error && <p className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-4">
@@ -406,11 +416,6 @@ export default function TaskDetailPage() {
                 <p className="mt-2 text-sm font-bold" style={{ color: LANDING.olive }}>Tingnan ang profile →</p>
               </Link>
             ) : null}
-            {(isClient || isHiredTasker || task.status !== "open") && (
-              <Link href={`/task/${task.id}/chat`} className="flex h-11 items-center justify-center gap-2 rounded-xl border bg-card font-bold hover:bg-muted">
-                <MessageSquare className="h-4 w-4" /> Open chat
-              </Link>
-            )}
           </aside>
         </div>
       </Container>
