@@ -131,7 +131,7 @@ export default function BottomNav() {
                 aria-hidden
                 className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-card shadow-soft"
               />
-              <span className="relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#3D5C6E] text-[#F7F4EC] shadow-soft">
+              <span className="relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#163044] text-[#F7F4EC] shadow-soft">
                 {(() => {
                   const CenterIcon = postItem.icon || Plus;
                   return <CenterIcon className="h-5 w-5" color="currentColor" />;

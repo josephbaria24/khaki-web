@@ -54,11 +54,11 @@ function JobCard({ task }) {
           <p className="mt-0.5 truncate text-xs text-[#2A3F4D]/55">
             {shortCategory(task.category) || "Gawain"}
           </p>
-          <p className="mt-1.5 text-sm font-black text-[#3D5C6E]">
+          <p className="mt-1.5 text-sm font-black text-[#163044]">
             {formatPHP(task.budget_php)}
           </p>
         </div>
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#3D5C6E] text-white shadow-sm transition group-hover:bg-[#2A3F4D]">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#163044] text-white shadow-sm transition group-hover:bg-[#2A3F4D]">
           <Plus className="h-4 w-4" color="currentColor" />
         </span>
       </div>
@@ -123,7 +123,7 @@ function BrowseBody() {
           onSubmit={(e) => e.preventDefault()}
           className="flex h-14 items-center gap-3 rounded-[1.25rem] bg-white px-4 shadow-[0_8px_28px_rgba(42,63,77,0.08)]"
         >
-          <Search className="h-4 w-4 shrink-0 text-[#3D5C6E]/55" />
+          <Search className="h-4 w-4 shrink-0 text-[#163044]/55" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -178,7 +178,7 @@ function BrowseBody() {
                 className={cn(
                   "shrink-0 rounded-full px-4 py-2 text-xs font-bold transition",
                   on
-                    ? "bg-[#3D5C6E] text-[#F7F4EC] shadow-sm"
+                    ? "bg-[#163044] text-[#F7F4EC] shadow-sm"
                     : "bg-white text-[#2A3F4D] shadow-[0_2px_10px_rgba(42,63,77,0.06)]"
                 )}
               >

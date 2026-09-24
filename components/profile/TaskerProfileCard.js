@@ -424,7 +424,7 @@ export default function TaskerProfileCard({
                 step="50"
                 value={Number(skillsForm.price_amount) || 50}
                 onChange={(e) => setSkillsForm({ ...skillsForm, price_amount: e.target.value })}
-                className="flex-1 accent-[#3D5C6E]"
+                className="flex-1 accent-[#163044]"
               />
               <input
                 className={`${fieldClass()} w-28 shrink-0 text-center`}

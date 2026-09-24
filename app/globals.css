@@ -8,20 +8,20 @@
     --foreground: 40 12% 16%;
     --card: 40 50% 99%;
     --card-foreground: 40 12% 16%;
-    --primary: 199 22% 34%;
+    --primary: 206 51% 18%;
     --primary-foreground: 40 33% 97%;
     --secondary: 40 20% 92%;
     --secondary-foreground: 40 12% 16%;
     --muted: 40 20% 92%;
     --muted-foreground: 40 8% 38%;
-    --accent: 199 22% 34%;
+    --accent: 206 51% 18%;
     --accent-foreground: 40 33% 97%;
     --destructive: 0 72% 45%;
     --border: transparent;
     --input: 40 18% 90%;
-    --khaki: 199 22% 34%;
+    --khaki: 206 51% 18%;
     --sand: 40 35% 84%;
-    --action: 199 22% 34%;
+    --action: 206 51% 18%;
     --navy: 40 12% 16%;
     --chip: 40 18% 92%;
     --chip-hover: 40 16% 88%;
@@ -45,7 +45,7 @@
     --foreground: 40 20% 96%;
     --card: 222 18% 12%;
     --card-foreground: 40 20% 96%;
-    --primary: 199 90% 48%;
+    --primary: 206 66% 51%;
     --primary-foreground: 0 0% 100%;
     --secondary: 222 14% 16%;
     --secondary-foreground: 40 20% 96%;
@@ -56,9 +56,9 @@
     --destructive: 0 72% 52%;
     --border: 222 12% 18%;
     --input: 222 14% 18%;
-    --khaki: 199 90% 48%;
+    --khaki: 206 66% 51%;
     --sand: 45 90% 58%;
-    --action: 199 90% 48%;
+    --action: 206 66% 51%;
     --navy: 40 20% 96%;
     --chip: 222 14% 18%;
     --chip-hover: 222 12% 22%;
@@ -103,7 +103,7 @@
     --border: 40 12% 88%;
     --chip: 40 18% 92%;
     --chip-hover: 40 16% 88%;
-    --primary: 199 22% 34%;
+    --primary: 206 51% 18%;
     --shadow-soft: 0 12px 40px rgba(15, 23, 42, 0.07);
     --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.05);
     color-scheme: light;
@@ -166,10 +166,20 @@
     @apply rounded-full bg-foreground px-5 py-2.5 text-xs font-bold text-background transition-all duration-200 ease-out;
   }
 
+  .khaki-landing .chip-active,
+  .khaki-landing .chip-inactive {
+    transition:
+      background-color 0.28s ease,
+      color 0.28s ease,
+      box-shadow 0.28s ease,
+      border-color 0.28s ease,
+      transform 0.2s ease;
+  }
+
   .khaki-landing .chip-active {
-    background: #3D5C6E;
+    background: #163044;
     color: #F7F4EC;
-    box-shadow: 0 2px 10px rgba(61, 92, 110, 0.28);
+    box-shadow: 0 2px 10px rgba(22, 48, 68, 0.28);
   }
 
   .chip-inactive {
@@ -181,7 +191,7 @@
     background: #FFFCF7;
     color: #2A3F4D;
     box-shadow: 0 2px 10px rgba(44, 42, 34, 0.08);
-    border: 1px solid rgba(61, 92, 110, 0.12);
+    border: 1px solid rgba(22, 48, 68, 0.12);
   }
 
   .chip-inactive:hover {
@@ -190,20 +200,20 @@
 
   .khaki-landing .chip-inactive:hover {
     background: #FFFFFF;
-    border-color: rgba(61, 92, 110, 0.28);
+    border-color: rgba(22, 48, 68, 0.28);
   }
 
   .khaki-landing .search-pill {
     background: #FFFCF7;
     color: #2A3F4D;
     box-shadow: 0 4px 16px rgba(44, 42, 34, 0.08);
-    border: 1px solid rgba(61, 92, 110, 0.12);
+    border: 1px solid rgba(22, 48, 68, 0.12);
   }
 
   .khaki-landing .search-pill:focus-within {
     background: #FFFFFF;
     box-shadow: 0 6px 20px rgba(44, 42, 34, 0.1);
-    border-color: rgba(61, 92, 110, 0.3);
+    border-color: rgba(22, 48, 68, 0.3);
   }
 
   .chip-inactive:active,
@@ -212,7 +222,7 @@
   }
 
   .btn-olive {
-    @apply inline-flex items-center gap-2 rounded-full bg-[#3D5C6E] px-5 py-2.5 text-xs font-bold text-[#F7F4EC] transition-all duration-200 ease-out;
+    @apply inline-flex items-center gap-2 rounded-full bg-[#163044] px-5 py-2.5 text-xs font-bold text-[#F7F4EC] transition-all duration-200 ease-out;
   }
 
   .btn-olive:hover {
@@ -248,11 +258,11 @@
   }
 
   .landing-hero {
-    background: linear-gradient(160deg, #4A7082 0%, #3D5C6E 46%, #2A3F4D 100%);
+    background: linear-gradient(160deg, #3E7498 0%, #163044 46%, #102636 100%);
   }
 
   .landing-promo {
-    background: #2A3F4D;
+    background: #163044;
   }
 
   .btn-dark {
@@ -457,12 +467,111 @@
     }
   }
 
+  .site-menu-btn {
+    position: relative;
+    color: #163044;
+    transition:
+      background-color 0.28s ease,
+      color 0.28s ease,
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.28s ease;
+  }
+
+  .site-menu-btn:active {
+    transform: scale(0.94);
+  }
+
+  .site-menu-btn.is-open {
+    background: #163044;
+    color: #F7F4EC;
+    box-shadow: 0 8px 20px rgba(22, 48, 68, 0.28);
+  }
+
+  .site-menu-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      opacity 0.22s ease,
+      transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .site-menu-btn .icon-menu {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+
+  .site-menu-btn .icon-close {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.7);
+  }
+
+  .site-menu-btn.is-open .icon-menu {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.7);
+  }
+
+  .site-menu-btn.is-open .icon-close {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+
+  .site-nav-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.28s ease;
+  }
+
+  .site-nav-panel.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .site-nav-panel-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .site-nav-panel.is-open .site-nav-panel-inner > * > a,
+  .site-nav-panel.is-open .site-nav-panel-inner > * > div {
+    animation: fade-in-up 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .site-nav-panel.is-open .site-nav-panel-inner > * > a:nth-child(1) { animation-delay: 0.04s; }
+  .site-nav-panel.is-open .site-nav-panel-inner > * > a:nth-child(2) { animation-delay: 0.08s; }
+  .site-nav-panel.is-open .site-nav-panel-inner > * > a:nth-child(3) { animation-delay: 0.12s; }
+  .site-nav-panel.is-open .site-nav-panel-inner > * > div { animation-delay: 0.16s; }
+
   .hero-mobile-card {
     animation: hero-card-rise 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .hero-art-float {
     animation: hero-art-float 4.6s ease-in-out 0.55s infinite;
+    will-change: transform;
+  }
+
+  .hero-art-mask {
+    -webkit-mask-image: linear-gradient(to bottom, #000 38%, rgba(0, 0, 0, 0.45) 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 38%, rgba(0, 0, 0, 0.45) 72%, transparent 100%);
+  }
+
+  .hero-art-fade {
+    background: linear-gradient(
+      to top,
+      #163044 0%,
+      #163044 22%,
+      rgba(22, 48, 68, 0.82) 48%,
+      rgba(22, 48, 68, 0.28) 74%,
+      rgba(22, 48, 68, 0)
+    );
   }
 
   .hero-desktop-bg {
@@ -574,7 +683,7 @@
     font-weight: 800;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #3D5C6E;
+    color: #163044;
   }
 
   .mode-switch-title {
@@ -663,13 +772,18 @@
     .mode-switch-overlay,
     .mode-switch-card,
     .stagger-children > *,
-    .float-nav {
+    .float-nav,
+    .site-nav-panel.is-open .site-nav-panel-inner > * > a,
+    .site-nav-panel.is-open .site-nav-panel-inner > * > div {
       animation: none !important;
     }
 
     .profile-collapse,
     .profile-collapse-inner > *,
-    .profile-bio {
+    .profile-bio,
+    .site-nav-panel,
+    .site-menu-btn,
+    .site-menu-icon {
       transition: none !important;
       transform: none !important;
     }

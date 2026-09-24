@@ -30,7 +30,7 @@ export default function CategoryCard({ cat, compact = false }) {
         ) : (
           <>
             <div className="absolute -right-6 -top-8 h-28 w-28 rounded-full bg-white/35" />
-            <div className="absolute bottom-4 right-5 h-14 w-20 rounded-full bg-[#3D5C6E]/15" />
+            <div className="absolute bottom-4 right-5 h-14 w-20 rounded-full bg-[#163044]/15" />
             <div className="absolute bottom-5 left-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/55">
               <Leaf className="h-5 w-5" color={LANDING.oliveDeep} />
             </div>

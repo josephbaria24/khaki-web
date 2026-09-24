@@ -37,7 +37,7 @@ export default function ModeToggle({ className = "" }) {
         disabled={locked}
         onClick={() => switchTo("poster")}
         className={`rounded-full px-3.5 py-1.5 text-xs font-black transition sm:px-4 ${
-          mode === "poster" ? "bg-[#3D5C6E] text-[#F7F4EC] shadow-sm" : "text-[#2A3F4D] hover:bg-white/50"
+          mode === "poster" ? "bg-[#163044] text-[#F7F4EC] shadow-sm" : "text-[#2A3F4D] hover:bg-white/50"
         }`}
       >
         Poster
@@ -49,7 +49,7 @@ export default function ModeToggle({ className = "" }) {
         disabled={locked}
         onClick={() => switchTo("tasker")}
         className={`rounded-full px-3.5 py-1.5 text-xs font-black transition sm:px-4 ${
-          mode === "tasker" ? "bg-[#3D5C6E] text-[#F7F4EC] shadow-sm" : "text-[#2A3F4D] hover:bg-white/50"
+          mode === "tasker" ? "bg-[#163044] text-[#F7F4EC] shadow-sm" : "text-[#2A3F4D] hover:bg-white/50"
         }`}
       >
         Tasker

@@ -56,7 +56,7 @@ export default function AppHeader() {
                   href={item.href}
                   className={cn(
                     "rounded-full px-4 py-2 text-sm font-semibold transition",
-                    active ? "bg-[#3D5C6E] text-[#F7F4EC]" : "text-muted-foreground hover:text-foreground hover:bg-[#C9D6E0]/40"
+                    active ? "bg-[#163044] text-[#F7F4EC]" : "text-muted-foreground hover:text-foreground hover:bg-[#C9D6E0]/40"
                   )}
                 >
                   {item.label}
@@ -72,7 +72,7 @@ export default function AppHeader() {
           <Link href="/notifications" className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FFFCF7] text-[#2A3F4D] shadow-card">
             <Bell className="h-5 w-5" color="#2A3F4D" />
             {unread > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#3D5C6E] px-1 text-[10px] font-bold text-[#F7F4EC]">
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#163044] px-1 text-[10px] font-bold text-[#F7F4EC]">
                 {unread}
               </span>
             )}

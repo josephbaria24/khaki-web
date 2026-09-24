@@ -20,6 +20,7 @@ import {
 } from "@/lib/landingContent";
 import { useAuth } from "@/lib/AuthContext";
 import { canOpenPost } from "@/lib/roles";
+import { Collapse } from "@/components/ui/motion";
 
 function Stars({ count = 5, className = "h-3.5 w-3.5" }) {
   return (
@@ -43,6 +44,31 @@ function CheckMark() {
         <path d="M3.5 8.2l3 3.3 6-6.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </span>
+  );
+}
+
+function FaqItem({ item, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="rounded-2xl border border-black/5 bg-card p-5 shadow-card">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full cursor-pointer items-center justify-between gap-4 text-left text-base font-bold text-foreground"
+      >
+        {item.q}
+        <span
+          className={`shrink-0 text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "rotate-180" : "rotate-0"}`}
+          aria-hidden
+        >
+          ▾
+        </span>
+      </button>
+      <Collapse open={open}>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
+      </Collapse>
+    </div>
   );
 }
 
@@ -115,18 +141,24 @@ export default function LandingHome() {
             className="pointer-events-none absolute inset-x-8 top-8 h-36 rounded-full bg-[#3E7498]/45 blur-3xl md:hidden"
             aria-hidden
           />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/transparent-hero-protrait.png"
-            alt=""
-            className="hero-art-float relative z-[1] mx-auto block h-[min(105vw,24rem)] w-full max-w-full object-cover object-[center_44%] min-[400px]:h-[min(92vw,26rem)] sm:h-[min(72vw,28rem)] lg:hidden"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/transparent-hero.png"
-            alt=""
-            className="hero-art-float relative z-[1] hidden aspect-[16/9] w-full object-cover object-[center_46%] lg:block lg:aspect-[2/1]"
-          />
+          <div className="hero-art-stage relative overflow-hidden lg:hidden h-[min(105vw,24rem)] min-[400px]:h-[min(92vw,26rem)] sm:h-[min(72vw,28rem)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/transparent-hero-protrait.png"
+              alt=""
+              className="hero-art-float hero-art-mask absolute inset-x-0 top-0 z-[1] h-[calc(100%+1.5rem)] w-full object-cover object-[center_44%]"
+            />
+            <div className="hero-art-fade pointer-events-none absolute inset-x-0 -bottom-px z-[2] h-[56%]" aria-hidden />
+          </div>
+          <div className="hero-art-stage relative hidden aspect-[16/9] overflow-hidden lg:block lg:aspect-[2/1]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/transparent-hero.png"
+              alt=""
+              className="hero-art-float hero-art-mask absolute inset-x-0 top-0 z-[1] h-[calc(100%+1.5rem)] w-full object-cover object-[center_46%]"
+            />
+            <div className="hero-art-fade pointer-events-none absolute inset-x-0 -bottom-px z-[2] h-[34%]" aria-hidden />
+          </div>
           <div className="stagger-children relative z-[1] min-w-0 px-4 pb-6 pt-1 text-center min-[380px]:px-5 min-[380px]:pb-7 sm:px-8 sm:pb-9 md:px-12 md:pb-12 md:pt-2 lg:px-16">
             <h1 className="mx-auto max-w-full text-[1.7rem] font-black uppercase leading-[0.9] tracking-[-0.045em] text-white min-[360px]:text-[2rem] min-[400px]:text-[2.2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.4rem]">
               Get anything
@@ -200,7 +232,7 @@ export default function LandingHome() {
               <img
                 src={step.image}
                 alt=""
-                className="mx-auto mt-3 h-28 w-auto object-contain sm:h-32"
+                className="mx-auto mt-3 h-40 w-full object-contain sm:h-44"
               />
               <p className="mt-4 text-base font-black leading-snug text-foreground">{step.title}</p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
@@ -255,7 +287,7 @@ export default function LandingHome() {
             );
           })}
         </div>
-        <div className="mt-8">
+        <div key={tab} className="mt-8 animate-fade-in-up">
           <ScrollRow>
             {visibleTasks.map((task) => (
               <TaskPreviewCard key={task.title} task={task} />
@@ -292,13 +324,16 @@ export default function LandingHome() {
 
       <section id="earn" className="landing-hero scroll-mt-24">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
-          <div className="rounded-[2rem] p-6 sm:p-8" style={{ background: LANDING.sand }}>
+          <div className="rounded-[2rem] bg-white p-6 shadow-[0_16px_40px_rgba(16,38,54,0.16)] sm:p-8">
             <p className="text-sm font-black" style={{ color: LANDING.oliveDeep }}>
               160+ Palawan taskers already earning
             </p>
             <div className="mt-5 space-y-3">
               {LANDING_TASKERS.slice(0, 3).map((person) => (
-                <div key={person.name} className="flex items-center gap-3 rounded-2xl bg-white/75 p-3">
+                <div
+                  key={person.name}
+                  className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-[0_8px_22px_rgba(16,38,54,0.12)]"
+                >
                   <span
                     className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-black"
                     style={{ background: person.tone, color: LANDING.oliveDeep }}
@@ -397,19 +432,8 @@ export default function LandingHome() {
           <h2 className="text-3xl font-black tracking-tight text-foreground">Frequently Asked Questions</h2>
         </div>
         <div className="mt-8 space-y-3">
-          {LANDING_FAQS.map((item) => (
-            <details
-              key={item.q}
-              className="group rounded-2xl border border-black/5 bg-card p-5 shadow-card"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-bold text-foreground [&::-webkit-details-marker]:hidden">
-                {item.q}
-                <span className="text-muted-foreground transition-transform group-open:rotate-180" aria-hidden>
-                  ▾
-                </span>
-              </summary>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
-            </details>
+          {LANDING_FAQS.map((item, i) => (
+            <FaqItem key={item.q} item={item} defaultOpen={i === 0} />
           ))}
         </div>
       </SectionWrap>

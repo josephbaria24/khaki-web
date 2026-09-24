@@ -52,7 +52,7 @@ export default function PostingFeesPage() {
                 </p>
               </div>
               {row.task_id ? (
-                <Link href={`/task/${row.task_id}`} className="text-xs font-bold text-[#3D5C6E] underline">
+                <Link href={`/task/${row.task_id}`} className="text-xs font-bold text-[#163044] underline">
                   View gawain
                 </Link>
               ) : null}

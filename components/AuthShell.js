@@ -7,7 +7,7 @@ export default function AuthShell({ title, subtitle, footer, children }) {
     <div className="grid min-h-screen bg-background lg:grid-cols-2">
       <aside className="relative hidden overflow-hidden bg-auth-aside p-10 text-foreground lg:flex lg:flex-col lg:justify-between">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/40 dark:bg-white/5" />
-        <div className="pointer-events-none absolute -bottom-16 -left-12 h-52 w-52 rounded-full bg-[#3D5C6E]/15 dark:bg-black/25" />
+        <div className="pointer-events-none absolute -bottom-16 -left-12 h-52 w-52 rounded-full bg-[#163044]/15 dark:bg-black/25" />
         <Logo href="/" />
         <div className="relative max-w-md">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-foreground/60">Palawan marketplace</p>

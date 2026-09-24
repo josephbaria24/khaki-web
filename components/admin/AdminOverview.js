@@ -184,7 +184,7 @@ function Card({ title, sub, children, className = "", action }) {
           {sub ? <p className="text-[11px] text-muted-foreground">{sub}</p> : null}
         </div>
         {action ? (
-          <button type="button" onClick={action.onClick} className="text-xs font-bold text-[#3D5C6E]">
+          <button type="button" onClick={action.onClick} className="text-xs font-bold text-[#163044]">
             {action.label}
           </button>
         ) : null}

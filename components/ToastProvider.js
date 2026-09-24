@@ -41,7 +41,7 @@ export default function ToastProvider({ children }) {
               "pointer-events-auto flex max-w-md items-start gap-3 rounded-2xl px-4 py-3 text-sm font-semibold shadow-soft animate-fade-in-up",
               t.type === "error" && "bg-[#DC2626] text-white",
               t.type === "info" && "bg-[#2A3F4D] text-[#F7F4EC]",
-              t.type === "success" && "bg-[#3D5C6E] text-[#F7F4EC]"
+              t.type === "success" && "bg-[#163044] text-[#F7F4EC]"
             )}
           >
             <span className="flex-1 leading-snug">{t.message}</span>
