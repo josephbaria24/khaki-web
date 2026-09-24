@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
@@ -13,8 +12,7 @@ import { api } from "@/lib/store";
 import { toast } from "@/lib/toast";
 
 export default function ProfilePage() {
-  const { user, refresh, logout } = useAuth();
-  const router = useRouter();
+  const { user, refresh } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [tasks, setTasks] = useState([]);
 
@@ -71,27 +69,6 @@ export default function ProfilePage() {
                 </Link>
               </div>
             )}
-          </Container>
-        </section>
-
-        <section className="bg-background py-8 lg:py-12">
-          <Container>
-            <div className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row">
-              <Link href="/settings" className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[#F3EFE3] text-sm font-bold text-foreground transition hover:bg-[#E8E4D6]">
-                Settings
-              </Link>
-              <button
-                type="button"
-                onClick={async () => {
-                  await logout();
-                  toast.success("Logged out");
-                  router.push("/");
-                }}
-                className="h-12 flex-1 rounded-full border-2 border-[#2A3F4D] text-sm font-bold text-[#2A3F4D] transition hover:bg-[#2A3F4D]/10"
-              >
-                Log out
-              </button>
-            </div>
           </Container>
         </section>
       </div>

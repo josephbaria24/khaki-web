@@ -1,4 +1,4 @@
-import { cn, initials } from "@/lib/khaki";
+import { cn, initials, avatarTone } from "@/lib/khaki";
 
 const SIZES = {
   sm: "h-8 w-8 text-[11px]",
@@ -7,13 +7,15 @@ const SIZES = {
 };
 
 export default function ChatAvatar({ name, size = "md", className = "" }) {
+  const tone = avatarTone(name);
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full bg-[#C9D6E0] font-black text-[#163044]",
+        "inline-flex shrink-0 items-center justify-center rounded-full font-black",
         SIZES[size] || SIZES.md,
         className
       )}
+      style={{ background: tone.bg, color: tone.fg }}
     >
       {initials(name)}
     </span>

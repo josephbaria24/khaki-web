@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Plus } from "@/components/icons";
+import { Plus } from "@/components/icons";
 import Container from "@/components/Container";
 import Logo from "@/components/Logo";
 import ModeToggle from "@/components/ModeToggle";
+import AccountMenu from "@/components/AccountMenu";
+import NotificationsBell from "@/components/NotificationsBell";
 import { useAuth } from "@/lib/AuthContext";
 import { cn } from "@/lib/khaki";
 import { canOpenPost, isAdmin, needsTaskerVerification } from "@/lib/roles";
-import { api } from "@/lib/store";
+
 const NAV = [
   { href: "/dashboard", label: "Home" },
   { href: "/browse", label: "Browse" },
@@ -21,12 +22,6 @@ const NAV = [
 export default function AppHeader() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const [unread, setUnread] = useState(0);
-
-  useEffect(() => {
-    if (!user?.id) return undefined;
-    return api.notifications.subscribeUnread(setUnread);
-  }, [user?.id]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1]">
@@ -55,14 +50,7 @@ export default function AppHeader() {
           <ModeToggle />
         </div>
         <div className="flex items-center gap-2 text-[#2A3F4D]">
-          <Link href="/notifications" className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FFFCF7] text-[#2A3F4D] shadow-card">
-            <Bell className="h-5 w-5" color="#2A3F4D" />
-            {unread > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#163044] px-1 text-[10px] font-bold text-[#F7F4EC]">
-                {unread}
-              </span>
-            )}
-          </Link>
+          <NotificationsBell />
           {canOpenPost(user) && (
           <Link
             href="/post"
@@ -81,9 +69,7 @@ export default function AppHeader() {
               Verify
             </Link>
           )}
-          <Link href="/profile" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#C9D6E0] text-sm font-black text-[#2A3F4D]">
-            {(user?.full_name || "K").charAt(0)}
-          </Link>
+          <AccountMenu />
         </div>
       </Container>
       <div className="flex justify-center px-4 pb-2 sm:hidden">

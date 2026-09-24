@@ -2,136 +2,119 @@
 
 import Link from "next/link";
 import { formatPHP } from "@/lib/khaki";
-import { LANDING } from "@/lib/landingContent";
 import { isPosterMode } from "@/lib/roles";
+import Reicon from "@/components/icons/Reicon";
+import SectionIntro from "@/components/SectionIntro";
 
 export default function DashboardShortcuts({ user, postingFees = 0, myTasks = [] }) {
   const poster = isPosterMode(user);
-  const actions = poster
-    ? [
-        {
-          href: "/post",
-          title: "Mag-post ng gawain",
-          sub: "I-describe ang kailangan mo",
-          image: "/images/posttask.png",
-          bg: "#E8DCC4",
-          cover: true,
-        },
-        {
-          href: "/my-jobs",
-          title: "Aking mga gawain",
-          sub: "Status at kung sino'ng kumuha",
-          image: "/images/mypostedtask.png",
-          bg: "#D5DEC4",
-          cover: true,
-        },
-        {
-          href: "/wallet",
-          title: "Posting fees",
-          sub: "2% when you mag-post",
-          image: "/images/mywallet.png",
-          bg: "#C9D6E0",
-          cover: true,
-        },
-      ]
-    : [
-        {
-          href: "/browse",
-          title: "Maghanap ng gawain",
-          sub: "Open jobs near you",
-          image: "/images/findjob.png",
-          bg: "#E8D4C8",
-          cover: true,
-        },
-        {
-          href: "/my-jobs",
-          title: "My Jobs",
-          sub: "Bids at ongoing work",
-          image: "/images/myjob.png",
-          bg: "#C9D8D4",
-          cover: true,
-        },
-        {
-          href: "/profile",
-          title: "Profile",
-          sub: "Ratings at verification",
-          image: "/images/mywallet.png",
-          bg: "#C9D6E0",
-          cover: true,
-        },
-      ];
-
   const mine = myTasks.filter((t) => t.client_id === user?.id || t.accepted_tasker_id === user?.id);
   const active = mine.filter((t) => !["released", "cancelled"].includes(t.status)).length;
   const completed = mine.filter((t) => t.status === "released").length;
 
-  const stats = [
-    { label: poster ? "Active posts" : "Active jobs", value: String(active), href: "/my-jobs" },
-    { label: "Posting fees", value: formatPHP(postingFees), href: "/wallet" },
-    { label: "Tapos na", value: String(completed), href: "/my-jobs" },
-  ];
+  const hero = poster
+    ? {
+        href: "/post",
+        title: "Mag-post ng gawain",
+        sub: "I-describe ang kailangan mo",
+        cta: "Mag-post",
+        icon: "add-square",
+        iconColor: "#2E8A5A",
+        bg: "#CFF5D6",
+      }
+    : {
+        href: "/browse",
+        title: "Maghanap ng gawain",
+        sub: "Open jobs near you",
+        cta: "Maghanap",
+        icon: "search",
+        iconColor: "#E06A2F",
+        bg: "#FFE4D6",
+      };
+
+  const left = poster
+    ? {
+        href: "/my-jobs",
+        title: "Aking mga gawain",
+        value: String(active),
+        label: active === 1 ? "Active post" : "Active posts",
+        icon: "briefcase",
+        iconColor: "#C94B78",
+        bg: "#F8D5E0",
+      }
+    : {
+        href: "/my-jobs",
+        title: "My Jobs",
+        value: String(active),
+        label: active === 1 ? "Active job" : "Active jobs",
+        icon: "briefcase",
+        iconColor: "#C94B78",
+        bg: "#F8D5E0",
+      };
+
+  const right = poster
+    ? {
+        href: "/wallet",
+        title: "Posting fees",
+        value: formatPHP(postingFees),
+        label: "2% when you mag-post",
+        icon: "wallet",
+        iconColor: "#3A73C4",
+        bg: "#D4E6FF",
+      }
+    : {
+        href: "/profile",
+        title: "Profile",
+        value: String(completed),
+        label: "Jobs completed",
+        icon: "user",
+        iconColor: "#163044",
+        bg: "#D4E6FF",
+      };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-      <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: LANDING.olive }}>
-        {poster ? "Poster mode" : "Tasker mode"}
-      </p>
-      <h2 className="mt-2 text-2xl font-black text-foreground sm:text-3xl">
-        {poster ? "Mag-post ng gawain" : "Maghanap ng job o task"}
-      </h2>
-      <p className="mt-2 text-muted-foreground">
-        {poster
-          ? "I-post ang kailangan mo, i-track ang status, at i-rate ang tasker after a successful job."
-          : "Sumali sa bidding kung open ang job. I-adjust ang fee mo anytime habang pending."}
-      </p>
+      <SectionIntro
+        pill={poster ? "Poster" : "Tasker"}
+        title={poster ? "Mag-post ng gawain" : "Maghanap ng job o task"}
+        sub={
+          poster
+            ? "I-post, i-track ang status, at i-rate after a successful job."
+            : "Sumali sa bidding. I-adjust ang fee mo anytime habang pending."
+        }
+      />
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-        {actions.map((action, i) => (
-          <Link
-            key={action.title}
-            href={action.href}
-            className={`interactive-card min-w-0 rounded-[1.25rem] bg-[#FFFCF7] p-2.5 shadow-card sm:rounded-[1.5rem] sm:p-3 ${
-              i === 2 ? "col-span-2 sm:col-span-1" : ""
-            }`}
-          >
-            <div
-              className={`relative overflow-hidden rounded-[1rem] sm:rounded-[1.15rem] ${
-                i === 2
-                  ? "h-28 sm:h-40"
-                  : "aspect-[4/3] sm:aspect-auto sm:h-40"
-              }`}
-              style={{ background: action.bg }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={action.image}
-                alt=""
-                className={
-                  action.cover
-                    ? "absolute inset-0 h-full w-full object-cover"
-                    : "absolute inset-0 h-full w-full object-contain p-2 drop-shadow-sm"
-                }
-              />
-            </div>
-            <p className="mt-2 text-[13px] font-black leading-tight text-foreground sm:mt-3 sm:text-base">
-              {action.title}
-            </p>
-            <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-muted-foreground sm:text-sm">{action.sub}</p>
-          </Link>
-        ))}
-      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
+        <Link
+          href={hero.href}
+          className="bento-widget col-span-2 min-h-[10.5rem] sm:min-h-[11.5rem]"
+          style={{ background: hero.bg }}
+        >
+          <div className="relative z-[1] max-w-[calc(100%-4.75rem)] sm:max-w-[calc(100%-5.5rem)]">
+            <p className="text-[1.35rem] font-black leading-tight text-[#163044] sm:text-2xl">{hero.title}</p>
+            <p className="mt-1 text-[13px] leading-snug text-[#2A3F4D]/70 sm:text-sm">{hero.sub}</p>
+            <span className="bento-pill">{hero.cta}</span>
+          </div>
+          <Reicon name={hero.icon} color={hero.iconColor} className="bento-icon" />
+        </Link>
 
-      <div className="mt-5 grid grid-cols-3 gap-3">
-        {stats.map((stat) => (
-          <Link
-            key={stat.label}
-            href={stat.href}
-            className="rounded-[1.35rem] bg-[#FFFCF7] p-4 shadow-card transition-transform duration-200 hover:-translate-y-0.5"
-          >
-            <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{stat.label}</p>
-            <p className="mt-2 truncate text-lg font-black text-foreground sm:text-xl">{stat.value}</p>
-          </Link>
-        ))}
+        <Link href={left.href} className="bento-widget min-h-[10.5rem]" style={{ background: left.bg }}>
+          <p className="relative z-[1] pr-[3.25rem] text-[13px] font-black text-[#163044] sm:pr-16 sm:text-sm">{left.title}</p>
+          <p className="relative z-[1] mt-3 pr-[3.25rem] text-[1.75rem] font-black leading-none tracking-tight text-[#163044] sm:pr-16 sm:text-3xl">
+            {left.value}
+          </p>
+          <p className="relative z-[1] mt-1 pr-[3.25rem] text-[11px] font-semibold text-[#2A3F4D]/65 sm:pr-16 sm:text-xs">{left.label}</p>
+          <Reicon name={left.icon} color={left.iconColor} className="bento-icon-sm" />
+        </Link>
+
+        <Link href={right.href} className="bento-widget min-h-[10.5rem]" style={{ background: right.bg }}>
+          <p className="relative z-[1] pr-[3.25rem] text-[13px] font-black text-[#163044] sm:pr-16 sm:text-sm">{right.title}</p>
+          <p className="relative z-[1] mt-3 truncate pr-[3.25rem] text-[1.75rem] font-black leading-none tracking-tight text-[#163044] sm:pr-16 sm:text-3xl">
+            {right.value}
+          </p>
+          <p className="relative z-[1] mt-1 pr-[3.25rem] text-[11px] font-semibold text-[#2A3F4D]/65 sm:pr-16 sm:text-xs">{right.label}</p>
+          <Reicon name={right.icon} color={right.iconColor} className="bento-icon-sm" />
+        </Link>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import CategoryChips from "@/components/ui/CategoryChips";
 import SearchPill from "@/components/ui/SearchPill";
 import DashboardShortcuts from "@/components/DashboardShortcuts";
 import PostedJobCard from "@/components/PostedJobCard";
+import SectionIntro from "@/components/SectionIntro";
 import { FadeIn } from "@/components/ui/motion";
 import { CHIP_CATEGORIES, taskMatchesChip } from "@/lib/catalog";
 import { LANDING, LANDING_CATEGORIES } from "@/lib/landingContent";
@@ -145,24 +146,22 @@ export default function DashboardPage() {
           </div>
         ) : null}
 
-        <section className="bg-[#FBF8F1] py-12 lg:py-16">
+        <section className="bg-[#FBF8F1] py-6 sm:py-8">
           {poster ? (
             <>
               <DashboardShortcuts user={user} postingFees={postingFees} myTasks={myTasks} />
-              <div className="mx-auto mt-12 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: LANDING.olive }}>
-                  Poster
-                </p>
-                <div className="mt-2 flex items-end justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl font-black text-foreground sm:text-3xl">Mga naka-post mong gawain</h2>
-                    <p className="mt-2 text-muted-foreground">Status, kung sino&apos;ng kumuha, i-edit, at i-rate after a successful job.</p>
-                  </div>
-                  <Link href="/post" className="btn-olive hidden h-10 items-center px-5 text-xs sm:inline-flex">
-                    Mag-post ng gawain
-                  </Link>
-                </div>
-                <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+                <SectionIntro
+                  pill="Poster"
+                  title="Mga naka-post mong gawain"
+                  sub="Status, kung sino'ng kumuha, i-edit, at i-rate after a successful job."
+                  action={
+                    <Link href="/post" className="btn-olive hidden h-9 items-center px-4 text-[11px] sm:inline-flex">
+                      Mag-post ng gawain
+                    </Link>
+                  }
+                />
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {posted.map((task) => (
                     <PostedJobCard
                       key={task.id}
@@ -189,20 +188,21 @@ export default function DashboardPage() {
                   </p>
                 ) : null}
 
-                <p className="mt-12 text-xs font-bold uppercase tracking-[0.18em]" style={{ color: LANDING.olive }}>
-                  Categories
-                </p>
-                <h2 className="mt-2 text-2xl font-black text-foreground sm:text-3xl">Ano&apos;ng kailangan mo?</h2>
-                <p className="mt-2 text-muted-foreground">Tap a category para mag-post.</p>
+                <SectionIntro
+                  className="mt-8"
+                  pill="Categories"
+                  title="Ano'ng kailangan mo?"
+                  sub="Tap a category para mag-post."
+                />
               </div>
-              <div className="landing-marquee mt-8 hidden overflow-hidden sm:block">
+              <div className="landing-marquee mt-4 hidden overflow-hidden sm:block">
                 <div className="landing-marquee-track">
                   {[...LANDING_CATEGORIES, ...LANDING_CATEGORIES].map((cat, i) => (
                     <CategoryCard key={`${cat.key}-${i}`} cat={{ ...cat, href: "/post" }} />
                   ))}
                 </div>
               </div>
-              <div className="no-scrollbar mt-8 grid auto-cols-max grid-flow-col grid-rows-2 gap-3 overflow-x-auto px-4 pb-2 sm:hidden">
+              <div className="no-scrollbar mt-4 grid auto-cols-max grid-flow-col grid-rows-2 gap-3 overflow-x-auto px-4 pb-2 sm:hidden">
                 {LANDING_CATEGORIES.map((cat) => (
                   <CategoryCard key={cat.key} cat={{ ...cat, href: "/post" }} compact />
                 ))}
@@ -211,20 +211,16 @@ export default function DashboardPage() {
           ) : (
             <div className="mx-auto w-full max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: LANDING.olive }}>
-                  Open jobs
-                </p>
-                <div className="mt-2 flex items-end justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-                      Hanapin ang next gawain mo
-                    </h2>
-                    <p className="mt-2 text-muted-foreground">Swipe the carousel or tap See all for the full list.</p>
-                  </div>
-                  <Link href="/browse" className="text-sm font-bold underline-offset-4 hover:underline" style={{ color: LANDING.olive }}>
-                    See all
-                  </Link>
-                </div>
+                <SectionIntro
+                  pill="Open jobs"
+                  title="Hanapin ang next gawain mo"
+                  sub="Swipe the carousel or tap See all for the full list."
+                  action={
+                    <Link href="/browse" className="text-xs font-bold underline-offset-4 hover:underline" style={{ color: LANDING.olive }}>
+                      See all
+                    </Link>
+                  }
+                />
               </div>
 
               <SearchPill value={search} onChange={setSearch} placeholder="Maghanap ng job o task..." />
@@ -262,10 +258,10 @@ export default function DashboardPage() {
 
               {pendingBids.length > 0 ? (
                 <div className="rounded-[1.5rem] bg-[#FFFCF7] p-5 shadow-card">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: LANDING.olive }}>
-                    Mga bid mo
-                  </p>
-                  <h3 className="mt-2 text-lg font-black">Pending bids — puwede mo pang i-adjust</h3>
+                  <SectionIntro
+                    pill="Bids"
+                    title="Pending — puwede mo pang i-adjust"
+                  />
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     {pendingBids.map((bid) => (
                       <Link key={bid.id} href={`/task/${bid.task_id}`} className="rounded-2xl bg-[#F3EFE3] p-4">
@@ -283,11 +279,11 @@ export default function DashboardPage() {
               </div>
 
               <div className="pt-4">
-                <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: LANDING.olive }}>
-                  Categories
-                </p>
-                <h2 className="mt-2 text-2xl font-black text-foreground sm:text-3xl">Browse by type</h2>
-                <p className="mt-2 text-muted-foreground">Tap a category to filter open jobs.</p>
+                <SectionIntro
+                  pill="Categories"
+                  title="Browse by type"
+                  sub="Tap a category to filter open jobs."
+                />
               </div>
               <div className="landing-marquee mt-4 hidden overflow-hidden sm:block">
                 <div className="landing-marquee-track">

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, Lock, Mail } from "@/components/icons";
+import { Loader2, Mail } from "@/components/icons";
 import AuthShell from "@/components/AuthShell";
 import PasswordInput from "@/components/PasswordInput";
 import { useAuth } from "@/lib/AuthContext";
@@ -140,16 +140,14 @@ export default function LoginPage() {
         <label className="block text-sm font-medium text-foreground">
           Email
           <div className="relative mt-1">
-            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Mail className="pointer-events-none absolute left-3 top-1/2 z-[1] h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input className="auth-field pl-10" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
         </label>
         <label className="block text-sm font-medium text-foreground">
           Password
-          <div className="relative mt-1">
-            <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="mt-1">
             <PasswordInput
-              className="auth-field pl-10 pr-11"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

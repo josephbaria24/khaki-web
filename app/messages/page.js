@@ -26,6 +26,7 @@ export default function MessagesPage() {
   }, []);
 
   const firstName = (user?.full_name || "there").trim().split(/\s+/)[0];
+  const unreadCount = threads.filter(({ last }) => last?.sender_id && last.sender_id !== user?.id).length;
   const contacts = useMemo(() => {
     const seen = new Set();
     const list = [];
@@ -39,7 +40,12 @@ export default function MessagesPage() {
       const key = `${task.id}-${name}`;
       if (seen.has(key)) return;
       seen.add(key);
-      list.push({ id: task.id, name, href: `/task/${task.id}/chat` });
+      list.push({
+        id: task.id,
+        name,
+        href: `/task/${task.id}/chat`,
+        unread: Boolean(last?.sender_id && last.sender_id !== user?.id),
+      });
     });
     return list.slice(0, 8);
   }, [threads, user?.id]);
@@ -53,17 +59,38 @@ export default function MessagesPage() {
   return (
     <AppShell>
       <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#163044]">
-        <div className="shrink-0 px-5 pb-4 pt-5 sm:px-8">
-          <p className="text-sm font-medium text-[#F7F4EC]/75">Hi, {firstName}!</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-[#F7F4EC]">
-            {threads.length} {threads.length === 1 ? "Message" : "Messages"}
-          </h1>
+        <div className="shrink-0 px-5 pb-3 pt-3 sm:px-8">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold leading-none text-[#F7F4EC]/70">Hi, {firstName}</p>
+              <h1 className="mt-1 text-lg font-black tracking-tight text-[#F7F4EC]">Messages</h1>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className="inline-flex h-6 items-center rounded-full bg-[#D4E6FF] px-2.5 text-[10px] font-extrabold text-[#3A73C4]">
+                {threads.length}
+              </span>
+              {unreadCount > 0 ? (
+                <span className="inline-flex h-6 items-center rounded-full bg-[#F8D5E0] px-2.5 text-[10px] font-extrabold text-[#C94B78]">
+                  {unreadCount} new
+                </span>
+              ) : (
+                <span className="inline-flex h-6 items-center rounded-full bg-[#CFF5D6] px-2.5 text-[10px] font-extrabold text-[#1B6B45]">
+                  All read
+                </span>
+              )}
+            </div>
+          </div>
           {contacts.length > 0 ? (
-            <div className="no-scrollbar mt-5 flex gap-4 overflow-x-auto pb-1">
+            <div className="no-scrollbar mt-3 flex gap-3 overflow-x-auto pb-0.5">
               {contacts.map((c) => (
-                <Link key={c.id} href={c.href} className="flex w-14 shrink-0 flex-col items-center gap-1.5">
-                  <ChatAvatar name={c.name} size="md" />
-                  <span className="w-full truncate text-center text-[11px] font-semibold text-[#F7F4EC]/85">{c.name.split(" ")[0]}</span>
+                <Link key={c.id} href={c.href} className="flex w-11 shrink-0 flex-col items-center gap-1">
+                  <span className="relative">
+                    <ChatAvatar name={c.name} size="sm" />
+                    {c.unread ? (
+                      <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#F8D5E0] ring-2 ring-[#163044]" />
+                    ) : null}
+                  </span>
+                  <span className="w-full truncate text-center text-[10px] font-semibold text-[#F7F4EC]/80">{c.name.split(" ")[0]}</span>
                 </Link>
               ))}
             </div>
@@ -118,7 +145,11 @@ export default function MessagesPage() {
                       </div>
                       <p className="mt-0.5 truncate text-sm text-muted-foreground">{last?.text || "No messages yet"}</p>
                     </div>
-                    {unread ? <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#163044]" /> : null}
+                    {unread ? (
+                      <span className="shrink-0 rounded-full bg-[#F8D5E0] px-2 py-0.5 text-[10px] font-extrabold text-[#C94B78]">
+                        New
+                      </span>
+                    ) : null}
                   </Link>
                 );
               })

@@ -58,7 +58,7 @@ function ShareIcon() {
 
 function PersonFallback() {
   return (
-    <svg viewBox="0 0 24 24" className="h-12 w-12 text-[#7B8A6A] lg:h-16 lg:w-16" fill="currentColor">
+    <svg viewBox="0 0 24 24" className="h-8 w-8 text-[#7B8A6A] min-[400px]:h-12 min-[400px]:w-12 lg:h-16 lg:w-16" fill="currentColor">
       <circle cx="12" cy="8" r="3.2" />
       <path d="M5.5 19.2c.6-3.4 3.2-5.2 6.5-5.2s5.9 1.8 6.5 5.2" />
     </svg>
@@ -67,7 +67,7 @@ function PersonFallback() {
 
 function SectionCard({ children, className = "" }) {
   return (
-    <div className={`rounded-[1.45rem] p-4 shadow-[0_8px_28px_rgba(42,63,77,0.08)] md:p-5 lg:rounded-[1.7rem] lg:p-6 ${className}`} style={{ background: CARD }}>
+    <div className={`rounded-[1.25rem] p-3 shadow-[0_8px_28px_rgba(42,63,77,0.08)] min-[400px]:rounded-[1.45rem] min-[400px]:p-4 md:p-5 lg:rounded-[1.7rem] lg:p-6 ${className}`} style={{ background: CARD }}>
       {children}
     </div>
   );
@@ -182,8 +182,8 @@ export default function TaskerProfileCard({
 
   return (
     <Stagger className="mx-auto w-full max-w-[420px] space-y-3 md:max-w-[560px] lg:max-w-[640px] lg:space-y-4">
-      <div className="flex items-center justify-between gap-3 rounded-[1.35rem] px-4 py-3 text-white shadow-[0_8px_24px_rgba(42,63,77,0.18)] lg:px-5 lg:py-3.5" style={{ background: OLIVE_DEEP }}>
-        <h1 className="text-[15px] font-black tracking-tight lg:text-lg">{title}</h1>
+      <div className="flex items-center justify-between gap-2 rounded-[1.2rem] px-3 py-2.5 text-white shadow-[0_8px_24px_rgba(42,63,77,0.18)] min-[400px]:rounded-[1.35rem] min-[400px]:px-4 min-[400px]:py-3 lg:px-5 lg:py-3.5" style={{ background: OLIVE_DEEP }}>
+        <h1 className="min-w-0 truncate text-[13px] font-black tracking-tight min-[400px]:text-[15px] lg:text-lg">{title}</h1>
         <div className="flex items-center gap-1.5">
           {!isOwn ? (
             <button
@@ -204,84 +204,85 @@ export default function TaskerProfileCard({
       </div>
 
       <SectionCard>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 flex-1 items-start gap-3 lg:gap-4">
-            <div
-              className="flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E4D9B8] lg:h-[96px] lg:w-[96px]"
-              style={{ boxShadow: `0 0 0 2px #fff, 0 0 0 3.5px ${OLIVE}55` }}
-            >
-              {profile.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <PersonFallback />
-              )}
-            </div>
-            <div className="min-w-0 flex-1 pt-0.5">
-              <div className="flex items-start justify-between gap-2">
-                <h2 className="text-[20px] font-black leading-tight text-foreground lg:text-[26px]">{card.displayName}</h2>
-                <p className="shrink-0 text-[15px] font-black lg:text-lg" style={{ color: OLIVE_DEEP }}>
+        <div className="flex items-start gap-2.5 min-[400px]:gap-3 lg:gap-4">
+          <div
+            className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E4D9B8] min-[400px]:h-[72px] min-[400px]:w-[72px] lg:h-[96px] lg:w-[96px]"
+            style={{ boxShadow: `0 0 0 2px #fff, 0 0 0 3.5px ${OLIVE}55` }}
+          >
+            {profile.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <PersonFallback />
+            )}
+          </div>
+          <div className="min-w-0 flex-1 pt-0.5">
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <h2 className="truncate text-base font-black leading-tight text-foreground min-[400px]:text-[20px] lg:text-[26px]">{card.displayName}</h2>
+                <p className="mt-0.5 truncate text-[13px] font-black min-[400px]:text-[15px] lg:text-lg" style={{ color: OLIVE_DEEP }}>
                   {card.rateLabel}
                 </p>
               </div>
-              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[13px] font-semibold">
-                <span className="tracking-tight" style={{ color: "#E4B84A" }}>
-                  {"★".repeat(stars || 0)}
-                  <span className="text-[#D7D2C4]">{"★".repeat(Math.max(0, 5 - stars))}</span>
-                </span>
-                {card.reviewCount ? (
-                  <span className="text-foreground">
-                    <span className="font-black">{card.avg.toFixed(1)}</span>
-                    <span className="font-medium text-muted-foreground"> ({card.reviewCount} reviews)</span>
+              {canEdit ? (
+                <button
+                  type="button"
+                  onClick={() => setOpen(open === "header" ? "" : "header")}
+                  className="inline-flex shrink-0 items-center gap-1 pt-0.5 text-[11px] font-bold transition-transform duration-200 hover:scale-105 active:scale-95 min-[400px]:text-[12px]"
+                  style={{ color: OLIVE }}
+                  aria-label={open === "header" ? "Close" : "Edit"}
+                >
+                  <span className={`inline-flex transition-transform duration-300 ${open === "header" ? "rotate-90" : "rotate-0"}`}>
+                    <PencilIcon />
                   </span>
-                ) : (
-                  <span className="font-medium text-muted-foreground">No reviews yet</span>
-                )}
-              </p>
-              <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Verification Badges</p>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {card.verified ? (
-                  <>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#DCEFE6] px-2.5 py-1 text-[11px] font-bold text-[#1F6B4A]">
-                      <IdBadge />
-                      ID Check
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#DCEFE6] px-2.5 py-1 text-[11px] font-bold text-[#1F6B4A]">
-                      <CheckMini />
-                      Check
-                    </span>
-                  </>
-                ) : card.pendingVerify ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#F3E2B8] px-2.5 py-1 text-[11px] font-bold text-[#8A6A18]">Pending ID</span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#F3EFE3] px-2.5 py-1 text-[11px] font-bold text-muted-foreground">Unverified</span>
-                )}
-                {card.isAdmin ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#E8DCC4] px-2.5 py-1 text-[11px] font-bold text-[#2A3F4D]">
-                    <ShieldCheck className="h-3.5 w-3.5" color="#2A3F4D" />
-                    Admin
-                  </span>
-                ) : null}
-              </div>
-              <p className="mt-2 flex items-center gap-1 text-[12px] font-semibold text-muted-foreground lg:text-sm">
-                <MapPin className="h-3.5 w-3.5 shrink-0" color={OLIVE} />
-                Active in {card.town}
-              </p>
+                  <span className="hidden min-[380px]:inline">{open === "header" ? "Close" : "Edit"}</span>
+                </button>
+              ) : null}
             </div>
-          </div>
-          {canEdit ? (
-            <button
-              type="button"
-              onClick={() => setOpen(open === "header" ? "" : "header")}
-              className="inline-flex items-center gap-1 text-[12px] font-bold transition-transform duration-200 hover:scale-105 active:scale-95"
-              style={{ color: OLIVE }}
-            >
-              <span className={`inline-flex transition-transform duration-300 ${open === "header" ? "rotate-90" : "rotate-0"}`}>
-                <PencilIcon />
+            <p className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[12px] font-semibold min-[400px]:text-[13px]">
+              <span className="tracking-tight" style={{ color: "#E4B84A" }}>
+                {"★".repeat(stars || 0)}
+                <span className="text-[#D7D2C4]">{"★".repeat(Math.max(0, 5 - stars))}</span>
               </span>
-              {open === "header" ? "Close" : "Edit"}
-            </button>
-          ) : null}
+              {card.reviewCount ? (
+                <span className="min-w-0 text-foreground">
+                  <span className="font-black">{card.avg.toFixed(1)}</span>
+                  <span className="font-medium text-muted-foreground"> ({card.reviewCount} {card.reviewCount === 1 ? "review" : "reviews"})</span>
+                </span>
+              ) : (
+                <span className="font-medium text-muted-foreground">No reviews yet</span>
+              )}
+            </p>
+            <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground min-[400px]:mt-2 min-[400px]:text-[11px] min-[400px]:tracking-[0.12em]">Verification</p>
+            <div className="mt-1 flex flex-wrap gap-1 min-[400px]:mt-1.5 min-[400px]:gap-1.5">
+              {card.verified ? (
+                <>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#DCEFE6] px-2 py-0.5 text-[10px] font-bold text-[#1F6B4A] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
+                    <IdBadge />
+                    ID Check
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#DCEFE6] px-2 py-0.5 text-[10px] font-bold text-[#1F6B4A] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
+                    <CheckMini />
+                    Check
+                  </span>
+                </>
+              ) : card.pendingVerify ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#F3E2B8] px-2 py-0.5 text-[10px] font-bold text-[#8A6A18] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">Pending ID</span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#F3EFE3] px-2 py-0.5 text-[10px] font-bold text-muted-foreground min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">Unverified</span>
+              )}
+              {card.isAdmin ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#E8DCC4] px-2 py-0.5 text-[10px] font-bold text-[#2A3F4D] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
+                  <ShieldCheck className="h-3 w-3 min-[400px]:h-3.5 min-[400px]:w-3.5" color="#2A3F4D" />
+                  Admin
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-1.5 flex min-w-0 items-center gap-1 text-[11px] font-semibold text-muted-foreground min-[400px]:mt-2 min-[400px]:text-[12px] lg:text-sm">
+              <MapPin className="h-3 w-3 shrink-0 min-[400px]:h-3.5 min-[400px]:w-3.5" color={OLIVE} />
+              <span className="truncate">Active in {card.town}</span>
+            </p>
+          </div>
         </div>
         <Collapse open={canEdit && open === "header"}>
           <div className="mt-4 space-y-3 border-t border-[#E8E4D6] pt-4">
