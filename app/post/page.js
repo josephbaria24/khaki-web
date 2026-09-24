@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Clock, MapPin, Search, Wallet } from "@/components/icons";
+import { ChevronLeft, Clock, Search, Wallet } from "@/components/icons";
 import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
 import SectionIntro from "@/components/SectionIntro";
@@ -83,7 +83,7 @@ function PostSelect({ id, openId, setOpenId, value, options, onChange, placehold
   }, [open, setOpenId]);
 
   return (
-    <div className="relative" ref={wrapRef}>
+    <div className={cn("relative", shown && "z-40")} ref={wrapRef}>
       <button
         type="button"
         className={`${fieldClass} flex items-center justify-between gap-2 text-left`}
@@ -128,7 +128,7 @@ function PostSelect({ id, openId, setOpenId, value, options, onChange, placehold
                 const active = option.value === value;
                 return (
                   <button
-                    key={option.value}
+                    key={option.value || "__empty"}
                     type="button"
                     role="option"
                     aria-selected={active}
@@ -296,13 +296,15 @@ export default function PostPage() {
             </Field>
 
             <Field label="Kailan">
-              <div className="flex flex-wrap gap-1.5">
-                {Object.entries(SCHEDULE_LABELS).map(([k, v]) => (
-                  <Chip key={k} on={form.schedule_type === k} onClick={() => set("schedule_type", k)}>
-                    {v}
-                  </Chip>
-                ))}
-              </div>
+              <PostSelect
+                id="schedule"
+                openId={openSelect}
+                setOpenId={setOpenSelect}
+                value={form.schedule_type}
+                placeholder="Choose a schedule"
+                options={Object.entries(SCHEDULE_LABELS).map(([k, v]) => ({ value: k, label: v }))}
+                onChange={(type) => set("schedule_type", type)}
+              />
               {needsDate ? (
                 <div className="relative mt-2">
                   <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#163044]/45" />
@@ -327,31 +329,30 @@ export default function PostPage() {
               </div>
               {!form.is_remote ? (
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <div className="relative">
-                    <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#163044]/45" />
-                    <select
-                      className={`${fieldClass} appearance-none pl-9`}
-                      value={form.location_area}
-                      onChange={(e) => {
-                        set("location_area", e.target.value);
-                        set("barangay", "");
-                      }}
-                    >
-                      {LOCATIONS.map((l) => (
-                        <option key={l}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <select
-                    className={`${fieldClass} appearance-none`}
+                  <PostSelect
+                    id="town"
+                    openId={openSelect}
+                    setOpenId={setOpenSelect}
+                    value={form.location_area}
+                    placeholder="Town"
+                    options={LOCATIONS.map((l) => ({ value: l, label: l }))}
+                    onChange={(area) => {
+                      set("location_area", area);
+                      set("barangay", "");
+                    }}
+                  />
+                  <PostSelect
+                    id="barangay"
+                    openId={openSelect}
+                    setOpenId={setOpenSelect}
                     value={form.barangay}
-                    onChange={(e) => set("barangay", e.target.value)}
-                  >
-                    <option value="">Barangay (optional)</option>
-                    {barangays.map((b) => (
-                      <option key={b}>{b}</option>
-                    ))}
-                  </select>
+                    placeholder="Barangay (optional)"
+                    options={[
+                      { value: "", label: "Any barangay" },
+                      ...barangays.map((b) => ({ value: b, label: b })),
+                    ]}
+                    onChange={(b) => set("barangay", b)}
+                  />
                   <input
                     className={`${fieldClass} sm:col-span-2`}
                     placeholder="Sitio, street, or landmark"
