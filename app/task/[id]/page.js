@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, TASKER_LOCKED_NOTICE, cn, displayCategory, formatPHP, postingFee, scheduleLabel, serviceByKey, serviceForTaskCategory, timeAgo } from "@/lib/khaki";
 import { distanceLabel, townDistanceKm } from "@/lib/palawanLocations";
 import { describeExtras, describePins, vehicleLabel } from "@/lib/serviceTemplates";
+import { displayName } from "@/lib/taskerProfile";
 import { LANDING } from "@/lib/landingContent";
 import { canAcceptJobs, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -99,7 +100,9 @@ export default function TaskDetailPage() {
       const map = {};
       ids.forEach((bidId, i) => {
         const rows = lists[i] || [];
-        map[bidId] = rows.length ? rows.reduce((sum, row) => sum + Number(row.rating || 0), 0) / rows.length : null;
+        map[bidId] = rows.length
+          ? { avg: rows.reduce((sum, row) => sum + Number(row.rating || 0), 0) / rows.length, count: rows.length }
+          : null;
       });
       setBidderRatings(map);
     });
@@ -248,8 +251,8 @@ export default function TaskDetailPage() {
 
   const featured = offers.find((o) => o.status === "pending" && !bidsLocked) || offers.find((o) => o.status === "accepted") || offers[0] || null;
   const featuredBidder = featured ? bidders[featured.tasker_id] : null;
-  const featuredName = shortName(featured?.tasker_name);
-  const featuredKm = task.is_remote ? null : townDistanceKm(featuredBidder?.location_area, task.location_area);
+  const featuredName = displayName(featuredBidder?.full_name || featured?.tasker_name);
+  const featuredRating = featured ? bidderRatings[featured.tasker_id] : null;
   const featuredLive = Boolean(featured && featured.status === "pending" && !bidsLocked);
   const bidAccepted = Boolean(task.accepted_tasker_id) || offers.some((o) => o.status === "accepted");
   const canEditDetails = isClient && task.status === "open" && !bidAccepted;
@@ -345,14 +348,16 @@ export default function TaskDetailPage() {
                     {featuredName}
                   </Link>
                   <p className="mt-0.5 flex items-center gap-1 text-xs font-bold">
-                    <GoldStars value={bidderRatings[featured.tasker_id]} />
+                    <GoldStars value={featuredRating?.count ? featuredRating.avg : null} />
                     <span className="text-[#2A3F4D]/70">
-                      {bidderRatings[featured.tasker_id] != null ? `(${Number(bidderRatings[featured.tasker_id]).toFixed(1)})` : "(New)"}
+                      {featuredRating?.count
+                        ? `${featuredRating.avg.toFixed(1)} (${featuredRating.count} ${featuredRating.count === 1 ? "review" : "reviews"})`
+                        : "No reviews yet"}
                     </span>
                   </p>
                   <p className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-[#2A3F4D]/75">
                     <PinIcon />
-                    {nearLabel(featuredKm, featuredBidder?.location_area)}
+                    Active in {featuredBidder?.location_area || "Palawan"}
                   </p>
                 </div>
               </div>
@@ -415,10 +420,10 @@ export default function TaskDetailPage() {
               {offers.filter((o) => o.id !== featured?.id).map((o) => (
                 <div key={o.id} className="flex items-center justify-between gap-3 rounded-2xl bg-[#FFFCF7] p-3 shadow-card">
                   <div className="min-w-0">
-                    <Link href={`/u/${o.tasker_id}`} className="block truncate text-sm font-black text-[#163044]">{shortName(o.tasker_name)}</Link>
+                    <Link href={`/u/${o.tasker_id}`} className="block truncate text-sm font-black text-[#163044]">{displayName(bidders[o.tasker_id]?.full_name || o.tasker_name)}</Link>
                     <p className="text-xs font-semibold text-[#2A3F4D]/65">
                       {formatPHP(o.amount_php)}
-                      {bidderRatings[o.tasker_id] != null ? ` · ${Number(bidderRatings[o.tasker_id]).toFixed(1)}★` : ""}
+                      {bidderRatings[o.tasker_id]?.count ? ` · ${bidderRatings[o.tasker_id].avg.toFixed(1)}★` : ""}
                       {o.status !== "pending" ? ` · ${o.status}` : ""}
                     </p>
                   </div>
@@ -767,7 +772,7 @@ export default function TaskDetailPage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <Link href={`/u/${o.tasker_id}`} className="font-bold underline-offset-2 hover:underline">
-                              {o.tasker_name}
+                              {displayName(bidder?.full_name || o.tasker_name)}
                             </Link>
                             <p className="mt-0.5 text-[11px] font-semibold text-muted-foreground">
                               {bidder?.location_area || "Palawan"}
@@ -894,21 +899,6 @@ function PinnedLocations({ pins }) {
       ))}
     </div>
   );
-}
-
-function shortName(name) {
-  const parts = String(name || "Tasker").trim().split(/\s+/).filter(Boolean);
-  if (parts.length < 2) return parts[0] || "Tasker";
-  return `${parts[0]} ${parts[1][0].toUpperCase()}.`;
-}
-
-function nearLabel(km, area) {
-  if (km == null) return area || "Palawan";
-  const n = Number(km);
-  if (!Number.isFinite(n)) return area || "Palawan";
-  if (n === 0) return area ? `Same town · ${area} (Malapit!)` : "Same town (Malapit!)";
-  if (n < 8) return `~ ${n < 10 ? n.toFixed(1) : Math.round(n)} km away (Malapit!)`;
-  return area ? `${distanceLabel(n)} · ${area}` : distanceLabel(n);
 }
 
 function GoldStars({ value }) {

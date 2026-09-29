@@ -5,6 +5,7 @@ import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
 import PostedJobsList from "@/components/PostedJobsList";
 import TaskCard from "@/components/TaskCard";
+import TaskerVehicleSetup from "@/components/TaskerVehicleSetup";
 import { JobSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/AuthContext";
 import { isPosterMode } from "@/lib/roles";
@@ -34,15 +35,15 @@ export default function MyJobsPage() {
   const postedKey = posted.map((t) => t.id).join(",");
 
   useEffect(() => {
-    if (!postedKey) {
+    if (!poster || !postedKey) {
       setBidCounts({});
       return;
     }
     api.offers.countsByTask(postedKey.split(",")).then(setBidCounts).catch(() => setBidCounts({}));
-  }, [postedKey]);
+  }, [poster, postedKey]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !poster) return;
     const ids = [...new Set(posted.map((t) => t.accepted_tasker_id).filter(Boolean))];
     Promise.all(ids.map((id) => api.profile.get(id).catch(() => null))).then((rows) => {
       const map = {};
@@ -56,7 +57,7 @@ export default function MyJobsPage() {
         setReviews(map);
       })
       .catch(() => setReviews({}));
-  }, [user, posted.length]);
+  }, [user, poster, posted.length]);
 
   const cancelPosted = async (task) => {
     try {
@@ -100,7 +101,9 @@ export default function MyJobsPage() {
             )}
           </section>
         ) : (
-          <section>
+          <section className="space-y-8">
+            <TaskerVehicleSetup />
+            <div>
             <h2 className="mb-4 text-lg font-black">Jobs na tinatapos mo</h2>
             {!ready ? (
               <div className="grid gap-4">
@@ -117,20 +120,9 @@ export default function MyJobsPage() {
                 Wala pang accepted job. Maghanap sa browse at sumali sa bidding.
               </p>
             )}
-            {posted.length > 0 ? (
-              <div className="mt-10">
-                <h2 className="mb-4 text-lg font-black">Gawain na naka-post mo</h2>
-                <PostedJobsList
-                  tasks={posted}
-                  people={people}
-                  reviews={reviews}
-                  bidCounts={bidCounts}
-                  onCancel={cancelPosted}
-                />
-              </div>
-            ) : null}
               </>
             )}
+            </div>
           </section>
         )}
       </Container>

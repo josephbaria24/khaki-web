@@ -243,7 +243,7 @@ export default function LocationPinMap({ center, slots, pins, onChange }) {
         "overflow-hidden bg-white",
         fullscreen
           ? "fixed inset-0 z-[2000] flex h-dvh max-h-dvh w-dvw flex-col pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
-          : "rounded-2xl border border-[#EFE7DA]"
+          : "relative z-0 rounded-2xl border border-[#EFE7DA]"
       )}
     >
       {slots.length > 1 ? (
