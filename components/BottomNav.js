@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Briefcase, Home, MessageSquare, Plus, Search, User } from "@/components/icons";
+import ActiveJobDock from "@/components/ActiveJobDock";
 import { cn } from "@/lib/khaki";
 import { canOpenPost, isAdmin, needsTaskerVerification } from "@/lib/roles";
 import { useAuth } from "@/lib/AuthContext";
@@ -46,6 +47,7 @@ export default function BottomNav({ hidden = false }) {
       inert={hidden || undefined}
     >
       <div className="relative mx-auto max-w-md pt-3">
+        <ActiveJobDock />
         <div className="float-nav float-nav-notch relative flex h-14 items-center justify-around px-1.5">
           {items.map((item) => {
             const active = tabActive(pathname, item.href);

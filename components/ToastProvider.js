@@ -6,6 +6,18 @@ import { cn } from "@/lib/khaki";
 
 const DURATION = 3200;
 
+const TONE = {
+  success: "border-[#6EE7B7] bg-[#ECFDF5] text-[#065F46]",
+  error: "border-[#FECACA] bg-[#FEF2F2] text-[#991B1B]",
+  info: "border-[#BFDBFE] bg-[#EFF6FF] text-[#1E40AF]",
+};
+
+const DOT = {
+  success: "bg-[#059669]",
+  error: "bg-[#DC2626]",
+  info: "bg-[#2563EB]",
+};
+
 export default function ToastProvider({ children }) {
   const [items, setItems] = useState([]);
 
@@ -29,7 +41,7 @@ export default function ToastProvider({ children }) {
     <>
       {children}
       <div
-        className="pointer-events-none fixed inset-x-0 bottom-4 z-[100] flex flex-col items-center gap-2 px-4 sm:bottom-6"
+        className="pointer-events-none fixed inset-x-0 top-4 z-[100] flex flex-col items-center gap-2 px-4 sm:top-5"
         aria-live="polite"
         aria-relevant="additions"
       >
@@ -38,12 +50,11 @@ export default function ToastProvider({ children }) {
             key={t.id}
             role="status"
             className={cn(
-              "pointer-events-auto flex max-w-md items-start gap-3 rounded-2xl px-4 py-3 text-sm font-semibold shadow-soft animate-fade-in-up",
-              t.type === "error" && "bg-[#DC2626] text-white",
-              t.type === "info" && "bg-[#2A3F4D] text-[#F7F4EC]",
-              t.type === "success" && "bg-[#163044] text-[#F7F4EC]"
+              "pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-soft animate-toast-in",
+              TONE[t.type] || TONE.success
             )}
           >
+            <span className={cn("mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full", DOT[t.type] || DOT.success)} aria-hidden />
             <span className="flex-1 leading-snug">{t.message}</span>
             <button
               type="button"

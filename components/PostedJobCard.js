@@ -6,11 +6,12 @@ import StarRating from "@/components/StarRating";
 import { displayCategory, formatPHP } from "@/lib/khaki";
 import { LANDING } from "@/lib/landingContent";
 
-export default function PostedJobCard({ task, tasker, review, onCancel }) {
+export default function PostedJobCard({ task, tasker, review, onCancel, bidCount }) {
   const hired = tasker || (task.accepted_tasker_id ? { id: task.accepted_tasker_id, full_name: "Tasker" } : null);
-  const canEdit = task.status === "open";
+  const canEdit = task.status === "open" && !task.accepted_tasker_id;
   const canRate = task.status === "released" && hired && !review;
   const canCancel = task.status === "open" && typeof onCancel === "function";
+  const bids = Number(bidCount ?? task.offer_count) || 0;
 
   return (
     <article className="rounded-[1.5rem] bg-[#FFFCF7] p-5 shadow-card">
@@ -25,9 +26,13 @@ export default function PostedJobCard({ task, tasker, review, onCancel }) {
           <h3 className="mt-2 text-lg font-black leading-snug text-foreground">{task.title}</h3>
           <p className="mt-1 text-sm font-black">{formatPHP(task.budget_php)}</p>
         </div>
-        <p className="text-xs font-semibold text-muted-foreground">
-          {task.offer_count ? `${task.offer_count} bid${task.offer_count === 1 ? "" : "s"}` : "Walang bid pa"}
-        </p>
+        {bids > 0 ? (
+          <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1F9D6A] px-2 text-[11px] font-bold text-white shadow-[0_0_12px_2px_rgba(31,157,106,0.75)]">
+            {bids} {bids === 1 ? "bid" : "bids"}
+          </span>
+        ) : (
+          <p className="text-xs font-semibold text-muted-foreground">Walang bid pa</p>
+        )}
       </div>
 
       {hired ? (

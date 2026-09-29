@@ -320,13 +320,17 @@
   }
 
   .category-tile-go {
-    @apply absolute bottom-1.5 right-1.5 flex items-center justify-center rounded-full bg-[#163044] text-white;
-    box-shadow: 0 4px 12px rgba(22, 48, 68, 0.35);
-    transition: transform 0.2s ease-out;
+    @apply absolute bottom-2 right-2 flex items-center justify-center rounded-full bg-[#F7F4EC] text-[#163044];
+    box-shadow:
+      0 0 0 2px #fff,
+      0 8px 18px rgba(22, 48, 68, 0.32);
+    transition: transform 0.2s ease-out, background-color 0.2s ease-out, color 0.2s ease-out;
   }
 
   .category-tile:hover .category-tile-go {
-    transform: translateX(2px);
+    transform: translateX(3px) scale(1.06);
+    background-color: #163044;
+    color: #F7F4EC;
   }
 
   .shortcut-tile {
@@ -376,7 +380,7 @@
   }
 
   .bento-pill {
-    @apply mt-4 inline-flex h-8 items-center rounded-full bg-[#163044] px-3.5 text-[11px] font-extrabold tracking-tight text-[#F7F4EC];
+    @apply mt-2.5 inline-flex h-8 items-center rounded-full bg-[#163044] px-3.5 text-[11px] font-extrabold tracking-tight text-[#F7F4EC] sm:mt-4;
   }
 
   .bento-icon {
@@ -455,6 +459,16 @@
     @apply overflow-visible rounded-full bg-card/95 shadow-soft backdrop-blur-md;
     box-shadow: var(--shadow-soft);
     animation: nav-slide-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes active-job-pulse {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    75% { transform: scale(1.85); opacity: 0; }
+    100% { transform: scale(1.85); opacity: 0; }
+  }
+
+  .active-job-pulse {
+    animation: active-job-pulse 1.5s ease-out infinite;
   }
 
   .float-nav-tab {
@@ -631,6 +645,17 @@
     from {
       opacity: 0;
       transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
     }
     to {
       opacity: 1;
@@ -828,6 +853,10 @@
     animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  .animate-toast-in {
+    animation: toast-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   .animate-fade-in {
     animation: fade-in 0.4s ease-out both;
   }
@@ -1009,7 +1038,7 @@
     flex-direction: column;
     overflow: hidden;
     border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     background: #FFFCF7;
     margin-top: 0.375rem;
     box-shadow: 0 16px 40px rgba(22, 48, 68, 0.16);
@@ -1238,6 +1267,7 @@
   @media (prefers-reduced-motion: reduce) {
     .animate-page-enter,
     .animate-fade-in-up,
+    .animate-toast-in,
     .animate-fade-in,
     .animate-post-pop,
     .hero-mobile-card,
@@ -1253,6 +1283,7 @@
     .notif-sheet,
     .stagger-children > *,
     .float-nav,
+    .active-job-pulse,
     .chat-bubble-enter-mine,
     .chat-bubble-enter-theirs,
     .site-nav-panel.is-open .site-nav-panel-inner > * > a,

@@ -8,7 +8,7 @@ import { NoticeSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/AuthContext";
 import { cn, timeAgo } from "@/lib/khaki";
 import { api } from "@/lib/store";
-import { mergeNotificationFeed, noticeHref } from "@/lib/verificationNotice";
+import { isVerificationSeen, markVerificationSeen, mergeNotificationFeed, noticeHref, verificationNotice } from "@/lib/verificationNotice";
 
 export default function NotificationsBell() {
   const { user } = useAuth();
@@ -48,6 +48,7 @@ export function NotificationsSheet({ open, onClose }) {
   const cached = api.notifications.peek();
   const [notes, setNotes] = useState(() => cached || []);
   const [ready, setReady] = useState(() => cached != null);
+  const [freshIds, setFreshIds] = useState(() => new Set());
 
   useEffect(() => {
     if (open) {
@@ -82,10 +83,15 @@ export function NotificationsSheet({ open, onClose }) {
       setReady(true);
       if (marked) return;
       marked = true;
+      const status = verificationNotice(user);
+      const ids = new Set(list.filter((n) => n.read === false).map((n) => n.id));
+      if (status && !isVerificationSeen(status)) ids.add(status.id);
+      setFreshIds(ids);
+      markVerificationSeen(status);
       api.notifications.markAllRead().catch(() => {});
     });
     return stop;
-  }, [open]);
+  }, [open, user]);
 
   if (!shown || typeof document === "undefined") return null;
 
@@ -141,23 +147,33 @@ export function NotificationsSheet({ open, onClose }) {
           ) : (
             feed.map((n) => {
               const verification = n.kind === "verification" || n.id === "verification-status";
+              const unread = freshIds.has(n.id);
               return (
                 <button
                   key={n.id}
                   type="button"
                   onClick={() => go(n)}
                   className={cn(
-                    "w-full rounded-2xl border bg-white p-4 text-left",
-                    verification ? "border-[#0D666A]/25" : "border-transparent"
+                    "w-full rounded-2xl border p-4 text-left",
+                    unread
+                      ? "border-[#0D666A] bg-[#D5EFEF]"
+                      : "border-[#0D666A]/10 bg-[#F4F7F7]"
                   )}
                 >
                   {verification ? (
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#0D666A]">
+                    <p className={cn(
+                      "text-[11px] font-bold uppercase tracking-[0.14em]",
+                      unread ? "text-[#0D666A]" : "text-[#0D666A]/45"
+                    )}>
                       {n.title || "Verification"}
                     </p>
                   ) : null}
-                  <p className={`text-sm font-medium ${verification ? "mt-1" : ""}`}>{n.text}</p>
-                  <p className="mt-1 text-[11px] text-muted-foreground">{timeAgo(n.created_at)}</p>
+                  <p className={cn(
+                    "text-sm",
+                    verification && "mt-1",
+                    unread ? "font-semibold text-[#163044]" : "font-medium text-[#2A3F4D]/50"
+                  )}>{n.text}</p>
+                  <p className={cn("mt-1 text-[11px]", unread ? "text-[#2A3F4D]/70" : "text-[#2A3F4D]/35")}>{timeAgo(n.created_at)}</p>
                 </button>
               );
             })

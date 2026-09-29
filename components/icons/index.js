@@ -62,6 +62,37 @@ export const X = make("X");
 export const Mail = make("Mail");
 export const Loader2 = make("Loader2");
 export const Leaf = make("Leaf");
+export const Car = make("Car");
+export const Motorbike = make("Motorbike");
+export const Van = make("Van");
+export const Package = make("Package");
+export const Scooter = make("Scooter");
+export const Basket = make("Basket");
+export const Flash = make("Flash");
+export const Calendar = make("Calendar");
+export const Refresh = make("Refresh");
+export const Users = make("Users");
+export const Luggage = make("Luggage");
+export const Wrench = make("Wrench");
+export const Beach = make("Beach");
+export const Clean = make("Clean");
+export const Laptop = make("Laptop");
+export const Scissor = make("Scissor");
+export const Compass = make("Compass");
+export const Sparkles = make("Sparkles");
+export const Tools = make("Tools");
+export const Maximize = make("Maximize");
+export const Minimize = make("Minimize");
+
+export function CircleAlert({ className = "h-5 w-5", color = "currentColor", ...props }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className} {...props}>
+      <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.75" />
+      <path d="M12 8v5" stroke={color} strokeWidth="1.75" strokeLinecap="round" />
+      <circle cx="12" cy="16.25" r="0.9" fill={color} />
+    </svg>
+  );
+}
 
 export function Eye({ className = "h-4 w-4", color = "currentColor", ...props }) {
   return (

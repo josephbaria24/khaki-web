@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
-import PostedJobCard from "@/components/PostedJobCard";
+import PostedJobsList from "@/components/PostedJobsList";
 import TaskCard from "@/components/TaskCard";
 import { JobSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/AuthContext";
@@ -19,6 +19,7 @@ export default function MyJobsPage() {
   const [ready, setReady] = useState(() => cached != null);
   const [people, setPeople] = useState({});
   const [reviews, setReviews] = useState({});
+  const [bidCounts, setBidCounts] = useState({});
 
   useEffect(() => {
     const stop = api.tasks.subscribeMine((list) => {
@@ -30,6 +31,15 @@ export default function MyJobsPage() {
 
   const posted = tasks.filter((t) => t.client_id === user?.id);
   const working = tasks.filter((t) => t.accepted_tasker_id === user?.id);
+  const postedKey = posted.map((t) => t.id).join(",");
+
+  useEffect(() => {
+    if (!postedKey) {
+      setBidCounts({});
+      return;
+    }
+    api.offers.countsByTask(postedKey.split(",")).then(setBidCounts).catch(() => setBidCounts({}));
+  }, [postedKey]);
 
   useEffect(() => {
     if (!user) return;
@@ -79,22 +89,13 @@ export default function MyJobsPage() {
               </div>
             ) : (
               <>
-            <div className="grid gap-4 md:grid-cols-2">
-              {posted.map((t) => (
-                <PostedJobCard
-                  key={t.id}
-                  task={t}
-                  tasker={people[t.accepted_tasker_id]}
-                  review={reviews[t.id]}
-                  onCancel={cancelPosted}
-                />
-              ))}
-            </div>
-            {posted.length === 0 && (
-              <p className="rounded-2xl border border-dashed p-8 text-sm text-muted-foreground">
-                Wala ka pang naka-post. Mag-post ng gawain.
-              </p>
-            )}
+            <PostedJobsList
+              tasks={posted}
+              people={people}
+              reviews={reviews}
+              bidCounts={bidCounts}
+              onCancel={cancelPosted}
+            />
               </>
             )}
           </section>
@@ -119,17 +120,13 @@ export default function MyJobsPage() {
             {posted.length > 0 ? (
               <div className="mt-10">
                 <h2 className="mb-4 text-lg font-black">Gawain na naka-post mo</h2>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {posted.map((t) => (
-                    <PostedJobCard
-                      key={t.id}
-                      task={t}
-                      tasker={people[t.accepted_tasker_id]}
-                      review={reviews[t.id]}
-                      onCancel={cancelPosted}
-                    />
-                  ))}
-                </div>
+                <PostedJobsList
+                  tasks={posted}
+                  people={people}
+                  reviews={reviews}
+                  bidCounts={bidCounts}
+                  onCancel={cancelPosted}
+                />
               </div>
             ) : null}
               </>

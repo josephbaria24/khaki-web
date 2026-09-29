@@ -7,6 +7,7 @@ import { LOCATIONS, SERVICE_CATEGORIES, hasServiceSkill, toggleServiceSkill } fr
 import { LANDING } from "@/lib/landingContent";
 import { Collapse, Stagger } from "@/components/ui/motion";
 import { buildTaskerCard, PRICE_TYPES, pricingModelLabel } from "@/lib/taskerProfile";
+import { VEHICLE_OPTIONS, vehicleLabel } from "@/lib/serviceTemplates";
 
 const OLIVE = LANDING.olive;
 const OLIVE_DEEP = LANDING.oliveDeep;
@@ -115,7 +116,14 @@ export default function TaskerProfileCard({
   const [open, setOpen] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [headerForm, setHeaderForm] = useState({ full_name: "", location_area: "", phone: "" });
+  const [headerForm, setHeaderForm] = useState({
+    full_name: "",
+    location_area: "",
+    phone: "",
+    vehicle_type: "",
+    vehicle_model: "",
+    plate_number: "",
+  });
   const [aboutForm, setAboutForm] = useState({ bio: "", headline: "" });
   const [skillsForm, setSkillsForm] = useState({ skills: [], price_type: "Per Hour", price_amount: "", price_description: "" });
 
@@ -124,6 +132,9 @@ export default function TaskerProfileCard({
       full_name: profile?.full_name || "",
       location_area: profile?.location_area || LOCATIONS[0],
       phone: profile?.phone || "",
+      vehicle_type: profile?.vehicle_type || "",
+      vehicle_model: profile?.vehicle_model || "",
+      plate_number: profile?.plate_number || "",
     });
     setAboutForm({
       bio: profile?.bio || "",
@@ -282,6 +293,13 @@ export default function TaskerProfileCard({
               <MapPin className="h-3 w-3 shrink-0 min-[400px]:h-3.5 min-[400px]:w-3.5" color={OLIVE} />
               <span className="truncate">Active in {card.town}</span>
             </p>
+            {profile?.vehicle_type ? (
+              <p className="mt-1 truncate text-[11px] font-bold text-[#163044]/70 min-[400px]:text-[12px]">
+                {vehicleLabel(profile.vehicle_type)}
+                {profile.vehicle_model ? ` · ${profile.vehicle_model}` : ""}
+                {profile.plate_number ? ` · ${profile.plate_number}` : ""}
+              </p>
+            ) : null}
           </div>
         </div>
         <Collapse open={canEdit && open === "header"}>
@@ -293,6 +311,21 @@ export default function TaskerProfileCard({
                 <option key={l}>{l}</option>
               ))}
             </select>
+            <p className="pt-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground">
+              Sasakyan (para sa Transport & Rides)
+            </p>
+            <select className={fieldClass()} value={headerForm.vehicle_type} onChange={(e) => setHeaderForm({ ...headerForm, vehicle_type: e.target.value })}>
+              <option value="">Walang sasakyan</option>
+              {VEHICLE_OPTIONS.map((v) => (
+                <option key={v.value} value={v.value}>{v.label}</option>
+              ))}
+            </select>
+            {headerForm.vehicle_type ? (
+              <>
+                <input className={fieldClass()} value={headerForm.vehicle_model} onChange={(e) => setHeaderForm({ ...headerForm, vehicle_model: e.target.value })} placeholder="Model (e.g. Honda Click 125)" />
+                <input className={fieldClass()} value={headerForm.plate_number} onChange={(e) => setHeaderForm({ ...headerForm, plate_number: e.target.value.toUpperCase() })} placeholder="Plate number" />
+              </>
+            ) : null}
             <button type="button" disabled={saving} onClick={() => saveSection(headerForm)} className="btn-olive inline-flex h-10 items-center px-5 text-xs disabled:opacity-60">
               {saving ? "Saving..." : "Save"}
             </button>

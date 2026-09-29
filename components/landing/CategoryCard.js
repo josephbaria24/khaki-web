@@ -43,11 +43,11 @@ export default function CategoryCard({ cat, compact = false }) {
         <span
           className={cn(
             "category-tile-go",
-            compact ? "h-7 w-7" : "h-9 w-9"
+            compact ? "h-9 w-9" : "h-11 w-11"
           )}
           aria-hidden
         >
-          <ArrowRight className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} color="#fff" />
+          <ArrowRight className={compact ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2.25} />
         </span>
       </div>
       <p className={cn("font-black leading-tight text-foreground", compact ? "mt-2 text-[13px]" : "mt-3 text-base")}>

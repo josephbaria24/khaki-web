@@ -87,29 +87,29 @@ export default function DashboardShortcuts({ user, postingFees = 0, myTasks = []
       <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
         <Link
           href={hero.href}
-          className="bento-widget col-span-2 min-h-[10.5rem] sm:min-h-[11.5rem]"
+          className="bento-widget col-span-2 min-h-[7.25rem] sm:min-h-[11.5rem]"
           style={{ background: hero.bg }}
         >
           <div className="relative z-[1] max-w-[calc(100%-4.75rem)] sm:max-w-[calc(100%-5.5rem)]">
-            <p className="text-[1.35rem] font-black leading-tight text-[#163044] sm:text-2xl">{hero.title}</p>
+            <p className="text-lg font-black leading-tight text-[#163044] sm:text-2xl">{hero.title}</p>
             <p className="mt-1 text-[13px] leading-snug text-[#2A3F4D]/70 sm:text-sm">{hero.sub}</p>
             <span className="bento-pill">{hero.cta}</span>
           </div>
           <Reicon name={hero.icon} color={hero.iconColor} className="bento-icon" />
         </Link>
 
-        <Link href={left.href} className="bento-widget min-h-[10.5rem]" style={{ background: left.bg }}>
+        <Link href={left.href} className="bento-widget min-h-[6.5rem] sm:min-h-[10.5rem]" style={{ background: left.bg }}>
           <p className="relative z-[1] pr-[3.25rem] text-[13px] font-black text-[#163044] sm:pr-16 sm:text-sm">{left.title}</p>
-          <p className="relative z-[1] mt-3 pr-[3.25rem] text-[1.75rem] font-black leading-none tracking-tight text-[#163044] sm:pr-16 sm:text-3xl">
+          <p className="relative z-[1] mt-1.5 pr-[3.25rem] text-2xl font-black leading-none tracking-tight text-[#163044] sm:mt-3 sm:pr-16 sm:text-3xl">
             {left.value}
           </p>
           <p className="relative z-[1] mt-1 pr-[3.25rem] text-[11px] font-semibold text-[#2A3F4D]/65 sm:pr-16 sm:text-xs">{left.label}</p>
           <Reicon name={left.icon} color={left.iconColor} className="bento-icon-sm" />
         </Link>
 
-        <Link href={right.href} className="bento-widget min-h-[10.5rem]" style={{ background: right.bg }}>
+        <Link href={right.href} className="bento-widget min-h-[6.5rem] sm:min-h-[10.5rem]" style={{ background: right.bg }}>
           <p className="relative z-[1] pr-[3.25rem] text-[13px] font-black text-[#163044] sm:pr-16 sm:text-sm">{right.title}</p>
-          <p className="relative z-[1] mt-3 truncate pr-[3.25rem] text-[1.75rem] font-black leading-none tracking-tight text-[#163044] sm:pr-16 sm:text-3xl">
+          <p className="relative z-[1] mt-1.5 truncate pr-[3.25rem] text-2xl font-black leading-none tracking-tight text-[#163044] sm:mt-3 sm:pr-16 sm:text-3xl">
             {right.value}
           </p>
           <p className="relative z-[1] mt-1 pr-[3.25rem] text-[11px] font-semibold text-[#2A3F4D]/65 sm:pr-16 sm:text-xs">{right.label}</p>
