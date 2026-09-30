@@ -95,7 +95,6 @@ function BrowseBody() {
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               {user?.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={user.avatar_url}
                   alt=""
