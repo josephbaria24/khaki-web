@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/lib/AuthContext";
 import { canOpenPost } from "@/lib/roles";
 import { Collapse } from "@/components/ui/motion";
+import InstallAppBanner from "@/components/InstallAppBanner";
 
 function Stars({ count = 5, className = "h-3.5 w-3.5" }) {
   return (
@@ -135,7 +136,10 @@ export default function LandingHome() {
 
   return (
     <div className="landing-page w-full min-w-0">
-      <section className="overflow-x-clip bg-[#FBF8F1] px-0 pb-3 pt-3 sm:pt-5 md:px-8 md:py-6 lg:px-[6vw] lg:py-8">
+      <div className="pt-3">
+        <InstallAppBanner />
+      </div>
+      <section className="overflow-x-clip bg-[#FBF8F1] px-0 pb-3 pt-0 sm:pt-2 md:px-8 md:py-6 lg:px-[6vw] lg:py-8 dark:bg-[#11141A]">
         <div className="hero-mobile-card relative mx-auto w-[95%] min-w-0 overflow-hidden rounded-[1.75rem] bg-[#163044] text-white shadow-[0_22px_50px_rgba(22,48,68,0.28)] min-[380px]:rounded-[1.85rem] md:w-full md:max-w-5xl md:rounded-[2.15rem] lg:max-w-none">
           <div
             className="pointer-events-none absolute inset-x-8 top-8 h-36 rounded-full bg-[#3E7498]/45 blur-3xl md:hidden"

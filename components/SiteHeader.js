@@ -39,7 +39,7 @@ export default function SiteHeader({ landing: _landing = false }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1]/95 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1]/95 backdrop-blur-md dark:border-white/10 dark:bg-[#11141A]/95">
       <Container className="flex h-16 min-w-0 items-center justify-between gap-2 lg:h-[72px] lg:gap-4">
         <Logo />
         <nav className="hidden items-center gap-1 md:flex">
@@ -49,7 +49,7 @@ export default function SiteHeader({ landing: _landing = false }) {
               href={link.href}
               onClick={closeAndGo(link.href)}
               className={cn(
-                "rounded-full px-3 py-2 text-sm font-semibold transition-colors duration-200 ease-out hover:bg-black/[0.04]",
+                "rounded-full px-3 py-2 text-sm font-semibold transition-colors duration-200 ease-out hover:bg-black/[0.04] dark:hover:bg-white/10",
                 pathname === link.href ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -84,7 +84,7 @@ export default function SiteHeader({ landing: _landing = false }) {
           )}
           <button
             type="button"
-            className={cn("site-menu-btn inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-card", open && "is-open")}
+            className={cn("site-menu-btn inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#163044] shadow-card dark:bg-[#1A1E27] dark:text-[#F5F3EE]", open && "is-open")}
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
@@ -106,7 +106,7 @@ export default function SiteHeader({ landing: _landing = false }) {
                 key={link.href}
                 href={link.href}
                 onClick={closeAndGo(link.href)}
-                className="block rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors duration-200 hover:bg-black/[0.04]"
+                className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-black/[0.04] dark:hover:bg-white/10"
               >
                 {link.label}
               </Link>

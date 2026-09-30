@@ -84,21 +84,39 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
 
   useEffect(() => {
     let cancelled = false;
-    import("leaflet").then((mod) => {
-      if (cancelled || !boxRef.current || mapRef.current) return;
-      const L = mod.default || mod;
-      leafletRef.current = L;
-      const map = L.map(boxRef.current, { zoomControl: true, attributionControl: true }).setView(center, 14);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap",
-      }).addTo(map);
-      map.on("click", (e) => place(activeRef.current, e.latlng));
-      mapRef.current = map;
-      setReady(true);
-    });
+    let booting = false;
+    const node = boxRef.current;
+    const boot = () => {
+      if (cancelled || booting || mapRef.current) return;
+      const box = boxRef.current;
+      if (!box || box.clientWidth < 20 || box.clientHeight < 20) return;
+      booting = true;
+      import("leaflet").then((mod) => {
+        if (cancelled || !boxRef.current || mapRef.current) return;
+        const L = mod.default || mod;
+        leafletRef.current = L;
+        const host = boxRef.current;
+        if (host._leaflet_id) {
+          host._leaflet_id = undefined;
+          host.replaceChildren();
+        }
+        const map = L.map(host, { zoomControl: true, attributionControl: true }).setView(center, 14);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap",
+        }).addTo(map);
+        map.on("click", (e) => place(activeRef.current, e.latlng));
+        mapRef.current = map;
+        setReady(true);
+        requestAnimationFrame(() => map.invalidateSize({ animate: false, pan: false }));
+      });
+    };
+    const observer = new ResizeObserver(boot);
+    if (node) observer.observe(node);
+    boot();
     return () => {
       cancelled = true;
+      observer.disconnect();
       mapRef.current?.remove();
       mapRef.current = null;
       markersRef.current = {};
@@ -162,24 +180,28 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
       node.style.height = "";
     }
     const fit = () => {
-      if (!mapRef.current || node.clientHeight < 20) return;
+      if (!mapRef.current || node.clientWidth < 20 || node.clientHeight < 20) return;
       mapRef.current.invalidateSize({ animate: false, pan: false });
     };
     const frameObserver = new ResizeObserver(() => {
-      if (!fullscreen) return;
-      const next = frame.clientHeight;
-      if (next > 20) node.style.height = `${next}px`;
+      if (fullscreen) {
+        const next = frame.clientHeight;
+        if (next > 20) node.style.height = `${next}px`;
+      }
       fit();
     });
     frameObserver.observe(frame);
+    frameObserver.observe(node);
     const frameId = requestAnimationFrame(fit);
     const later = setTimeout(fit, 200);
+    const afterEnter = setTimeout(fit, 600);
     return () => {
       frameObserver.disconnect();
       cancelAnimationFrame(frameId);
       clearTimeout(later);
+      clearTimeout(afterEnter);
     };
-  }, [fullscreen, ready]);
+  }, [fullscreen, ready, compact]);
 
   useEffect(() => {
     if (!fullscreen) return undefined;
@@ -267,7 +289,7 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
       ) : null}
 
       <div className={cn("relative", fullscreen && "min-h-0 w-full flex-1")}>
-        <div ref={boxRef} className={cn("map-pin-canvas w-full", compact ? "h-40 sm:h-56" : "h-64 sm:h-72")} style={{ zIndex: 0 }} />
+        <div ref={boxRef} className={cn("map-pin-canvas w-full", compact ? "is-compact h-40 sm:h-56" : "h-64 sm:h-72")} style={{ zIndex: 0 }} />
         <button
           type="button"
           onClick={toggleFullscreen}

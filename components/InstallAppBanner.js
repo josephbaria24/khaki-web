@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react";
 import { X } from "@/components/icons";
 import {
-  closeInstallBanner,
-  installBannerClosed,
   isAndroid,
   isAndroidChrome,
+  isAppInstalled,
   isIOS,
   isIOSSafari,
-  isStandaloneApp,
+  markAppInstalled,
   openInChrome,
   openInSafari,
   promptInstall,
@@ -32,28 +31,33 @@ export default function InstallAppBanner() {
   const [guide, setGuide] = useState("");
 
   useEffect(() => {
-    if (isStandaloneApp() || installBannerClosed()) return undefined;
-    setVisible(true);
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("install") === "safari" && isIOS()) {
-      setGuide(isIOSSafari() ? SAFARI_STEPS : SAFARI_HANDOFF);
-      const url = new URL(window.location.href);
-      url.searchParams.delete("install");
-      const next = `${url.pathname}${url.search}${url.hash}`;
-      window.history.replaceState(null, "", next);
-    }
+    let cancelled = false;
+    isAppInstalled().then((installed) => {
+      if (cancelled || installed) return;
+      setVisible(true);
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("install") === "safari" && isIOS()) {
+        setGuide(isIOSSafari() ? SAFARI_STEPS : SAFARI_HANDOFF);
+        const url = new URL(window.location.href);
+        url.searchParams.delete("install");
+        const next = `${url.pathname}${url.search}${url.hash}`;
+        window.history.replaceState(null, "", next);
+      }
+    });
     const onInstalled = () => {
-      closeInstallBanner();
+      markAppInstalled();
       setVisible(false);
     };
     window.addEventListener("appinstalled", onInstalled);
-    return () => window.removeEventListener("appinstalled", onInstalled);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("appinstalled", onInstalled);
+    };
   }, []);
 
   if (!visible) return null;
 
   const close = () => {
-    closeInstallBanner();
     setVisible(false);
   };
 
@@ -73,6 +77,7 @@ export default function InstallAppBanner() {
     }
     const outcome = await promptInstall();
     if (outcome === "accepted") {
+      markAppInstalled();
       close();
       return;
     }
@@ -81,19 +86,27 @@ export default function InstallAppBanner() {
 
   return (
     <div className="mx-auto mb-4 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-      <div className="flex items-center gap-2">
+      <div className="relative flex items-center overflow-hidden rounded-[1.25rem] bg-gradient-to-r from-[#163044] via-[#1F6A62] to-[#3A73C4] p-1.5 shadow-[0_12px_28px_rgba(22,48,68,0.28)]">
+        <span className="pointer-events-none absolute -right-4 -top-8 h-20 w-20 rounded-full bg-[#C8F0D8]/35" aria-hidden />
+        <span className="pointer-events-none absolute -bottom-8 right-24 h-16 w-16 rounded-full bg-[#FAD4DC]/45" aria-hidden />
         <button
           type="button"
           onClick={install}
-          className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-full border border-[#E6DDD0] bg-[#FFFCF7] px-3 text-left text-[#163044] shadow-card"
+          className="relative flex min-h-12 min-w-0 flex-1 items-center gap-2.5 rounded-[1rem] px-2 py-1.5 text-left"
         >
-          <DownloadIcon />
-          <span className="truncate text-xs font-bold">Install the app</span>
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C8F0D8] text-[#163044]">
+            <DownloadIcon />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-black text-white">Install the app</span>
+            <span className="block truncate text-[11px] font-semibold text-[#C8F0D8]">One tap, then it lives on your home screen</span>
+          </span>
+          <span className="shrink-0 rounded-full bg-[#FAD4DC] px-2.5 py-1 text-[11px] font-black text-[#9D3A5C]">Get</span>
         </button>
         <button
           type="button"
           onClick={close}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E6DDD0] bg-[#FFFCF7] text-[#2A3F4D]"
+          className="relative mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-white"
           aria-label="Close"
         >
           <X className="h-3.5 w-3.5" color="currentColor" />
