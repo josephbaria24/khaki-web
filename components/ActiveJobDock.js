@@ -167,6 +167,7 @@ export default function ActiveJobDock() {
                 {displayTaskCategory(task)}
               </p>
               <p className="mt-1 text-base font-black leading-snug text-[#2A3F4D]">{task.title}</p>
+              <p className="mt-0.5 text-xs font-semibold text-[#2A3F4D]/55">{timeAgo(task.created_at)}</p>
               <div className="mt-2 flex items-center justify-between gap-2">
                 <span className="rounded-full bg-[#E8F6F4] px-2.5 py-1 text-[10px] font-bold text-[#0D666A]">{status}</span>
                 <span className="text-sm font-black text-[#2A3F4D]">{formatPHP(task.budget_php)}</span>

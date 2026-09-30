@@ -37,13 +37,15 @@ function JobCard({ task }) {
         className="relative aspect-[4/3] overflow-hidden rounded-[1.15rem]"
         style={{ backgroundColor: graphic.bg }}
       >
-        <Image
-          src={graphic.image}
-          alt=""
-          fill
-          className="object-contain p-3 transition duration-300 group-hover:scale-105"
-          sizes="(max-width: 640px) 50vw, 280px"
-        />
+        {graphic.image ? (
+          <Image
+            src={graphic.image}
+            alt=""
+            fill
+            className="object-contain p-3 transition duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 50vw, 280px"
+          />
+        ) : null}
         <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-bold text-[#2A3F4D] shadow-sm">
           <span className="text-[#C4A035]">★</span> {rating}
         </span>
