@@ -80,7 +80,7 @@ function BrowseBody() {
 
   const filtered = tasks.filter((task) => {
     if (search && !`${task.title} ${task.details}`.toLowerCase().includes(search.toLowerCase())) return false;
-    if (!taskMatchesChip(task.category, category)) return false;
+    if (!taskMatchesChip(task.category, category, task)) return false;
     return true;
   });
 

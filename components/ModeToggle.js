@@ -26,7 +26,7 @@ export default function ModeToggle({ className = "" }) {
 
   return (
     <div
-      className={`inline-flex rounded-full bg-[#C9D6E0]/55 p-1 ${className}`}
+      className={`inline-flex rounded-full bg-[#C9D6E0]/55 p-1 dark:bg-[#252A35] ${className}`}
       role="tablist"
       aria-label="Account mode"
     >

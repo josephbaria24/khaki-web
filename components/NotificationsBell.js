@@ -25,11 +25,11 @@ export default function NotificationsBell() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FFFCF7] text-[#2A3F4D] shadow-card"
+        className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FFFCF7] text-[#2A3F4D] shadow-card dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
         aria-label="Notifications"
         aria-expanded={open}
       >
-        <Bell className="h-5 w-5" color="#2A3F4D" />
+        <Bell className="h-5 w-5" color="currentColor" />
         {unread > 0 ? (
           <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#163044] px-1 text-[10px] font-bold text-[#F7F4EC]">
             {unread}

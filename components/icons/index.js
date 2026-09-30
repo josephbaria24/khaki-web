@@ -81,8 +81,19 @@ export const Scissor = make("Scissor");
 export const Compass = make("Compass");
 export const Sparkles = make("Sparkles");
 export const Tools = make("Tools");
+export const Snowflake = make("Snowflake");
+export const GasPipe = make("GasPipe");
+export const Repair = make("Repair");
+export const ElectricPlugs = make("ElectricPlugs");
+export const Hammer = make("Hammer");
+export const WashingMachine = make("WashingMachine");
+export const Door = make("Door");
+export const Grid = make("Grid");
+export const MoreHorizontal = make("MoreHorizontal");
 export const Maximize = make("Maximize");
 export const Minimize = make("Minimize");
+export const Sun = make("Sun");
+export const Moon = make("Moon");
 
 export function CircleAlert({ className = "h-5 w-5", color = "currentColor", ...props }) {
   return (

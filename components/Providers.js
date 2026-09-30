@@ -4,6 +4,7 @@ import { AuthProvider } from "@/lib/AuthContext";
 import AppFrame from "@/components/AppFrame";
 import ThemeProvider from "@/components/ThemeProvider";
 import ToastProvider from "@/components/ToastProvider";
+import "@/lib/installApp";
 
 export default function Providers({ children }) {
   return (

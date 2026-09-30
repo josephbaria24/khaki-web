@@ -11,7 +11,6 @@ import { VEHICLE_OPTIONS, vehicleLabel } from "@/lib/serviceTemplates";
 
 const OLIVE = LANDING.olive;
 const OLIVE_DEEP = LANDING.oliveDeep;
-const CARD = "#FFFCF7";
 
 function PencilIcon() {
   return (
@@ -68,7 +67,7 @@ function PersonFallback() {
 
 function SectionCard({ children, className = "" }) {
   return (
-    <div className={`rounded-[1.25rem] p-3 shadow-[0_8px_28px_rgba(42,63,77,0.08)] min-[400px]:rounded-[1.45rem] min-[400px]:p-4 md:p-5 lg:rounded-[1.7rem] lg:p-6 ${className}`} style={{ background: CARD }}>
+    <div className={`rounded-[1.25rem] bg-[#FFFCF7] p-3 shadow-[0_8px_28px_rgba(42,63,77,0.08)] min-[400px]:rounded-[1.45rem] min-[400px]:p-4 md:p-5 lg:rounded-[1.7rem] lg:p-6 ${className}`}>
       {children}
     </div>
   );
@@ -231,7 +230,7 @@ export default function TaskerProfileCard({
             <div className="flex items-start gap-2">
               <div className="min-w-0 flex-1">
                 <h2 className="truncate text-base font-black leading-tight text-foreground min-[400px]:text-[20px] lg:text-[26px]">{card.displayName}</h2>
-                <p className="mt-0.5 truncate text-[13px] font-black min-[400px]:text-[15px] lg:text-lg" style={{ color: OLIVE_DEEP }}>
+                <p className="mt-0.5 truncate text-[13px] font-black text-[#163044] min-[400px]:text-[15px] lg:text-lg">
                   {card.rateLabel}
                 </p>
               </div>
@@ -468,7 +467,7 @@ export default function TaskerProfileCard({
                 placeholder="₱"
               />
             </div>
-            <p className="text-[12px] font-bold transition-all duration-200" style={{ color: OLIVE_DEEP }}>
+            <p className="text-[12px] font-bold text-[#163044] transition-all duration-200">
               ₱50 — ₱{Number(skillsForm.price_amount || 50).toLocaleString("en-PH")}
             </p>
             <button

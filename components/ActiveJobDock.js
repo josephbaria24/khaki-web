@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn, displayCategory, formatPHP, STATUS_CONFIG, timeAgo } from "@/lib/khaki";
+import { cn, displayTaskCategory, formatPHP, STATUS_CONFIG, timeAgo } from "@/lib/khaki";
 import { useAuth } from "@/lib/AuthContext";
 import { api } from "@/lib/store";
 
@@ -164,7 +164,7 @@ export default function ActiveJobDock() {
           <div className="overflow-hidden">
             <div className="mb-2 max-h-[min(46vh,300px)] overflow-y-auto rounded-[1.35rem] bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)]">
               <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#3D5C6E]">
-                {displayCategory(task.category)}
+                {displayTaskCategory(task)}
               </p>
               <p className="mt-1 text-base font-black leading-snug text-[#2A3F4D]">{task.title}</p>
               <div className="mt-2 flex items-center justify-between gap-2">

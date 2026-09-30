@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import PostedJobCard from "@/components/PostedJobCard";
-import { cn, displayCategory } from "@/lib/khaki";
-import { LANDING } from "@/lib/landingContent";
+import { cn, displayTaskCategory } from "@/lib/khaki";
 
 const TABS = [
   { id: "all", label: "All" },
@@ -51,7 +50,7 @@ export default function PostedJobsList({ tasks = [], people = {}, reviews = {}, 
   const categories = useMemo(() => {
     const set = new Set();
     tasks.forEach((task) => {
-      const label = displayCategory(task.category);
+      const label = displayTaskCategory(task);
       if (label) set.add(label);
     });
     return ["All", ...set];
@@ -69,8 +68,8 @@ export default function PostedJobsList({ tasks = [], people = {}, reviews = {}, 
     const q = query.trim().toLowerCase();
     const rows = tasks.filter((task) => {
       if (tab !== "all" && postedJobTab(task.status) !== tab) return false;
-      if (category !== "All" && displayCategory(task.category) !== category) return false;
-      if (q && !`${task.title} ${task.details || ""} ${displayCategory(task.category)}`.toLowerCase().includes(q)) return false;
+      if (category !== "All" && displayTaskCategory(task) !== category) return false;
+      if (q && !`${task.title} ${task.details || ""} ${displayTaskCategory(task)}`.toLowerCase().includes(q)) return false;
       return true;
     });
     rows.sort((a, b) => {
@@ -167,7 +166,7 @@ export default function PostedJobsList({ tasks = [], people = {}, reviews = {}, 
         </p>
       ) : null}
 
-      <p className="mt-3 text-[11px] font-semibold" style={{ color: LANDING.olive }}>
+      <p className="mt-3 text-[11px] font-semibold text-[#163044]">
         {visible.length} shown
       </p>
     </div>

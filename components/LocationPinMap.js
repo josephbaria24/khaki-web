@@ -53,7 +53,7 @@ function pinIcon(L, color, label) {
   });
 }
 
-export default function LocationPinMap({ center, slots, pins, onChange }) {
+export default function LocationPinMap({ center, slots, pins, onChange, compact = false }) {
   const shellRef = useRef(null);
   const boxRef = useRef(null);
   const mapRef = useRef(null);
@@ -267,7 +267,7 @@ export default function LocationPinMap({ center, slots, pins, onChange }) {
       ) : null}
 
       <div className={cn("relative", fullscreen && "min-h-0 w-full flex-1")}>
-        <div ref={boxRef} className="map-pin-canvas h-64 w-full sm:h-72" style={{ zIndex: 0 }} />
+        <div ref={boxRef} className={cn("map-pin-canvas w-full", compact ? "h-40 sm:h-56" : "h-64 sm:h-72")} style={{ zIndex: 0 }} />
         <button
           type="button"
           onClick={toggleFullscreen}

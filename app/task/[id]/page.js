@@ -9,7 +9,7 @@ import Container from "@/components/Container";
 import StatusPill from "@/components/StatusPill";
 import StarRating from "@/components/StarRating";
 import { useAuth } from "@/lib/AuthContext";
-import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, TASKER_LOCKED_NOTICE, cn, displayCategory, formatPHP, postingFee, scheduleLabel, serviceByKey, serviceForTaskCategory, timeAgo } from "@/lib/khaki";
+import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, TASKER_LOCKED_NOTICE, cn, displayTaskCategory, formatPHP, postingFee, scheduleLabel, serviceByKey, serviceForTaskCategory, timeAgo } from "@/lib/khaki";
 import { distanceLabel, townDistanceKm } from "@/lib/palawanLocations";
 import { describeExtras, describePins, vehicleLabel } from "@/lib/serviceTemplates";
 import { displayName } from "@/lib/taskerProfile";
@@ -267,7 +267,7 @@ export default function TaskDetailPage() {
           </button>
           <h1 className="text-center text-[1.35rem] font-black tracking-tight text-[#163044]">Job Post Status</h1>
           <p className="mt-1 text-center text-xs font-semibold text-[#2A3F4D]/55">
-            {displayCategory(task.category)} · Posted {timeAgo(task.created_at)}
+            {displayTaskCategory(task)} · Posted {timeAgo(task.created_at)}
           </p>
           {error ? <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
 
@@ -295,7 +295,7 @@ export default function TaskDetailPage() {
                 <span className="font-semibold text-[#2A3F4D]/70">Budget:</span>
                 <span className="flex items-center gap-1.5 font-black text-[#163044]">
                   <TintIcon bg="bg-[#D8F5E8]" label="Budget"><PesoIcon /></TintIcon>
-                  {formatPHP(task.budget_php)} <span className="font-semibold text-[#2A3F4D]/60">(Fixed)</span>
+                  {formatPHP(task.budget_php)} <span className="font-semibold text-[#2A3F4D]/60">{task.extras?.price_type === "per_hour" ? "(Per hour)" : task.extras?.price_type === "contract" ? "(Contract)" : "(Fixed)"}</span>
                 </span>
               </div>
               <div className="grid grid-cols-[5.5rem_1fr] items-center gap-2">
@@ -328,7 +328,7 @@ export default function TaskDetailPage() {
           </section>
 
           {featured ? (
-            <article className="relative mt-4 overflow-hidden rounded-[1.35rem] border border-white/80 bg-gradient-to-br from-[#FDE8F4] via-[#E9FBF4] to-[#D9F4FF] p-4 shadow-card">
+            <article className="relative mt-4 overflow-hidden rounded-[1.35rem] border border-white/80 bg-gradient-to-br from-[#FDE8F4] via-[#E9FBF4] to-[#D9F4FF] p-4 shadow-card dark:border-white/10 dark:from-[#4E2C44] dark:via-[#1F4A3E] dark:to-[#1C3E5A]">
               <span className="absolute left-3 top-3 text-lg" aria-hidden>🎉</span>
               <span className="absolute right-3 top-3 text-lg" aria-hidden>🎉</span>
               <h2 className="px-8 text-center text-base font-black text-[#163044]">
@@ -546,7 +546,7 @@ export default function TaskDetailPage() {
             <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <StatusPill status={task.status} />
-                <span className="text-xs font-semibold text-muted-foreground">{displayCategory(task.category)}</span>
+                <span className="text-xs font-semibold text-muted-foreground">{displayTaskCategory(task)}</span>
                 <span className="text-xs font-semibold text-muted-foreground">· Posted {timeAgo(task.created_at)}</span>
               </div>
               <h1 className="text-2xl font-black sm:text-3xl">{task.title}</h1>

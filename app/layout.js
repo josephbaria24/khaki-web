@@ -12,7 +12,12 @@ export const metadata = {
   description: "Post a task or find work. Connect with trusted locals across Palawan. 2% posting fee.",
   icons: {
     icon: "/images/logo.png",
-    apple: "/apple-icon.png",
+    apple: "/icons/icon-192.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Khaki",
+    statusBarStyle: "default",
   },
 };
 

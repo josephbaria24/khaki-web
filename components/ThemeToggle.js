@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import { Moon, Sun } from "@/components/icons";
 import { cn } from "@/lib/khaki";
 
 const OPTIONS = [
@@ -53,5 +54,30 @@ export default function ThemeToggle({ className }) {
         );
       })}
     </div>
+  );
+}
+
+export function ThemeModeButton() {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const dark = mounted && resolvedTheme === "dark";
+
+  return (
+    <button
+      type="button"
+      className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFFCF7] text-[#2A3F4D] shadow-card dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
+      aria-label={dark ? "Turn on light mode" : "Turn on dark mode"}
+      aria-pressed={dark}
+      onClick={() => setTheme(dark ? "light" : "dark")}
+    >
+      {mounted ? (
+        dark ? <Sun className="h-5 w-5" color="currentColor" /> : <Moon className="h-5 w-5" color="currentColor" />
+      ) : (
+        <span className="h-5 w-5" />
+      )}
+    </button>
   );
 }

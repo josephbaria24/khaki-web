@@ -92,8 +92,11 @@
     background-color: #FBF8F1;
   }
 
-  .khaki-landing,
-  html.dark .khaki-landing {
+  html.dark body {
+    background-color: #11141A;
+  }
+
+  .khaki-landing {
     --background: 42 55% 97%;
     --foreground: 40 12% 16%;
     --card: 40 50% 99%;
@@ -109,6 +112,24 @@
     color-scheme: light;
     color: hsl(var(--foreground));
     background: #FBF8F1;
+  }
+
+  html.dark .khaki-landing {
+    --background: 222 24% 8%;
+    --foreground: 40 20% 96%;
+    --card: 222 18% 12%;
+    --card-foreground: 40 20% 96%;
+    --muted: 222 14% 16%;
+    --muted-foreground: 215 14% 72%;
+    --border: 222 12% 20%;
+    --chip: 222 14% 18%;
+    --chip-hover: 222 12% 24%;
+    --primary: 206 66% 62%;
+    --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.45);
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+    color: hsl(var(--foreground));
+    background: #11141A;
   }
 
   input,
@@ -406,9 +427,6 @@
     background: radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.08) 0%, transparent 55%);
   }
 
-  html.dark .khaki-landing .featured-card {
-    background: radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.65) 0%, transparent 55%);
-  }
 
   .service-card {
     @apply interactive-card relative overflow-hidden rounded-[1.75rem] p-5;
@@ -421,9 +439,6 @@
     background: radial-gradient(ellipse at 15% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
   }
 
-  html.dark .khaki-landing .service-card {
-    background: radial-gradient(ellipse at 15% 0%, rgba(255, 255, 255, 0.5) 0%, transparent 50%);
-  }
 
   .glass-pill {
     @apply inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/35 px-3.5 py-1.5 text-[11px] font-bold text-[#0F172A] backdrop-blur-md transition-all duration-200;
@@ -1028,6 +1043,28 @@
     }
   }
 
+  .post-select-backdrop {
+    position: absolute;
+    z-index: 20;
+    top: -100vmax;
+    right: -100vmax;
+    bottom: -100vmax;
+    left: -100vmax;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: rgba(22, 48, 68, 0.28);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    animation: notif-backdrop-in 0.2s ease-out both;
+    cursor: default;
+  }
+
+  .post-select-backdrop.is-leaving {
+    animation: notif-backdrop-out 0.16s ease-in both;
+    pointer-events: none;
+  }
+
   .post-select-menu {
     position: absolute;
     left: 0;
@@ -1044,6 +1081,11 @@
     box-shadow: 0 16px 40px rgba(22, 48, 68, 0.16);
     transform-origin: top center;
     animation: post-select-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .post-select-menu.is-compact {
+    height: auto;
+    max-height: 16rem;
   }
 
   .post-select-menu.is-leaving {
@@ -1220,6 +1262,12 @@
     transform: translateY(1px) scale(0.97);
   }
 
+  html.dark .khaki-landing a.float-nav-tab.is-active {
+    color: #F5F3EE;
+    background: #2A303C;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
+  }
+
   .khaki-landing a.float-nav-tab:active {
     color: #2A3F4D;
     background: #B7C8D4;
@@ -1300,6 +1348,7 @@
     .mode-switch-card,
     .account-menu,
     .account-menu [role="menuitem"],
+    .post-select-backdrop,
     .post-select-menu,
     .post-select-menu [role="option"],
     .tasker-setup-panel,
@@ -1388,4 +1437,127 @@
       animation: none !important;
     }
   }
+}
+
+/* Logged-in shell: paper surfaces go dark, ink text goes light. */
+html.dark .khaki-landing :is(
+  .category-tile,
+  .chip-inactive,
+  .search-pill,
+  .post-select-menu,
+  .notif-sheet,
+  .mode-switch-card,
+  .account-menu,
+  .bg-\[\#FFFCF7\],
+  .bg-\[\#F6F1E4\],
+  .bg-\[\#F3EFE3\],
+  .bg-\[\#C9D6E0\],
+  .bg-white
+) {
+  background-color: #1A1E27 !important;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #F5F3EE;
+}
+
+html.dark .khaki-landing :is(
+  .bg-\[\#FBF8F1\],
+  .bg-\[\#F7F4EC\]
+) {
+  background-color: #11141A !important;
+}
+
+html.dark .khaki-landing :is(
+  .chip-inactive:hover,
+  .search-pill:focus-within,
+  .bg-\[\#F3EFE3\],
+  .bg-\[\#C9D6E0\],
+  .bg-\[\#E8DCC4\]
+) {
+  background-color: #252A35 !important;
+  color: #F5F3EE !important;
+}
+
+html.dark .khaki-landing .hover\:bg-\[\#F3EFE3\]:hover,
+html.dark .khaki-landing .hover\:bg-\[\#F7F4EC\]:hover,
+html.dark .khaki-landing .hover\:bg-white:hover {
+  background-color: #2A303C !important;
+}
+
+html.dark .khaki-landing [style*="FFFCF7"],
+html.dark .khaki-landing [style*="fffcf7"],
+html.dark .khaki-landing [style*="255, 252, 247"],
+html.dark .khaki-landing [style*="255,252,247"],
+html.dark .khaki-landing [style*="FBF8F1"],
+html.dark .khaki-landing [style*="F7F4EC"],
+html.dark .khaki-landing [style*="F6F1E4"],
+html.dark .khaki-landing [style*="F3EFE3"] {
+  background-color: #1A1E27 !important;
+}
+
+html.dark .khaki-landing [style*="22, 48, 68"],
+html.dark .khaki-landing [style*="22,48,68"],
+html.dark .khaki-landing [class*="text-[#163044]"],
+html.dark .khaki-landing [class*="text-[#2A3F4D]"],
+html.dark .khaki-landing [class*="text-[#2C2A22]"],
+html.dark .khaki-landing [class*="text-[#1F2937]"] {
+  color: #F5F3EE !important;
+}
+
+html.dark .khaki-landing .bg-\[\#C8F0D8\] {
+  background-color: #C8F0D8 !important;
+  color: #163044 !important;
+}
+
+html.dark .khaki-landing .bento-widget,
+html.dark .khaki-landing .bento-widget [class*="text-[#163044]"],
+html.dark .khaki-landing .bento-widget [class*="text-[#2A3F4D]"] {
+  color: #163044 !important;
+}
+
+html.dark .khaki-landing .bento-pill {
+  color: #F7F4EC !important;
+  background-color: #163044 !important;
+}
+
+html.dark .khaki-landing .category-tile-go {
+  background-color: #F7F4EC !important;
+  color: #163044 !important;
+}
+
+html.dark .khaki-landing :is(
+  [class*="border-[#E6DDD0]"],
+  [class*="border-[#E8DCC4]"],
+  [class*="border-[#E6D9C4]"],
+  [class*="border-[#EFE7DA]"],
+  [class*="border-[#E8E4D6]"],
+  [class*="border-[#D9D3C5]"]
+) {
+  border-color: #2A303C !important;
+}
+
+html.dark .khaki-landing .chat-bubble-theirs {
+  background: #252A35;
+  color: #F5F3EE;
+}
+
+html.dark .khaki-landing .chat-bubble-theirs.has-tail::before {
+  background: #252A35;
+}
+
+html.dark .khaki-landing .chat-bubble-mine.has-tail::after,
+html.dark .khaki-landing .chat-bubble-theirs.has-tail::after {
+  background: #1A1E27;
+}
+
+html.dark .khaki-landing :is([stroke="#163044"], [stroke="#2A3F4D"], [stroke="#2C2A22"], [stroke="#6B6558"], [stroke="#6B7280"]) {
+  stroke: #F5F3EE;
+}
+
+html.dark .khaki-landing :is([fill="#163044"], [fill="#2A3F4D"], [fill="#2C2A22"]) {
+  fill: #F5F3EE;
+}
+
+html.dark .khaki-landing [class*="placeholder:text-[#2A3F4D]"]::placeholder,
+html.dark .khaki-landing [class*="placeholder:text-[#163044]"]::placeholder {
+  color: rgba(231, 238, 243, 0.5) !important;
 }

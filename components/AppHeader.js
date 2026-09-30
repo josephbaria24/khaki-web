@@ -8,6 +8,7 @@ import Logo from "@/components/Logo";
 import ModeToggle from "@/components/ModeToggle";
 import AccountMenu from "@/components/AccountMenu";
 import NotificationsBell from "@/components/NotificationsBell";
+import { ThemeModeButton } from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
 import { cn } from "@/lib/khaki";
 import { canOpenPost, isAdmin, needsTaskerVerification } from "@/lib/roles";
@@ -24,7 +25,7 @@ export default function AppHeader() {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1]">
+    <header className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1] dark:border-white/10 dark:bg-[#11141A]">
       <Container className="flex h-16 items-center justify-between gap-4 lg:h-[72px]">
         <div className="flex min-w-0 items-center gap-8">
           <Logo href="/dashboard" />
@@ -50,6 +51,7 @@ export default function AppHeader() {
           <ModeToggle />
         </div>
         <div className="flex items-center gap-2 text-[#2A3F4D]">
+          <ThemeModeButton />
           <NotificationsBell />
           {canOpenPost(user) && (
           <Link

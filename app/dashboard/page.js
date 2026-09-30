@@ -12,12 +12,13 @@ import SectionIntro from "@/components/SectionIntro";
 import { FadeIn } from "@/components/ui/motion";
 import { CHIP_CATEGORIES, taskMatchesChip } from "@/lib/catalog";
 import { LANDING, LANDING_CATEGORIES } from "@/lib/landingContent";
-import { displayCategory, formatPHP } from "@/lib/khaki";
+import { displayTaskCategory, formatPHP } from "@/lib/khaki";
 import { useAuth } from "@/lib/AuthContext";
 import { canOpenPost, isPosterMode, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
 import { toast } from "@/lib/toast";
 import { CircleAlert, X } from "@/components/icons";
+import InstallAppBanner from "@/components/InstallAppBanner";
 
 const PROMO_DISMISS_KEY = "khaki.dashboardPromoDismissed";
 
@@ -111,7 +112,7 @@ export default function DashboardPage() {
 
   const filtered = openTasks.filter((task) => {
     if (search && !`${task.title} ${task.details}`.toLowerCase().includes(search.toLowerCase())) return false;
-    if (!taskMatchesChip(task.category, category)) return false;
+    if (!taskMatchesChip(task.category, category, task)) return false;
     return true;
   }).slice(0, 8);
 
@@ -195,6 +196,7 @@ export default function DashboardPage() {
         ) : null}
 
         <section className="bg-[#FBF8F1] py-6 sm:py-8">
+          <InstallAppBanner />
           {poster ? (
             <>
               <DashboardShortcuts user={user} postingFees={postingFees} myTasks={myTasks} />
@@ -277,7 +279,7 @@ export default function DashboardPage() {
                     >
                       <div className="flex items-start justify-between gap-2">
                         <p className="text-xs font-bold uppercase tracking-wide" style={{ color: LANDING.olive }}>
-                          {displayCategory(task.category)}
+                          {displayTaskCategory(task)}
                         </p>
                         {badge ? (
                           <span

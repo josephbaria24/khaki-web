@@ -3,8 +3,7 @@
 import Link from "next/link";
 import StatusPill from "@/components/StatusPill";
 import StarRating from "@/components/StarRating";
-import { displayCategory, formatPHP } from "@/lib/khaki";
-import { LANDING } from "@/lib/landingContent";
+import { displayTaskCategory, formatPHP } from "@/lib/khaki";
 
 export default function PostedJobCard({ task, tasker, review, onCancel, bidCount }) {
   const hired = tasker || (task.accepted_tasker_id ? { id: task.accepted_tasker_id, full_name: "Tasker" } : null);
@@ -19,8 +18,8 @@ export default function PostedJobCard({ task, tasker, review, onCancel, bidCount
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill status={task.status} />
-            <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: LANDING.olive }}>
-              {displayCategory(task.category)}
+            <span className="text-[11px] font-bold uppercase tracking-wide text-[#163044]">
+              {displayTaskCategory(task)}
             </span>
           </div>
           <h3 className="mt-2 text-lg font-black leading-snug text-foreground">{task.title}</h3>
