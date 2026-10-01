@@ -115,7 +115,7 @@ function ScrollRow({ children }) {
 function TaskPreviewCard({ task }) {
   return (
     <article className="w-[240px] shrink-0 rounded-[1.35rem] bg-card p-5 shadow-card">
-      <p className="text-xs font-bold uppercase tracking-wide" style={{ color: LANDING.olive }}>
+      <p className="text-xs font-bold uppercase tracking-wide text-[#163044]">
         {task.category}
       </p>
       <p className="mt-2 min-h-[48px] text-[15px] font-bold leading-snug text-foreground">{task.title}</p>
@@ -139,7 +139,7 @@ export default function LandingHome() {
       <div className="pt-3">
         <InstallAppBanner />
       </div>
-      <section className="overflow-x-clip bg-[#FBF8F1] px-0 pb-3 pt-0 sm:pt-2 md:px-8 md:py-6 lg:px-[6vw] lg:py-8 dark:bg-[#11141A]">
+      <section className="overflow-x-clip bg-[#FBF8F1] px-0 pb-3 pt-0 sm:pt-1 md:px-8 md:pb-6 md:pt-1 lg:px-[6vw] lg:pb-8 lg:pt-2 dark:bg-[#11141A]">
         <div className="hero-mobile-card relative mx-auto w-[95%] min-w-0 overflow-hidden rounded-[1.75rem] bg-[#163044] text-white shadow-[0_22px_50px_rgba(22,48,68,0.28)] min-[380px]:rounded-[1.85rem] md:w-full md:max-w-5xl md:rounded-[2.15rem] lg:max-w-none">
           <div
             className="pointer-events-none absolute inset-x-8 top-8 h-36 rounded-full bg-[#3E7498]/45 blur-3xl md:hidden"
@@ -154,25 +154,25 @@ export default function LandingHome() {
             />
             <div className="hero-art-fade pointer-events-none absolute inset-x-0 -bottom-px z-[2] h-[56%]" aria-hidden />
           </div>
-          <div className="hero-art-stage relative hidden aspect-[16/9] overflow-hidden lg:block lg:aspect-[2/1]">
+          <div className="hero-art-stage relative hidden overflow-hidden lg:block lg:h-[min(58vh,28rem)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/transparent-hero.png"
               alt=""
-              className="hero-art-float hero-art-mask absolute inset-x-0 top-0 z-[1] h-[calc(100%+1.5rem)] w-full object-cover object-[center_46%]"
+              className="hero-art-float hero-art-mask hero-art-mask-desk absolute inset-x-0 top-0 z-[1] h-[calc(100%+1.5rem)] w-full object-cover object-top"
             />
-            <div className="hero-art-fade pointer-events-none absolute inset-x-0 -bottom-px z-[2] h-[34%]" aria-hidden />
+            <div className="hero-art-fade pointer-events-none absolute inset-x-0 -bottom-px z-[2] h-[22%]" aria-hidden />
           </div>
-          <div className="stagger-children relative z-[1] min-w-0 px-4 pb-6 pt-1 text-center min-[380px]:px-5 min-[380px]:pb-7 sm:px-8 sm:pb-9 md:px-12 md:pb-12 md:pt-2 lg:px-16">
-            <h1 className="mx-auto max-w-full text-[1.7rem] font-black uppercase leading-[0.9] tracking-[-0.045em] text-white min-[360px]:text-[2rem] min-[400px]:text-[2.2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.4rem]">
+          <div className="stagger-children relative z-[1] min-w-0 px-4 pb-6 pt-1 text-center min-[380px]:px-5 min-[380px]:pb-7 sm:px-8 sm:pb-9 md:px-12 md:pb-12 md:pt-2 lg:mt-1 lg:px-16 lg:pb-8 lg:pt-3">
+            <h1 className="mx-auto max-w-full text-[1.7rem] font-black uppercase leading-[0.9] tracking-[-0.045em] text-white min-[360px]:text-[2rem] min-[400px]:text-[2.2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.15rem]">
               Get anything
               <br />
               done
             </h1>
-            <p className="mx-auto mt-3 max-w-[16.5rem] text-[13.5px] font-medium leading-snug text-white/80 min-[380px]:mt-4 min-[380px]:text-[15px] sm:max-w-xs sm:text-base md:max-w-md md:text-lg">
+            <p className="mx-auto mt-3 max-w-[16.5rem] text-[13.5px] font-medium leading-snug text-white/80 min-[380px]:mt-4 min-[380px]:text-[15px] sm:max-w-xs sm:text-base md:max-w-md md:text-lg lg:mt-3">
               Post any task. Pick a trusted Palawan local. Get it done.
             </p>
-            <div className="mx-auto mt-5 flex w-full flex-col gap-2.5 min-[380px]:mt-6 md:mt-7 md:max-w-xl md:flex-row md:justify-center">
+            <div className="mx-auto mt-5 flex w-full flex-col gap-2.5 min-[380px]:mt-6 md:mt-7 md:max-w-xl md:flex-row md:justify-center lg:mt-5">
               <Link
                 href={postHref}
                 className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#2F8AD4] px-4 text-[13.5px] font-bold text-white shadow-[0_10px_24px_rgba(47,138,212,0.38)] transition-transform duration-200 active:scale-[0.98] min-[380px]:h-[3.25rem] min-[380px]:text-[15px] md:flex-1"
@@ -186,7 +186,7 @@ export default function LandingHome() {
                 Earn money as a Tasker
               </Link>
             </div>
-            <div className="mt-6 flex items-center justify-center gap-2.5">
+            <div className="mt-6 flex items-center justify-center gap-2.5 lg:mt-5">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10" aria-hidden>
                 <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="currentColor">
                   <path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6.2-.4a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2ZM4.2 18.2c.4-2.3 2.4-3.7 4.8-3.7s4.4 1.4 4.8 3.7c.1.5-.3.8-.8.8H5c-.5 0-.9-.3-.8-.8Zm8.3-.2c-.2-1.5.2-2.8 1.2-3.7.4-.3.9-.5 1.4-.6 1.9.2 3.4 1.5 3.7 3.6.1.5-.3.9-.8.9h-4.8c-.3 0-.6-.1-.7-.2Z" />
@@ -214,7 +214,7 @@ export default function LandingHome() {
       </div>
 
       <SectionWrap id="how-it-works" className="scroll-mt-24 bg-background py-16 lg:py-20">
-        <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: LANDING.olive }}>
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#163044]">
           How it works
         </p>
         <h2 className="mt-3 max-w-xl text-3xl font-black tracking-tight text-foreground sm:text-4xl">
@@ -329,7 +329,7 @@ export default function LandingHome() {
       <section id="earn" className="landing-hero scroll-mt-24">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
           <div className="rounded-[2rem] bg-white p-6 shadow-[0_16px_40px_rgba(16,38,54,0.16)] sm:p-8">
-            <p className="text-sm font-black" style={{ color: LANDING.oliveDeep }}>
+            <p className="text-sm font-black text-[#102636]">
               160+ Palawan taskers already earning
             </p>
             <div className="mt-5 space-y-3">
@@ -413,7 +413,7 @@ export default function LandingHome() {
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-foreground/80">{person.bio}</p>
                 <div className="mt-4 rounded-2xl p-4" style={{ background: LANDING.cream }}>
-                  <p className="text-xs font-bold uppercase tracking-wide" style={{ color: LANDING.olive }}>
+                  <p className="text-xs font-bold uppercase tracking-wide text-[#163044]">
                     What the reviews say
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-[#2C2A22]">&ldquo;{person.quote}&rdquo;</p>

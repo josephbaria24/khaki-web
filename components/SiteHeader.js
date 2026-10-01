@@ -6,6 +6,7 @@ import { Menu, X } from "@/components/icons";
 import { useState } from "react";
 import Container from "@/components/Container";
 import Logo from "@/components/Logo";
+import { ThemeModeButton } from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
 import { cn } from "@/lib/khaki";
 import { homePathFor } from "@/lib/roles";
@@ -58,6 +59,7 @@ export default function SiteHeader({ landing: _landing = false }) {
           ))}
         </nav>
         <div className="hidden items-center gap-2 md:flex">
+          <ThemeModeButton />
           {isAuthenticated ? (
             <Link href={homePathFor(user)} className="btn-olive inline-flex h-10 items-center px-5 text-sm">
               Dashboard

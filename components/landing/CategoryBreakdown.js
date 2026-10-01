@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LANDING, LANDING_CATEGORIES } from "@/lib/landingContent";
+import { LANDING_CATEGORIES } from "@/lib/landingContent";
 import { Collapse } from "@/components/ui/motion";
 
 export default function CategoryBreakdown() {
@@ -23,7 +23,7 @@ export default function CategoryBreakdown() {
               aria-expanded={open}
               className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
             >
-              <span className="w-7 shrink-0 text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: LANDING.olive }}>
+              <span className="w-7 shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#163044]">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <span className="min-w-0 flex-1 truncate text-[15px] font-black text-foreground">{cat.title}</span>
@@ -47,8 +47,7 @@ export default function CategoryBreakdown() {
                 </ul>
                 <Link
                   href={cat.href || "/browse"}
-                  className="mt-3 inline-flex text-sm font-bold underline-offset-4 hover:underline"
-                  style={{ color: LANDING.olive }}
+                  className="mt-3 inline-flex text-sm font-bold text-[#163044] underline-offset-4 hover:underline"
                 >
                   {cat.key === "other" ? `Post ${cat.title}` : `Browse ${cat.title}`}
                 </Link>
