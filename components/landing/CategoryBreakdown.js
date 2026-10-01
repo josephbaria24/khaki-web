@@ -9,7 +9,7 @@ export default function CategoryBreakdown() {
   const [openKey, setOpenKey] = useState(null);
 
   return (
-    <div className="mt-10 grid gap-2 sm:grid-cols-2 sm:gap-3">
+    <div className="mt-10 grid items-start gap-2 sm:grid-cols-2 sm:gap-3">
       {LANDING_CATEGORIES.map((cat, i) => {
         const open = openKey === cat.key;
         return (

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, ShieldCheck, Wallet } from "@/components/icons";
+import { MapPin, ShieldCheck } from "@/components/icons";
 import Logo from "@/components/Logo";
 
 export default function AuthShell({ title, subtitle, footer, children }) {
@@ -13,11 +13,10 @@ export default function AuthShell({ title, subtitle, footer, children }) {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-foreground/60">Palawan marketplace</p>
           <h2 className="mt-3 text-4xl font-black leading-tight text-foreground xl:text-5xl">Get things done with trusted locals.</h2>
           <p className="mt-4 text-base leading-relaxed text-foreground/70">
-            Post a task, compare offers, and hire a local. Khaki takes a 2% posting fee — you and the tasker settle the job payment yourselves.
+            Post a task, compare offers, and hire a local in your town.
           </p>
           <div className="mt-8 flex gap-6 text-sm text-foreground/70">
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> Direct pay</span>
-            <span className="inline-flex items-center gap-1.5"><Wallet className="h-4 w-4" /> 2% post fee</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> Trusted locals</span>
             <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> Palawan</span>
           </div>
         </div>

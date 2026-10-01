@@ -11,6 +11,7 @@ import TaskerProfileCard from "@/components/profile/TaskerProfileCard";
 import { useAuth } from "@/lib/AuthContext";
 import { canOpenPost } from "@/lib/roles";
 import { api } from "@/lib/store";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 
 export default function PublicProfilePage() {
   const { id } = useParams();
@@ -40,7 +41,7 @@ export default function PublicProfilePage() {
   const ctaHref = isAuthenticated && canOpenPost(user) ? "/post" : isAuthenticated ? "/browse" : "/register";
 
   const body = loading ? (
-    <p className="p-8 text-center text-sm text-muted-foreground">Loading…</p>
+    <Container className="py-8"><PageSkeleton rows={4} /></Container>
   ) : !profile ? (
     <p className="p-8 text-center">Hindi mahanap ang profile</p>
   ) : (

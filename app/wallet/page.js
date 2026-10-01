@@ -6,10 +6,12 @@ import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
 import { formatPHP } from "@/lib/khaki";
 import { api } from "@/lib/store";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 
 export default function PostingFeesPage() {
   const [fees, setFees] = useState([]);
   const [error, setError] = useState("");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     api.fees.mine()
@@ -17,7 +19,8 @@ export default function PostingFeesPage() {
       .catch((e) => {
         setFees([]);
         setError(e.message || "Could not load posting fees.");
-      });
+      })
+      .finally(() => setReady(true));
   }, []);
 
   const total = fees.reduce((sum, row) => sum + Number(row.fee_php || 0), 0);
@@ -38,7 +41,8 @@ export default function PostingFeesPage() {
           <p className="mt-2 text-xs text-[#2A3F4D]/70">{fees.length} posted gawain</p>
         </div>
         <div className="space-y-3">
-          {fees.length === 0 && !error ? (
+          {!ready ? <PageSkeleton rows={3} /> : null}
+          {ready && fees.length === 0 && !error ? (
             <p className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">
               Wala pang posting fee. Mag-post ng gawain at mare-record ang 2%.
             </p>

@@ -18,6 +18,7 @@ import { canAcceptJobs, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
 import ReportGawain from "@/components/ReportGawain";
 import { toast } from "@/lib/toast";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 
 export default function TaskDetailPage() {
   const { id } = useParams();
@@ -125,7 +126,9 @@ export default function TaskDetailPage() {
   if (loading) {
     return (
       <AppShell>
-        <p className="p-8 text-center text-sm text-muted-foreground">Loading…</p>
+        <Container className="py-8">
+          <PageSkeleton rows={4} />
+        </Container>
       </AppShell>
     );
   }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { fileMeta } from "@/lib/roles";
 import { getBarangays, MUNICIPALITY_NAMES } from "@/lib/palawanLocations";
 import SignaturePad from "@/components/verify/SignaturePad";
 import {
@@ -15,6 +14,7 @@ import {
   toggleList,
   validateTaskerApplication,
 } from "@/lib/taskerApplication";
+import { uploadToCloudinary } from "@/lib/uploadFile";
 
 const TEAL = "#0D666A";
 
@@ -51,6 +51,7 @@ function Check({ on, disabled, onToggle, label }) {
 
 export default function TaskerApplicationForm({ user, idDocument, onIdDocument, error, saving, locked, onSubmit }) {
   const [form, setForm] = useState(() => emptyTaskerApplication(user));
+  const [uploading, setUploading] = useState(false);
   const barangays = useMemo(() => getBarangays(form.location_area), [form.location_area]);
   const set = (patch) => setForm((prev) => ({ ...prev, ...patch }));
   const status = user?.verification_status || "unverified";
@@ -145,10 +146,29 @@ export default function TaskerApplicationForm({ user, idDocument, onIdDocument, 
                 className="mt-2 block w-full text-sm"
                 type="file"
                 accept="image/*,.pdf"
-                disabled={locked}
-                onChange={(e) => onIdDocument(fileMeta(e.target.files?.[0]))}
+                disabled={locked || uploading}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) {
+                    onIdDocument(null);
+                    return;
+                  }
+                  setUploading(true);
+                  try {
+                    onIdDocument(await uploadToCloudinary(file, "khaki/verification"));
+                  } catch (err) {
+                    onIdDocument(null);
+                    onSubmit(err instanceof Error ? err : new Error("Upload failed."));
+                  } finally {
+                    setUploading(false);
+                  }
+                }}
               />
+              {uploading ? <p className="mt-1 text-xs text-muted-foreground">Uploading…</p> : null}
               {idDocument?.name ? <p className="mt-1 text-xs text-muted-foreground">Attached: {idDocument.name}</p> : null}
+              {idDocument?.url && idDocument.type?.startsWith("image/") ? (
+                <img src={idDocument.url} alt="Valid ID preview" className="mt-2 h-32 rounded-lg bg-white object-contain" />
+              ) : null}
             </LineField>
           </div>
         </section>
@@ -272,11 +292,11 @@ export default function TaskerApplicationForm({ user, idDocument, onIdDocument, 
         {!locked ? (
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || uploading}
             className="flex h-12 w-full items-center justify-center rounded-full text-sm font-black text-white disabled:opacity-60"
             style={{ background: TEAL }}
           >
-            {saving ? "Submitting…" : "Submit application"}
+            {uploading ? "Uploading…" : saving ? "Submitting…" : "Submit application"}
           </button>
         ) : (
           <p className="text-center text-sm font-semibold" style={{ color: TEAL }}>

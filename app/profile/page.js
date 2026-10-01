@@ -10,11 +10,13 @@ import { LANDING } from "@/lib/landingContent";
 import { needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
 import { toast } from "@/lib/toast";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 
 export default function ProfilePage() {
   const { user, refresh } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -26,7 +28,7 @@ export default function ProfilePage() {
       if (!live) return;
       setReviews(revs);
       setTasks(list);
-    });
+    }).finally(() => { if (live) setReady(true); });
     return () => { live = false; };
   }, [user?.id]);
 
@@ -35,6 +37,7 @@ export default function ProfilePage() {
       <div className="landing-page">
         <section className="bg-[#FBF8F1] py-8 lg:py-12">
           <Container>
+            {!ready ? <PageSkeleton rows={3} /> : (
             <TaskerProfileCard
               profile={user}
               reviews={reviews}
@@ -47,6 +50,7 @@ export default function ProfilePage() {
                 toast.success("Profile saved");
               }}
             />
+            )}
             {(user?.role === "admin" || needsTaskerVerification(user) || user?.verification_status === "pending" || user?.id) && (
               <div className="mx-auto mt-4 flex w-full max-w-[420px] flex-wrap justify-center gap-2 md:max-w-[560px] lg:max-w-[640px]">
                 {user?.role === "admin" && (

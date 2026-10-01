@@ -177,7 +177,7 @@ export default function LandingHome() {
                 href={postHref}
                 className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#2F8AD4] px-4 text-[13.5px] font-bold text-white shadow-[0_10px_24px_rgba(47,138,212,0.38)] transition-transform duration-200 active:scale-[0.98] min-[380px]:h-[3.25rem] min-[380px]:text-[15px] md:flex-1"
               >
-                Post your task for free
+                Post your task now!
               </Link>
               <Link
                 href={earnHref}
@@ -299,7 +299,7 @@ export default function LandingHome() {
           </ScrollRow>
         </div>
         <Link href={postHref} className="btn-olive mt-8 inline-flex h-12 items-center px-7 text-sm">
-          Post your task for free
+          Post your task now!
         </Link>
       </SectionWrap>
 
@@ -321,7 +321,7 @@ export default function LandingHome() {
             ))}
           </div>
           <Link href={postHref} className="btn-olive mt-10 inline-flex h-12 items-center px-7 text-sm">
-            Post your task for free
+            Post your task now!
           </Link>
         </div>
       </section>

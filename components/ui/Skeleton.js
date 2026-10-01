@@ -27,6 +27,25 @@ export function NoticeSkeleton() {
   );
 }
 
+export function PageSkeleton({ rows = 4 }) {
+  return (
+    <div className="space-y-3" aria-busy="true" aria-label="Loading">
+      <Skeleton className="h-8 w-40 rounded-xl" />
+      {Array.from({ length: rows }, (_, index) => (
+        <div key={index} className="rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-9 w-9 rounded-xl" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-4 w-2/5" />
+              <Skeleton className="h-3 w-3/5" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function JobSkeleton() {
   return (
     <div className="rounded-2xl border border-border bg-card p-5" aria-hidden>

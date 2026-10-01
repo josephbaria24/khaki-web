@@ -12,6 +12,7 @@ import { LANDING } from "@/lib/landingContent";
 import { useAuth } from "@/lib/AuthContext";
 import { api } from "@/lib/store";
 import { Plus, Search } from "@/components/icons";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 
 const PAGE_BG = LANDING.page;
 
@@ -73,11 +74,13 @@ function BrowseBody() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [tasks, setTasks] = useState([]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     api.tasks.list()
       .then((list) => setTasks(list.filter((t) => t.status === "open")))
-      .catch(() => setTasks([]));
+      .catch(() => setTasks([]))
+      .finally(() => setReady(true));
   }, []);
 
   const filtered = tasks.filter((task) => {
@@ -195,6 +198,9 @@ function BrowseBody() {
             <p className="text-xs font-semibold text-[#2A3F4D]/45">{filtered.length} available</p>
           </div>
 
+          {!ready ? (
+            <PageSkeleton rows={6} />
+          ) : (
           <FadeIn delay={40}>
             <Stagger className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
               {filtered.map((task) => (
@@ -202,8 +208,9 @@ function BrowseBody() {
               ))}
             </Stagger>
           </FadeIn>
+          )}
 
-          {filtered.length === 0 ? (
+          {ready && filtered.length === 0 ? (
             <p className="rounded-[1.5rem] border border-dashed border-[#C9D6E0] bg-white/70 py-14 text-center text-sm text-[#2A3F4D]/50">
               Walang open jobs na tumugma sa filter.
             </p>

@@ -18,6 +18,7 @@ import { canOpenPost, isPosterMode, needsTaskerVerification } from "@/lib/roles"
 import { api } from "@/lib/store";
 import { toast } from "@/lib/toast";
 import { CircleAlert, X } from "@/components/icons";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 import InstallAppBanner from "@/components/InstallAppBanner";
 
 const PROMO_DISMISS_KEY = "khaki.dashboardPromoDismissed";
@@ -44,6 +45,7 @@ export default function DashboardPage() {
   const [myBids, setMyBids] = useState([]);
   const [bidCounts, setBidCounts] = useState({});
   const [promoOpen, setPromoOpen] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     try {
@@ -71,7 +73,8 @@ export default function DashboardPage() {
       .catch(() => {
         setOpenTasks([]);
         setMyTasks([]);
-      });
+      })
+      .finally(() => setReady(true));
     api.fees.mine()
       .then((rows) => setPostingFees(rows.reduce((sum, row) => sum + Number(row.fee_php || 0), 0)))
       .catch(() => setPostingFees(0));
@@ -211,6 +214,7 @@ export default function DashboardPage() {
                     </Link>
                   }
                 />
+                {!ready ? <div className="mt-4"><PageSkeleton rows={3} /></div> : (
                 <PostedJobsList
                   tasks={posted}
                   people={people}
@@ -228,6 +232,7 @@ export default function DashboardPage() {
                     }
                   }}
                 />
+                )}
 
                 <SectionIntro
                   className="mt-8"
@@ -267,6 +272,9 @@ export default function DashboardPage() {
               <SearchPill value={search} onChange={setSearch} placeholder="Maghanap ng job o task..." />
               <CategoryChips categories={CHIP_CATEGORIES} value={category} onChange={setCategory} />
 
+              {!ready ? (
+                <PageSkeleton rows={3} />
+              ) : (
               <FadeIn delay={80}>
                 <div className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory sm:mx-0 sm:px-0">
                   {filtered.map((task) => {
@@ -303,8 +311,9 @@ export default function DashboardPage() {
                   })}
                 </div>
               </FadeIn>
+              )}
 
-              {filtered.length === 0 ? (
+              {ready && filtered.length === 0 ? (
                 <p className="rounded-[1.35rem] border border-dashed border-[#C9D6E0] bg-card py-12 text-center text-sm text-muted-foreground">
                   Walang open jobs pa. Check back soon.
                 </p>

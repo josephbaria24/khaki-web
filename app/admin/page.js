@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
 import { useAuth } from "@/lib/AuthContext";
 import { formatPHP, DISPUTE_STATUS_LABEL, reportReasonLabel } from "@/lib/khaki";
 import { ROLE_LABELS } from "@/lib/roles";
 import { api } from "@/lib/store";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 import ApplicationReviewCard from "@/components/admin/ApplicationReviewCard";
 import AdminOverview from "@/components/admin/AdminOverview";
 import { toast } from "@/lib/toast";
@@ -20,36 +22,116 @@ const TABS = [
   { id: "transactions", label: "Transactions" },
   { id: "activity", label: "Activity" },
 ];
+const TAB_IDS = new Set(TABS.map((item) => item.id));
+const CACHE_MS = 2 * 60 * 1000;
+const CACHE_KEY = "khaki.adminData";
+const adminCache = { data: null, at: 0, pending: null };
 
-export default function AdminPage() {
+function storedAdmin() {
+  if (typeof window === "undefined") return null;
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
+    if (!parsed?.at || Date.now() - parsed.at > CACHE_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function rememberAdmin(data) {
+  const at = Date.now();
+  adminCache.data = data;
+  adminCache.at = at;
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ...data, at }));
+  } catch {
+    // Keep the in-memory copy if the browser storage is full.
+  }
+}
+
+function readTab(value) {
+  return TAB_IDS.has(value) ? value : "overview";
+}
+
+function loadAdmin(force) {
+  if (!force && adminCache.data && Date.now() - adminCache.at < CACHE_MS) {
+    return Promise.resolve(adminCache.data);
+  }
+  if (!force && adminCache.pending) return adminCache.pending;
+  const request = Promise.all([
+    api.admin.overview(),
+    api.admin.users(),
+    api.admin.logs(),
+    api.admin.transactions(),
+    api.admin.disputes().catch(() => []),
+  ]).then(([overview, users, logs, transactions, disputes]) => {
+    const data = { overview, users, logs, transactions, disputes };
+    rememberAdmin(data);
+    adminCache.pending = null;
+    return data;
+  }).catch((err) => {
+    adminCache.pending = null;
+    throw err;
+  });
+  if (!force) adminCache.pending = request;
+  return request;
+}
+
+function AdminScreen() {
   const { user } = useAuth();
-  const [tab, setTab] = useState("overview");
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const tab = readTab(params.get("tab"));
   const [tick, setTick] = useState(0);
   const [error, setError] = useState("");
-  const [overview, setOverview] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [logs, setLogs] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [disputes, setDisputes] = useState([]);
+  const [overview, setOverview] = useState(() => adminCache.data?.overview ?? null);
+  const [users, setUsers] = useState(() => adminCache.data?.users ?? []);
+  const [logs, setLogs] = useState(() => adminCache.data?.logs ?? []);
+  const [transactions, setTransactions] = useState(() => adminCache.data?.transactions ?? []);
+  const [disputes, setDisputes] = useState(() => adminCache.data?.disputes ?? []);
+  const [ready, setReady] = useState(() => Boolean(adminCache.data));
   const refresh = () => setTick((n) => n + 1);
+
+  const selectTab = (id) => {
+    const next = readTab(id);
+    const query = new URLSearchParams(params.toString());
+    if (next === "overview") query.delete("tab");
+    else query.set("tab", next);
+    const search = query.toString();
+    router.replace(search ? `${pathname}?${search}` : pathname, { scroll: false });
+  };
 
   useEffect(() => {
     if (user?.role !== "admin") return;
     let live = true;
-    Promise.all([
-      api.admin.overview(),
-      api.admin.users(),
-      api.admin.logs(),
-      api.admin.transactions(),
-      api.admin.disputes().catch(() => []),
-    ]).then(([ov, u, l, t, d]) => {
+    const force = tick > 0;
+    if (!force) {
+      const stored = (adminCache.data && Date.now() - adminCache.at < CACHE_MS) ? adminCache.data : storedAdmin();
+      if (stored) {
+        setOverview(stored.overview);
+        setUsers(stored.users || []);
+        setLogs(stored.logs || []);
+        setTransactions(stored.transactions || []);
+        setDisputes(stored.disputes || []);
+        setReady(true);
+        return undefined;
+      }
+    }
+    loadAdmin(force).then((data) => {
       if (!live) return;
-      setOverview(ov);
-      setUsers(u);
-      setLogs(l);
-      setTransactions(t);
-      setDisputes(d);
-    }).catch((err) => setError(err.message));
+      setOverview(data.overview);
+      setUsers(data.users);
+      setLogs(data.logs);
+      setTransactions(data.transactions);
+      setDisputes(data.disputes);
+      setReady(true);
+    }).catch((err) => {
+      if (live) {
+        setError(err.message);
+        setReady(true);
+      }
+    });
     return () => { live = false; };
   }, [tick, user?.role]);
 
@@ -62,6 +144,19 @@ export default function AdminPage() {
   }
 
   const pending = users.filter((u) => u.verification_status === "pending");
+  const applications = users
+    .filter((u) => u.role !== "admin" && (
+      u.verification_status === "pending"
+      || u.verification_status === "verified"
+      || u.tasker_application
+      || u.id_document
+      || (u.verification_documents || []).length
+      || (u.credentials || []).some((item) => item?.application)
+    ))
+    .sort((a, b) => {
+      const rank = { pending: 0, unverified: 1, verified: 2 };
+      return (rank[a.verification_status] ?? 1) - (rank[b.verification_status] ?? 1);
+    });
   const openReports = disputes.filter((d) => ["pending_review", "under_review"].includes(d.status));
 
   const act = async (fn, successMessage) => {
@@ -89,7 +184,7 @@ export default function AdminPage() {
           {TABS.map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => selectTab(t.id)}
               className={`rounded-full px-4 py-2 text-sm font-semibold ${tab === t.id ? "bg-foreground text-background" : "bg-card text-muted-foreground"}`}
             >
               {t.label}
@@ -99,17 +194,19 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {tab === "overview" && overview && (
+        {!ready ? <PageSkeleton rows={5} /> : null}
+
+        {ready && tab === "overview" && overview && (
           <AdminOverview
             overview={overview}
             users={users}
             logs={logs}
             transactions={transactions}
-            onOpenTab={setTab}
+            onOpenTab={selectTab}
           />
         )}
 
-        {tab === "users" && (
+        {ready && tab === "users" && (
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <MiniStat label="All accounts" value={users.length} />
@@ -161,10 +258,10 @@ export default function AdminPage() {
           </div>
         )}
 
-        {tab === "verification" && (
-          <div className="grid gap-3 xl:grid-cols-2">
-            {pending.length === 0 && <p className="text-sm text-muted-foreground xl:col-span-2">No pending applications. Submitted forms from /verify appear here for you to approve or reject.</p>}
-            {pending.map((u) => (
+        {ready && tab === "verification" && (
+          <div className="space-y-4">
+            {applications.length === 0 && <p className="text-sm text-muted-foreground">No verification submissions yet. Forms from /verify appear here with the ID, details, and signature.</p>}
+            {applications.map((u) => (
               <ApplicationReviewCard
                 key={u.id}
                 user={u}
@@ -175,7 +272,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {tab === "reports" && (
+        {ready && tab === "reports" && (
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
               <MiniStat label="Open reports" value={openReports.length} />
@@ -234,7 +331,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {tab === "transactions" && (
+        {ready && tab === "transactions" && (
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
               <MiniStat label="Posting fees" value={transactions.length} />
@@ -263,7 +360,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {tab === "activity" && (
+        {ready && tab === "activity" && (
           <div className="grid gap-3 xl:grid-cols-2">
             {logs.length === 0 && <p className="text-sm text-muted-foreground">No activity yet.</p>}
             {logs.map((log) => (
@@ -277,6 +374,14 @@ export default function AdminPage() {
         )}
       </Container>
     </AppShell>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8"><PageSkeleton rows={5} /></div>}>
+      <AdminScreen />
+    </Suspense>
   );
 }
 

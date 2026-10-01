@@ -32,7 +32,7 @@ export default function VerifyPage() {
   }
 
   const status = user.verification_status;
-  const locked = status === "pending" || status === "verified";
+  const locked = status === "verified";
 
   const handleSubmit = async (err, payload) => {
     if (err) {
