@@ -47,7 +47,16 @@ export default function ProfilePage() {
               onSave={async (patch) => {
                 await api.profile.update(patch);
                 await refresh();
-                toast.success("Profile saved");
+                const keys = Object.keys(patch || {});
+                const vehicleOnly = keys.length > 0 && keys.every((key) => ["vehicle_type", "vehicle_model", "plate_number"].includes(key));
+                if (!vehicleOnly) toast.success("Profile saved");
+              }}
+              onResubmit={async (payload) => {
+                await api.verification.submit(payload);
+                await refresh();
+                toast.success(user?.verification_status === "verified"
+                  ? "Sent for review. You can keep using your account."
+                  : "Verification submitted");
               }}
             />
             )}

@@ -49,7 +49,7 @@ function Check({ on, disabled, onToggle, label }) {
   );
 }
 
-export default function TaskerApplicationForm({ user, idDocument, onIdDocument, error, saving, locked, onSubmit }) {
+export default function TaskerApplicationForm({ user, idDocument, onIdDocument, error, saving, locked, onSubmit, submitLabel = "Submit application" }) {
   const [form, setForm] = useState(() => emptyTaskerApplication(user));
   const [uploading, setUploading] = useState(false);
   const barangays = useMemo(() => getBarangays(form.location_area), [form.location_area]);
@@ -296,7 +296,7 @@ export default function TaskerApplicationForm({ user, idDocument, onIdDocument, 
             className="flex h-12 w-full items-center justify-center rounded-full text-sm font-black text-white disabled:opacity-60"
             style={{ background: TEAL }}
           >
-            {uploading ? "Uploading…" : saving ? "Submitting…" : "Submit application"}
+            {uploading ? "Uploading…" : saving ? "Submitting…" : submitLabel}
           </button>
         ) : (
           <p className="text-center text-sm font-semibold" style={{ color: TEAL }}>

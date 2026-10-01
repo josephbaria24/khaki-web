@@ -143,7 +143,8 @@ function AdminScreen() {
     );
   }
 
-  const pending = users.filter((u) => u.verification_status === "pending");
+  const needsReview = (u) => u.verification_status === "pending" || u.tasker_application?.review_state === "reverify";
+  const pending = users.filter(needsReview);
   const applications = users
     .filter((u) => u.role !== "admin" && (
       u.verification_status === "pending"
@@ -154,8 +155,8 @@ function AdminScreen() {
       || (u.credentials || []).some((item) => item?.application)
     ))
     .sort((a, b) => {
-      const rank = { pending: 0, unverified: 1, verified: 2 };
-      return (rank[a.verification_status] ?? 1) - (rank[b.verification_status] ?? 1);
+      const rankOf = (u) => (needsReview(u) ? 0 : u.verification_status === "verified" ? 2 : 1);
+      return rankOf(a) - rankOf(b);
     });
   const openReports = disputes.filter((d) => ["pending_review", "under_review"].includes(d.status));
 

@@ -8,6 +8,7 @@ import { LANDING } from "@/lib/landingContent";
 import { Collapse, Stagger } from "@/components/ui/motion";
 import { buildTaskerCard, PRICE_TYPES, pricingModelLabel } from "@/lib/taskerProfile";
 import { VEHICLE_OPTIONS, vehicleLabel } from "@/lib/serviceTemplates";
+import TaskerApplicationForm from "@/components/verify/TaskerApplicationForm";
 
 const OLIVE = LANDING.olive;
 const OLIVE_DEEP = LANDING.oliveDeep;
@@ -107,6 +108,7 @@ export default function TaskerProfileCard({
   showCta = true,
   onCta,
   onSave,
+  onResubmit,
 }) {
   const card = useMemo(() => buildTaskerCard(profile, reviews, tasks), [profile, reviews, tasks]);
   const [saved, setSaved] = useState(false);
@@ -125,6 +127,7 @@ export default function TaskerProfileCard({
   });
   const [aboutForm, setAboutForm] = useState({ bio: "", headline: "" });
   const [skillsForm, setSkillsForm] = useState({ skills: [], price_type: "Per Hour", price_amount: "", price_description: "" });
+  const [idDocument, setIdDocument] = useState(profile?.id_document || null);
 
   useEffect(() => {
     setHeaderForm({
@@ -145,6 +148,7 @@ export default function TaskerProfileCard({
       price_amount: profile?.price_amount ? String(profile.price_amount) : "",
       price_description: profile?.price_description || "",
     });
+    setIdDocument(profile?.id_document || null);
   }, [profile]);
 
   const stars = card.reviewCount ? Math.round(card.avg) : 0;
@@ -181,6 +185,36 @@ export default function TaskerProfileCard({
       setOpen("");
     } catch (err) {
       setError(err.message || "Could not save.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const hasDossier = Boolean(
+    profile?.tasker_application
+    || profile?.id_document
+    || profile?.verification_status === "verified"
+    || profile?.verification_status === "pending"
+  );
+
+  const saveVerification = async (err, payload) => {
+    if (err) {
+      setError(err.message || "Could not save.");
+      return;
+    }
+    if (!onResubmit) return;
+    setError("");
+    setSaving(true);
+    try {
+      await onSave?.({
+        vehicle_type: headerForm.vehicle_type,
+        vehicle_model: headerForm.vehicle_model,
+        plate_number: headerForm.plate_number,
+      });
+      await onResubmit(payload);
+      setOpen("");
+    } catch (saveError) {
+      setError(saveError.message || "Could not save.");
     } finally {
       setSaving(false);
     }
@@ -275,6 +309,9 @@ export default function TaskerProfileCard({
                     <CheckMini />
                     Check
                   </span>
+                  {card.reverifying ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F3E2B8] px-2 py-0.5 text-[10px] font-bold text-[#8A6A18] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">Re-verifying</span>
+                  ) : null}
                 </>
               ) : card.pendingVerify ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-[#F3E2B8] px-2 py-0.5 text-[10px] font-bold text-[#8A6A18] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">Pending ID</span>
@@ -303,13 +340,17 @@ export default function TaskerProfileCard({
         </div>
         <Collapse open={canEdit && open === "header"}>
           <div className="mt-4 space-y-3 border-t border-[#E8E4D6] pt-4">
-            <input className={fieldClass()} value={headerForm.full_name} onChange={(e) => setHeaderForm({ ...headerForm, full_name: e.target.value })} placeholder="Full name" />
-            <input className={fieldClass()} value={headerForm.phone} onChange={(e) => setHeaderForm({ ...headerForm, phone: e.target.value })} placeholder="09xx" />
-            <select className={fieldClass()} value={headerForm.location_area} onChange={(e) => setHeaderForm({ ...headerForm, location_area: e.target.value })}>
-              {LOCATIONS.map((l) => (
-                <option key={l}>{l}</option>
-              ))}
-            </select>
+            {hasDossier ? null : (
+              <>
+                <input className={fieldClass()} value={headerForm.full_name} onChange={(e) => setHeaderForm({ ...headerForm, full_name: e.target.value })} placeholder="Full name" />
+                <input className={fieldClass()} value={headerForm.phone} onChange={(e) => setHeaderForm({ ...headerForm, phone: e.target.value })} placeholder="09xx" />
+                <select className={fieldClass()} value={headerForm.location_area} onChange={(e) => setHeaderForm({ ...headerForm, location_area: e.target.value })}>
+                  {LOCATIONS.map((l) => (
+                    <option key={l}>{l}</option>
+                  ))}
+                </select>
+              </>
+            )}
             <p className="pt-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground">
               Sasakyan (para sa Transport & Rides)
             </p>
@@ -325,9 +366,27 @@ export default function TaskerProfileCard({
                 <input className={fieldClass()} value={headerForm.plate_number} onChange={(e) => setHeaderForm({ ...headerForm, plate_number: e.target.value.toUpperCase() })} placeholder="Plate number" />
               </>
             ) : null}
+            {hasDossier ? (
+              <>
+                <p className="text-xs font-semibold leading-relaxed text-muted-foreground">
+                  Your ID and verification answers are below. Saving sends them back to admin. Your account stays usable while it is re-verifying.
+                </p>
+                <TaskerApplicationForm
+                  user={profile}
+                  idDocument={idDocument}
+                  onIdDocument={setIdDocument}
+                  error={error}
+                  saving={saving}
+                  locked={false}
+                  submitLabel={profile?.verification_status === "verified" ? "Save and send for review" : "Save application"}
+                  onSubmit={saveVerification}
+                />
+              </>
+            ) : (
             <button type="button" disabled={saving} onClick={() => saveSection(headerForm)} className="btn-olive inline-flex h-10 items-center px-5 text-xs disabled:opacity-60">
               {saving ? "Saving..." : "Save"}
             </button>
+            )}
           </div>
         </Collapse>
       </SectionCard>

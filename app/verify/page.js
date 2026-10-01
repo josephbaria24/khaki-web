@@ -32,7 +32,8 @@ export default function VerifyPage() {
   }
 
   const status = user.verification_status;
-  const locked = status === "verified";
+  const locked = false;
+  const updating = status === "verified";
 
   const handleSubmit = async (err, payload) => {
     if (err) {
@@ -74,6 +75,7 @@ export default function VerifyPage() {
               error={error}
               saving={saving}
               locked={locked}
+              submitLabel={updating ? "Save and send for review" : "Submit application"}
               onSubmit={handleSubmit}
             />
           </div>

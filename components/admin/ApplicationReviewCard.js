@@ -91,6 +91,7 @@ function DocumentView({ doc }) {
 
 const TONES = {
   pending: { bar: "#C4841D", bg: "#FEF3C7", ink: "#92400E", soft: "#FFF8E8" },
+  reverify: { bar: "#C4841D", bg: "#FEF3C7", ink: "#92400E", soft: "#FFF8E8" },
   verified: { bar: "#1A7A58", bg: "#D7F0EA", ink: "#0D666A", soft: "#F3FBF8" },
   rejected: { bar: "#B42318", bg: "#FEE2E2", ink: "#991B1B", soft: "#FFF6F6" },
   unverified: { bar: "#8A94A6", bg: "#EEF2F6", ink: "#3D4A5C", soft: "#F7F8FA" },
@@ -100,14 +101,16 @@ export default function ApplicationReviewCard({ user, onApprove, onReject }) {
   const [open, setOpen] = useState(false);
   const app = readSubmittedApplication(user);
   const skills = (app.skills || []).filter((skill) => skill && skill !== app.other_skill);
-  const statusKey = app.verification_status === "pending"
-    ? "pending"
-    : app.verification_status === "verified"
-      ? "verified"
-      : app.verification_note
-        ? "rejected"
-        : "unverified";
-  const statusLabel = statusKey === "pending" ? "Pending" : statusKey === "verified" ? "Verified" : statusKey === "rejected" ? "Rejected" : "Unverified";
+  const statusKey = app.review_state === "reverify" && app.verification_status === "verified"
+    ? "reverify"
+    : app.verification_status === "pending"
+      ? "pending"
+      : app.verification_status === "verified"
+        ? "verified"
+        : app.verification_note
+          ? "rejected"
+          : "unverified";
+  const statusLabel = statusKey === "reverify" ? "Re-verifying" : statusKey === "pending" ? "Pending" : statusKey === "verified" ? "Verified" : statusKey === "rejected" ? "Rejected" : "Unverified";
   const tone = TONES[statusKey] || TONES.unverified;
   const name = shown(app.full_name || user.full_name);
   const email = shown(app.email || user.email);
@@ -202,7 +205,7 @@ export default function ApplicationReviewCard({ user, onApprove, onReject }) {
               ))}
             </Section>
           ) : null}
-          {statusKey === "pending" ? (
+          {statusKey === "pending" || statusKey === "reverify" ? (
             <div className="flex flex-wrap gap-2 lg:col-span-2">
               <button type="button" className="h-9 rounded-xl px-4 text-sm font-bold text-white" style={{ background: tone.bar }} onClick={onApprove}>
                 Approve

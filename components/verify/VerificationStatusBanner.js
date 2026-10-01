@@ -3,6 +3,14 @@ const TEAL = "#0D666A";
 export function verificationStatusCopy(user) {
   const status = user?.verification_status || "unverified";
   const rejected = status === "unverified" && Boolean(user?.verification_note);
+  if (status === "verified" && user?.tasker_application?.review_state === "reverify") {
+    return {
+      key: "reverify",
+      label: "Re-verifying",
+      detail: "Admin is reviewing your update. You can keep posting and accepting work.",
+      tone: "wait",
+    };
+  }
   if (status === "verified") {
     return {
       key: "verified",

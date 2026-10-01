@@ -244,13 +244,13 @@ export default function DashboardPage() {
               <div className="landing-marquee mt-4 hidden overflow-hidden sm:block">
                 <div className="landing-marquee-track">
                   {[...LANDING_CATEGORIES, ...LANDING_CATEGORIES].map((cat, i) => (
-                    <CategoryCard key={`${cat.key}-${i}`} cat={{ ...cat, href: "/post" }} />
+                    <CategoryCard key={`${cat.key}-${i}`} cat={{ ...cat, href: `/post?category=${cat.key}` }} />
                   ))}
                 </div>
               </div>
               <div className="no-scrollbar mt-4 grid auto-cols-max grid-flow-col grid-rows-2 gap-3 overflow-x-auto px-4 pb-2 sm:hidden">
                 {LANDING_CATEGORIES.map((cat) => (
-                  <CategoryCard key={cat.key} cat={{ ...cat, href: "/post" }} compact />
+                  <CategoryCard key={cat.key} cat={{ ...cat, href: `/post?category=${cat.key}` }} compact />
                 ))}
               </div>
             </>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Basket, Beach, Briefcase, Calendar, Car, ChevronLeft, Clean, Clock, Compass, Door, ElectricPlugs, Flash, GasPipe, Grid, Hammer, Home, Laptop,
   Leaf, Luggage, MessageSquare, Moon, MoreHorizontal, Motorbike, Package, Refresh, Repair, Scooter, Scissor, Search, ShieldCheck, Snowflake, Sparkles, Tools, Users, Van, Wallet, WashingMachine, Wrench,
@@ -271,24 +271,40 @@ function PostSelect({ id, openId, setOpenId, value, options, onChange, placehold
   );
 }
 
-export default function PostPage() {
-  const router = useRouter();
-  const { user } = useAuth();
-  const [form, setForm] = useState({
+function categoryFromParam(value) {
+  return SERVICE_CATEGORIES.some((c) => c.key === value) ? value : null;
+}
+
+function formForCategory(key) {
+  const next = templateForKey(key);
+  return {
     title: "",
-    categoryKey: SERVICE_CATEGORIES[0].key,
+    categoryKey: key,
     groupTitle: "",
     location_area: LOCATIONS[0],
     barangay: "",
     location_detail: "",
-    is_remote: false,
-    schedule_type: "flexible",
+    is_remote: key === "digital",
+    schedule_type: next?.scheduleOptions ? next.scheduleOptions[0].value : "flexible",
     schedule_date: "",
     details: "",
     budget_php: 200,
-    extras: {},
+    extras: initialExtras(key),
     pins: {},
-  });
+  };
+}
+
+function PostPage() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const requested = categoryFromParam(params.get("category"));
+  const { user } = useAuth();
+  const [form, setForm] = useState(() => formForCategory(requested || SERVICE_CATEGORIES[0].key));
+
+  useEffect(() => {
+    if (!requested) return;
+    setForm((current) => (current.categoryKey === requested ? current : formForCategory(requested)));
+  }, [requested]);
   const [error, setError] = useState("");
   const [openSelect, setOpenSelect] = useState(null);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -750,5 +766,13 @@ export default function PostPage() {
         </form>
       </Container>
     </AppShell>
+  );
+}
+
+export default function PostRoute() {
+  return (
+    <Suspense fallback={null}>
+      <PostPage />
+    </Suspense>
   );
 }
