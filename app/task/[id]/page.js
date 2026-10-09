@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, CircleAlert, Lock, MessageSquare } from "@/components/icons";
@@ -11,11 +12,13 @@ import StarRating from "@/components/StarRating";
 import { useAuth } from "@/lib/AuthContext";
 import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, TASKER_LOCKED_NOTICE, cn, displayTaskCategory, formatPHP, postingFee, scheduleLabel, serviceByKey, serviceForTaskCategory, timeAgo } from "@/lib/khaki";
 import { distanceLabel, townDistanceKm } from "@/lib/palawanLocations";
+import { canTrack } from "@/lib/deliveryTrack";
 import { describeExtras, describePins, vehicleLabel } from "@/lib/serviceTemplates";
 import { displayName } from "@/lib/taskerProfile";
 import { LANDING } from "@/lib/landingContent";
 import { canAcceptJobs, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
+import PinPreviewMap from "@/components/task/PinPreviewMap";
 import ReportGawain from "@/components/ReportGawain";
 import { toast } from "@/lib/toast";
 import { PageSkeleton } from "@/components/ui/Skeleton";
@@ -264,7 +267,7 @@ export default function TaskDetailPage() {
   if (isClient) {
     return (
       <AppShell>
-        <Container className="max-w-lg py-5 lg:max-w-xl lg:py-8">
+        <Container className={cn("max-w-lg lg:max-w-xl", (featured || canComplete || (!featured && canCancel)) ? "pt-5 pb-72 lg:pt-8 lg:pb-72" : "py-5 lg:py-8")}>
           <button onClick={() => router.back()} className="mb-3 inline-flex items-center gap-1 text-xs font-semibold text-[#2A3F4D]/60 hover:text-[#163044]">
             <ChevronLeft className="h-4 w-4" /> Back
           </button>
@@ -272,9 +275,14 @@ export default function TaskDetailPage() {
           <p className="mt-1 text-center text-xs font-semibold text-[#2A3F4D]/55">
             {displayTaskCategory(task)} · Posted {timeAgo(task.created_at)}
           </p>
+          {canTrack(task, user?.id) ? (
+            <Link href={`/task/${task.id}/track`} className="mt-4 flex h-12 items-center justify-center rounded-2xl bg-[#163044] text-sm font-black text-white">
+              Track this job
+            </Link>
+          ) : null}
           {error ? <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
 
-          <section className="mt-4 rounded-[1.35rem] border border-[#E6D9C4] bg-[#F6F1E4] p-4 shadow-[0_10px_28px_rgba(42,63,77,0.16)]">
+          <section className="mt-4 rounded-[1.35rem] border border-[#E6D9C4] bg-white p-4 shadow-[0_10px_28px_rgba(42,63,77,0.16)]">
             <h2 className="text-base font-black text-[#163044]">Job Details</h2>
             <p className="mt-2 text-xs font-semibold text-[#2A3F4D]/55">Ano ang kailangan mo?</p>
             <p className="mt-1.5 flex items-start gap-2 text-sm font-semibold leading-snug text-[#163044]">
@@ -301,6 +309,12 @@ export default function TaskDetailPage() {
                   {formatPHP(task.budget_php)} <span className="font-semibold text-[#2A3F4D]/60">{task.extras?.price_type === "per_hour" ? "(Per hour)" : task.extras?.price_type === "contract" ? "(Contract)" : "(Fixed)"}</span>
                 </span>
               </div>
+              {task.extras?.min_qualification ? (
+                <div className="grid grid-cols-[5.5rem_1fr] items-center gap-2">
+                  <span className="font-semibold text-[#2A3F4D]/70">Antas:</span>
+                  <span className="font-black text-[#163044]">Stage {task.extras.min_qualification} tasker</span>
+                </div>
+              ) : null}
               <div className="grid grid-cols-[5.5rem_1fr] items-center gap-2">
                 <span className="font-semibold text-[#2A3F4D]/70">Schedule:</span>
                 <span className="flex items-center gap-1.5 font-black text-[#163044]">
@@ -330,15 +344,17 @@ export default function TaskDetailPage() {
             ) : null}
           </section>
 
+          {featured || canComplete || (!featured && canCancel) ? (
+            <JobDock>
           {featured ? (
-            <article className="relative mt-4 overflow-hidden rounded-[1.35rem] border border-white/80 bg-gradient-to-br from-[#FDE8F4] via-[#E9FBF4] to-[#D9F4FF] p-4 shadow-card dark:border-white/10 dark:from-[#4E2C44] dark:via-[#1F4A3E] dark:to-[#1C3E5A]">
-              <span className="absolute left-3 top-3 text-lg" aria-hidden>🎉</span>
-              <span className="absolute right-3 top-3 text-lg" aria-hidden>🎉</span>
-              <h2 className="px-8 text-center text-base font-black text-[#163044]">
+            <article className="relative overflow-hidden rounded-2xl border border-white/80 bg-gradient-to-br from-[#FDE8F4] via-[#E9FBF4] to-[#D9F4FF] px-3 py-2.5 shadow-card dark:border-white/10 dark:from-[#4E2C44] dark:via-[#1F4A3E] dark:to-[#1C3E5A]">
+              <span className="absolute left-2.5 top-2 text-sm" aria-hidden>🎉</span>
+              <span className="absolute right-2.5 top-2 text-sm" aria-hidden>🎉</span>
+              <h2 className="px-7 text-center text-sm font-black text-[#163044]">
                 {featuredLive ? "Bagong Bid Natanggap!" : featured.status === "accepted" ? "Tinanggap na ang bid" : "Bid"}
               </h2>
-              <div className="mt-3 flex items-center gap-3">
-                <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-[#D4E6FF] text-[#3A73C4]">
+              <div className="mt-2 flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#D4E6FF] text-[#3A73C4]">
                   {featuredBidder?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={featuredBidder.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -347,7 +363,7 @@ export default function TaskDetailPage() {
                   )}
                 </span>
                 <div className="min-w-0">
-                  <Link href={`/u/${featured.tasker_id}`} className="block truncate text-base font-black text-[#163044]">
+                  <Link href={`/u/${featured.tasker_id}`} className="block truncate text-sm font-black text-[#163044]">
                     {featuredName}
                   </Link>
                   <p className="mt-0.5 flex items-center gap-1 text-xs font-bold">
@@ -364,74 +380,91 @@ export default function TaskDetailPage() {
                   </p>
                 </div>
               </div>
-              <p className="mt-3 text-lg font-black text-[#163044]">Nag-bid ng: {formatPHP(featured.amount_php)}</p>
+              <p className="mt-1.5 text-sm font-black text-[#163044]">Nag-bid ng: {formatPHP(featured.amount_php)}</p>
               {featured.pitch ? (
-                <p className="mt-1 text-sm leading-snug text-[#163044]">
+                <p className="mt-0.5 line-clamp-1 text-xs leading-snug text-[#163044]">
                   <span className="font-black">Note:</span> {featured.pitch}
                 </p>
               ) : null}
+              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const phone = featuredBidder?.phone || tasker?.phone;
+                    if (phone) window.location.href = `tel:${phone}`;
+                    else toast.error("Walang contact number si tasker.");
+                  }}
+                  className="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D9D3C5] bg-[#FFFCF7] px-2 text-center text-[11px] font-bold leading-tight text-[#163044]"
+                >
+                  <PhoneIcon /> Tumawag sa Tasker
+                </button>
+                {canCancel ? (
+                  <button
+                    type="button"
+                    onClick={cancelTask}
+                    className="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D9D3C5] bg-[#FFFCF7] px-2 text-center text-[11px] font-bold leading-tight text-[#163044]"
+                  >
+                    <XMarkIcon /> Kanselahin ang Job
+                  </button>
+                ) : null}
+                {canChat ? (
+                  <Link
+                    href={`/task/${task.id}/chat`}
+                    className="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D9D3C5] bg-[#FFFCF7] px-2 text-center text-[11px] font-bold leading-tight text-[#163044]"
+                  >
+                    <ChatIcon /> I-message si {featuredName.split(" ")[0]}
+                  </Link>
+                ) : null}
+                {featuredLive ? (
+                  <button
+                    type="button"
+                    onClick={() => accept(featured.id)}
+                    className="flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#1F9D6A] px-2 text-center text-[11px] font-black leading-tight text-white"
+                  >
+                    <PointIcon />
+                    <span>Tanggapin · {formatPHP(featured.amount_php)}</span>
+                  </button>
+                ) : null}
+              </div>
             </article>
-          ) : (
+          ) : null}
+          {!featured && canCancel ? (
+            <button
+              type="button"
+              onClick={cancelTask}
+              className="flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-[#D9D3C5] bg-[#FFFCF7] text-[12px] font-bold text-[#163044]"
+            >
+              <XMarkIcon /> Kanselahin ang Job
+            </button>
+          ) : null}
+          {canComplete ? (
+            <button onClick={complete} className="mt-2 h-10 w-full rounded-xl bg-[#163044] text-sm font-bold text-white">
+              Mark complete / Tapos na
+            </button>
+          ) : null}
+            </JobDock>
+          ) : null}
+
+          {!featured ? (
             <p className="mt-4 rounded-[1.35rem] border border-dashed border-[#C9D6E0] bg-[#FFFCF7] px-4 py-8 text-center text-sm font-semibold text-[#2A3F4D]/60">
               Wala pang bid. Maghintay ng tasker, o maghanap.
             </p>
-          )}
-
-          <div className="mt-4 grid grid-cols-2 gap-2.5">
-            <button
-              type="button"
-              onClick={() => {
-                const phone = featuredBidder?.phone || tasker?.phone;
-                if (phone) window.location.href = `tel:${phone}`;
-                else toast.error("Walang contact number si tasker.");
-              }}
-              className="flex min-h-12 items-center justify-center gap-1.5 rounded-2xl border border-[#D9D3C5] bg-[#FFFCF7] px-2 text-center text-[12px] font-bold leading-tight text-[#163044] shadow-card"
-            >
-              <PhoneIcon /> Tumawag sa Tasker
-            </button>
-            {canCancel ? (
-              <button
-                type="button"
-                onClick={cancelTask}
-                className="flex min-h-12 items-center justify-center gap-1.5 rounded-2xl border border-[#D9D3C5] bg-[#FFFCF7] px-2 text-center text-[12px] font-bold leading-tight text-[#163044] shadow-card"
-              >
-                <XMarkIcon /> Kanselahin ang Job
-              </button>
-            ) : <span />}
-            {featured && canChat ? (
-              <Link
-                href={`/task/${task.id}/chat`}
-                className="flex min-h-12 items-center justify-center gap-1.5 rounded-2xl border border-[#D9D3C5] bg-[#FFFCF7] px-2 text-center text-[12px] font-bold leading-tight text-[#163044] shadow-card"
-              >
-                <ChatIcon /> I-message si {featuredName.split(" ")[0]}
-              </Link>
-            ) : <span />}
-            {featuredLive ? (
-              <button
-                type="button"
-                onClick={() => accept(featured.id)}
-                className="flex min-h-12 items-center justify-center gap-1.5 rounded-2xl bg-[#1F9D6A] px-2 py-2 text-center text-[12px] font-black leading-tight text-white shadow-[0_8px_18px_rgba(31,157,106,0.35)]"
-              >
-                <PointIcon />
-                <span>Tanggapin ang Bid (Accept {formatPHP(featured.amount_php)})</span>
-              </button>
-            ) : null}
-          </div>
+          ) : null}
 
           {offers.filter((o) => o.id !== featured?.id).length > 0 ? (
-            <div className="mt-4 space-y-2">
+            <div className="mt-3 max-h-36 space-y-1.5 overflow-y-auto overscroll-contain">
               {offers.filter((o) => o.id !== featured?.id).map((o) => (
-                <div key={o.id} className="flex items-center justify-between gap-3 rounded-2xl bg-[#FFFCF7] p-3 shadow-card">
+                <div key={o.id} className="flex items-center justify-between gap-2 rounded-xl bg-[#FFFCF7] px-3 py-2 shadow-card">
                   <div className="min-w-0">
                     <Link href={`/u/${o.tasker_id}`} className="block truncate text-sm font-black text-[#163044]">{displayName(bidders[o.tasker_id]?.full_name || o.tasker_name)}</Link>
-                    <p className="text-xs font-semibold text-[#2A3F4D]/65">
+                    <p className="truncate text-[11px] font-semibold text-[#2A3F4D]/65">
                       {formatPHP(o.amount_php)}
                       {bidderRatings[o.tasker_id]?.count ? ` · ${bidderRatings[o.tasker_id].avg.toFixed(1)}★` : ""}
                       {o.status !== "pending" ? ` · ${o.status}` : ""}
                     </p>
                   </div>
                   {o.status === "pending" && !bidsLocked ? (
-                    <button type="button" onClick={() => accept(o.id)} className="h-9 shrink-0 rounded-full bg-[#1F9D6A] px-3 text-[11px] font-bold text-white">
+                    <button type="button" onClick={() => accept(o.id)} className="h-8 shrink-0 rounded-full bg-[#1F9D6A] px-3 text-[11px] font-bold text-white">
                       Tanggapin
                     </button>
                   ) : null}
@@ -487,12 +520,6 @@ export default function TaskDetailPage() {
             </div>
           ) : null}
 
-          {canComplete ? (
-            <button onClick={complete} className="mt-4 h-11 w-full rounded-2xl bg-[#163044] text-sm font-bold text-white">
-              Mark complete / Tapos na
-            </button>
-          ) : null}
-
           {task.status === "open" && offers.length === 0 ? (
             <Link href={`/task/${task.id}/taskers`} className="mt-3 block text-center text-sm font-bold text-[#3A73C4]">
               Maghanap ng tasker
@@ -534,14 +561,21 @@ export default function TaskDetailPage() {
           <button onClick={() => router.back()} className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground">
             <ChevronLeft className="h-4 w-4" /> Back
           </button>
-          {canChat ? (
-            <Link
-              href={`/task/${task.id}/chat`}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-[#FFFCF7] px-3.5 text-sm font-bold text-[#2A3F4D] shadow-card"
-            >
-              <MessageSquare className="h-4 w-4" color="#2A3F4D" /> Chat
-            </Link>
-          ) : null}
+          <div className="flex items-center gap-2">
+            {canTrack(task, user?.id) ? (
+              <Link href={`/task/${task.id}/track`} className="inline-flex h-10 items-center rounded-full bg-[#163044] px-3.5 text-sm font-black text-white">
+                Track
+              </Link>
+            ) : null}
+            {canChat ? (
+              <Link
+                href={`/task/${task.id}/chat`}
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-[#FFFCF7] px-3.5 text-sm font-bold text-[#2A3F4D] shadow-card"
+              >
+                <MessageSquare className="h-4 w-4" color="#2A3F4D" /> Chat
+              </Link>
+            ) : null}
+          </div>
         </div>
         {error && <p className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -882,10 +916,121 @@ export default function TaskDetailPage() {
   );
 }
 
+function JobDock({ children }) {
+  const peek = 112;
+  const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(true);
+  const [full, setFull] = useState(0);
+  const [tuck, setTuck] = useState(null);
+  const dragRef = useRef(null);
+  const movedRef = useRef(false);
+  const tuckRef = useRef(null);
+  const sheetRef = useRef(null);
+  const collapsed = Math.max(0, full - peek);
+  const shift = tuck == null ? (open ? 0 : collapsed) : tuck;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const node = sheetRef.current;
+    if (!node) return undefined;
+    const measure = () => setFull(node.offsetHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [mounted, children]);
+
+  function pointerDown(event) {
+    movedRef.current = false;
+    const handle = Boolean(event.target.closest("[data-sheet-handle]"));
+    dragRef.current = { y: event.clientY, base: open ? 0 : collapsed, handle, pointerId: event.pointerId };
+  }
+
+  function pointerMove(event) {
+    if (!dragRef.current) return;
+    const dy = event.clientY - dragRef.current.y;
+    if (Math.abs(dy) < 8) return;
+    movedRef.current = true;
+    if (sheetRef.current && !sheetRef.current.hasPointerCapture(dragRef.current.pointerId)) {
+      sheetRef.current.setPointerCapture(dragRef.current.pointerId);
+    }
+    const next = Math.min(collapsed, Math.max(0, dragRef.current.base + dy));
+    tuckRef.current = next;
+    setTuck(next);
+  }
+
+  function pointerUp() {
+    if (!dragRef.current) return;
+    const next = tuckRef.current;
+    const moved = movedRef.current;
+    const handle = dragRef.current.handle;
+    dragRef.current = null;
+    tuckRef.current = null;
+    setTuck(null);
+    if (moved && next != null) setOpen(next < collapsed * 0.45);
+    else if (handle) setOpen((value) => !value);
+  }
+
+  function swallowClick(event) {
+    if (!movedRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    movedRef.current = false;
+  }
+
+  if (!mounted) return null;
+  const sheet = (
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center">
+      <div
+        className={cn(
+          "pointer-events-auto w-full max-w-lg",
+          tuck == null && "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+        )}
+        style={{ transform: full ? `translateY(${shift}px)` : undefined }}
+      >
+        <div
+          ref={sheetRef}
+          onPointerDown={pointerDown}
+          onPointerMove={pointerMove}
+          onPointerUp={pointerUp}
+          onPointerCancel={pointerUp}
+          onClickCapture={swallowClick}
+          className="overflow-hidden rounded-t-[1.4rem] border border-b-0 border-[#E6DDD0] bg-[#FBF8F1] shadow-[0_-12px_32px_rgba(22,48,68,0.14)] dark:border-white/10 dark:bg-[#11141A]"
+        >
+          <div
+            data-sheet-handle
+            className="track-sheet-handle flex w-full touch-none flex-col items-center px-4 pb-1 pt-2.5"
+            aria-expanded={open}
+            role="button"
+            tabIndex={0}
+            aria-label={open ? "Collapse bid" : "Expand bid"}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" && event.key !== " ") return;
+              event.preventDefault();
+              setOpen((value) => !value);
+            }}
+          >
+            <span className="h-1.5 w-10 rounded-full bg-[#163044]/20 dark:bg-white/25" />
+          </div>
+          <div className="max-h-[min(24rem,52vh)] overflow-y-auto overscroll-contain px-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  const host = document.querySelector(".khaki-landing");
+  return host ? createPortal(sheet, host) : sheet;
+}
+
 function PinnedLocations({ pins }) {
   if (!pins?.length) return null;
   return (
     <div className="mt-3 space-y-1.5">
+      <PinPreviewMap pins={pins} />
       {pins.map((pin) => (
         <a
           key={pin.key}

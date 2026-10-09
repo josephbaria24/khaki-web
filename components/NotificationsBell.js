@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Bell, X } from "@/components/icons";
+import { Bell } from "@/components/icons";
 import { NoticeSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/AuthContext";
-import { cn, timeAgo } from "@/lib/khaki";
+import { cn, noticeDateLabel, timeAgo } from "@/lib/khaki";
 import { api } from "@/lib/store";
-import { isVerificationSeen, markVerificationSeen, mergeNotificationFeed, noticeHref, verificationNotice } from "@/lib/verificationNotice";
+import { isVerificationSeen, markVerificationSeen, mergeNotificationFeed, noticeHref, noticeParts, verificationNotice } from "@/lib/verificationNotice";
 
 export default function NotificationsBell() {
   const { user } = useAuth();
@@ -49,6 +49,19 @@ export function NotificationsSheet({ open, onClose }) {
   const [notes, setNotes] = useState(() => cached || []);
   const [ready, setReady] = useState(() => cached != null);
   const [freshIds, setFreshIds] = useState(() => new Set());
+  const sheetRef = useRef(null);
+  const listRef = useRef(null);
+  const dragRef = useRef(null);
+  const movedRef = useRef(false);
+  const [dragY, setDragY] = useState(null);
+  const [dragging, setDragging] = useState(false);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    setDragY(null);
+    setDragging(false);
+    return undefined;
+  }, [open]);
 
   useEffect(() => {
     if (open) {
@@ -77,18 +90,13 @@ export function NotificationsSheet({ open, onClose }) {
 
   useEffect(() => {
     if (!open) return undefined;
-    let marked = false;
     const stop = api.notifications.subscribe((list) => {
       setNotes(list);
       setReady(true);
-      if (marked) return;
-      marked = true;
       const status = verificationNotice(user);
       const ids = new Set(list.filter((n) => n.read === false).map((n) => n.id));
       if (status && !isVerificationSeen(status)) ids.add(status.id);
       setFreshIds(ids);
-      markVerificationSeen(status);
-      api.notifications.markAllRead().catch(() => {});
     });
     return stop;
   }, [open, user]);
@@ -102,6 +110,72 @@ export function NotificationsSheet({ open, onClose }) {
     router.push(noticeHref(note));
   };
 
+  const markAll = () => {
+    const status = verificationNotice(user);
+    markVerificationSeen(status);
+    setFreshIds(new Set());
+    setNotes((rows) => rows.map((row) => (row.read ? row : { ...row, read: true })));
+    api.notifications.markAllRead().catch(() => {});
+  };
+
+  function pointerDown(event) {
+    if (event.button !== 0) return;
+    movedRef.current = false;
+    dragRef.current = {
+      y: event.clientY,
+      t: event.timeStamp,
+      pointerId: event.pointerId,
+      handle: Boolean(event.target.closest("[data-sheet-handle]")),
+      mode: null,
+      lastY: 0,
+      lastT: event.timeStamp,
+    };
+  }
+
+  function pointerMove(event) {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const dy = event.clientY - drag.y;
+    if (!drag.mode) {
+      if (Math.abs(dy) < 8) return;
+      const atTop = !listRef.current || listRef.current.scrollTop <= 0;
+      drag.mode = dy > 0 && (drag.handle || atTop) ? "sheet" : "scroll";
+    }
+    if (drag.mode !== "sheet") return;
+    movedRef.current = true;
+    if (sheetRef.current && !sheetRef.current.hasPointerCapture(event.pointerId)) {
+      sheetRef.current.setPointerCapture(event.pointerId);
+    }
+    drag.lastY = Math.max(0, dy);
+    drag.lastT = event.timeStamp;
+    setDragging(true);
+    setDragY(drag.lastY);
+  }
+
+  function pointerUp(event) {
+    const drag = dragRef.current;
+    if (!drag || (event && drag.pointerId !== event.pointerId)) return;
+    dragRef.current = null;
+    if (drag.mode !== "sheet") return;
+    const y = drag.lastY || 0;
+    const dt = Math.max(1, (drag.lastT || event.timeStamp) - drag.t);
+    setDragging(false);
+    if (y > 96 || (y > 36 && y / dt > 0.55)) {
+      const height = sheetRef.current?.offsetHeight || 640;
+      setDragY(height);
+      window.setTimeout(() => onClose(), 200);
+      return;
+    }
+    setDragY(0);
+  }
+
+  function swallowClick(event) {
+    if (!movedRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    movedRef.current = false;
+  }
+
   return createPortal(
     <div
       className={cn("notif-backdrop", !open && "is-leaving")}
@@ -112,28 +186,43 @@ export function NotificationsSheet({ open, onClose }) {
       }}
     >
       <div
+        ref={sheetRef}
         role="dialog"
         aria-modal="true"
         aria-label="Notifications"
-        className={cn("notif-sheet", !open && "is-leaving")}
+        className={cn("notif-sheet", !open && "is-leaving", dragY != null && "is-dragging")}
+        style={
+          dragY == null
+            ? undefined
+            : {
+                transform: `translateY(${dragY}px)`,
+                animation: "none",
+                transition: dragging ? "none" : "transform 0.22s ease-out",
+              }
+        }
+        onTransitionEnd={(event) => {
+          if (event.target !== event.currentTarget || event.propertyName !== "transform") return;
+          if (!dragging && dragY === 0) setDragY(null);
+        }}
         onClick={(e) => e.stopPropagation()}
+        onPointerDown={pointerDown}
+        onPointerMove={pointerMove}
+        onPointerUp={pointerUp}
+        onPointerCancel={pointerUp}
+        onClickCapture={swallowClick}
       >
-        <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-[#C9D6E0]" />
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-lg font-black tracking-tight text-[#163044]">Notifications</p>
-            <p className="text-[12px] text-[#2A3F4D]/65">Offers, chat, verification, and task updates.</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3EFE3] text-[#163044]"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" color="#163044" />
-          </button>
+        <div data-sheet-handle className="mx-auto mb-2 flex w-full touch-none justify-center py-1">
+          <span className="h-1 w-9 rounded-full bg-[#C9D6E0]" />
         </div>
-        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pb-2">
+        <div data-sheet-handle className="mb-1 flex touch-none items-center justify-between gap-2">
+          <p className="text-base font-black tracking-tight text-[#163044]">Notifications</p>
+          {freshIds.size > 0 ? (
+            <button type="button" onClick={markAll} className="rounded-lg px-2 py-1 text-[12px] font-black text-[#0D666A]">
+              Mark all as read
+            </button>
+          ) : null}
+        </div>
+        <div ref={listRef} className="min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain pb-1">
           {!ready ? (
             <>
               <NoticeSkeleton />
@@ -145,38 +234,44 @@ export function NotificationsSheet({ open, onClose }) {
               You&apos;re all caught up.
             </p>
           ) : (
-            feed.map((n) => {
-              const verification = n.kind === "verification" || n.id === "verification-status";
+            (() => {
+            let prevDay = "";
+            return feed.map((n) => {
               const unread = freshIds.has(n.id);
+              const parts = noticeParts(n);
+              const day = noticeDateLabel(n.created_at);
+              const showDay = Boolean(day) && day !== prevDay;
+              if (day) prevDay = day;
               return (
+                <Fragment key={n.id}>
+                {showDay ? (
+                  <div className="flex items-center gap-2 px-2 pb-1 pt-3">
+                    <span className="text-[11px] font-black uppercase tracking-[0.08em] text-[#2A3F4D]/50">{day}</span>
+                    <span className="h-px flex-1 bg-[#E6DDD0] dark:bg-white/15" />
+                  </div>
+                ) : null}
                 <button
-                  key={n.id}
                   type="button"
                   onClick={() => go(n)}
                   className={cn(
-                    "w-full rounded-2xl border p-4 text-left",
-                    unread
-                      ? "border-[#0D666A] bg-[#D5EFEF]"
-                      : "border-[#0D666A]/10 bg-[#F4F7F7]"
+                    "flex w-full items-start gap-2.5 rounded-xl px-2 py-2 text-left",
+                    unread ? "bg-[#E7F4F4] dark:bg-[#163044]/40" : "bg-transparent"
                   )}
                 >
-                  {verification ? (
-                    <p className={cn(
-                      "text-[11px] font-bold uppercase tracking-[0.14em]",
-                      unread ? "text-[#0D666A]" : "text-[#0D666A]/45"
-                    )}>
-                      {n.title || "Verification"}
-                    </p>
-                  ) : null}
-                  <p className={cn(
-                    "text-sm",
-                    verification && "mt-1",
-                    unread ? "font-semibold text-[#163044]" : "font-medium text-[#2A3F4D]/50"
-                  )}>{n.text}</p>
-                  <p className={cn("mt-1 text-[11px]", unread ? "text-[#2A3F4D]/70" : "text-[#2A3F4D]/35")}>{timeAgo(n.created_at)}</p>
+                  <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#163044] text-xs font-black text-white">{parts.initial}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className={cn("block text-[13px] leading-snug", unread ? "text-[#163044]" : "text-[#2A3F4D]/70")}>
+                      {parts.name ? <span className="font-black">{parts.name} </span> : null}
+                      {parts.body}
+                    </span>
+                    <span className="mt-0.5 block text-[11px] font-semibold text-[#2A3F4D]/45">{timeAgo(n.created_at)}</span>
+                  </span>
+                  {unread ? <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-[#0D666A]" /> : <span className="mt-2 h-2.5 w-2.5 shrink-0" />}
                 </button>
+                </Fragment>
               );
-            })
+            });
+            })()
           )}
         </div>
       </div>

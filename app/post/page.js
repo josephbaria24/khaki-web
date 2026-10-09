@@ -307,6 +307,8 @@ function PostPage() {
   }, [requested]);
   const [error, setError] = useState("");
   const [openSelect, setOpenSelect] = useState(null);
+  const [postStep, setPostStep] = useState(1);
+  const [minStage, setMinStage] = useState(1);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setExtra = (k, v) => setForm((f) => ({ ...f, extras: { ...f.extras, [k]: v } }));
   const toggleExtra = (k, v) => setForm((f) => {
@@ -332,6 +334,10 @@ function PostPage() {
 
   const submit = async (e) => {
     e.preventDefault();
+    if (postStep < 3) {
+      setPostStep(postStep + 1);
+      return;
+    }
     setError("");
     const missing = missingRequiredField(template, form.extras);
     if (missing) {
@@ -369,6 +375,7 @@ function PostPage() {
         extras: {
           ...cleanExtras(template, extras),
           service_key: categoryKey,
+          min_qualification: minStage,
           ...(Object.keys(savedPins).length ? { pins: savedPins } : {}),
         },
       });
@@ -430,10 +437,27 @@ function PostPage() {
         <SectionIntro
           className="mb-2"
           pill="POST"
-          title="Mag-post ng gawain"
+          title="Gumawa ng task"
         />
+        <div className="mb-3 grid grid-cols-3 gap-2">
+          {[
+            ["1", "Gumawa ng task"],
+            ["2", "Antas ng tasker"],
+            ["3", "I-post"],
+          ].map(([n, label], index) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setPostStep(index + 1)}
+              className={cn("rounded-2xl px-2 py-2 text-left", postStep === index + 1 ? "bg-[#163044] text-white" : "bg-white text-[#163044]")}
+            >
+              <span className="block text-[10px] font-black uppercase tracking-wide opacity-70">Step {n}</span>
+              <span className="block text-[12px] font-black leading-tight">{label}</span>
+            </button>
+          ))}
+        </div>
         <form onSubmit={submit} className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start lg:gap-4">
-          <div className={cn("rounded-[1.25rem] bg-[#FFFCF7] shadow-card sm:rounded-[1.5rem]", stacked ? "space-y-2.5 p-3 sm:space-y-3 sm:p-4" : "space-y-4 p-4 sm:p-5")}>
+          <div className={cn("rounded-[1.25rem] bg-[#FFFCF7] shadow-card sm:rounded-[1.5rem]", postStep !== 1 && "hidden", stacked ? "space-y-2.5 p-3 sm:space-y-3 sm:p-4" : "space-y-4 p-4 sm:p-5")}>
             {error ? <p className="rounded-2xl bg-destructive/10 px-3 py-2 text-[12px] font-semibold text-destructive">{error}</p> : null}
 
             <PostSelect
@@ -715,6 +739,42 @@ function PostPage() {
             </Field>
           </div>
 
+          {postStep === 2 ? (
+            <div className="rounded-[1.25rem] bg-[#FFFCF7] p-4 shadow-card sm:p-5">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#0D666A]">Step 2 · Antas ng kwalipikasyon</p>
+              <h2 className="mt-1 text-xl font-black text-[#163044]">Anong antas ng tasker ang kailangan?</h2>
+              <p className="mt-1 text-sm text-[#163044]/70">I-filter ang inaasahan. Makikita ito sa gawain. Hindi nito binabago ang 2% posting fee.</p>
+              <div className="mt-4 space-y-2">
+                {[
+                  [1, "Stage 1 · Registered", "Kahit bagong account, basta makakita ng post."],
+                  [2, "Stage 2 · ID at face verified", "May government ID at face photo na inaprubahan."],
+                  [3, "Stage 3 · Skill verified", "May natapos nang job sa skill nila."],
+                  [4, "Stage 4 · Licensed", "May naka-save na license number."],
+                  [5, "Stage 5 · Pioneer", "8 jobs, 4.8 stars."],
+                ].map(([stage, label, detail]) => (
+                  <button
+                    key={stage}
+                    type="button"
+                    onClick={() => setMinStage(stage)}
+                    className={cn("block w-full rounded-2xl border px-3 py-3 text-left", minStage === stage ? "border-[#163044] bg-white" : "border-[#E6DDD0] bg-[#FBF8F1]")}
+                  >
+                    <span className="block text-sm font-black text-[#163044]">{label}</span>
+                    <span className="mt-0.5 block text-xs font-medium text-[#163044]/65">{detail}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {postStep === 3 ? (
+            <div className="rounded-[1.25rem] bg-[#FFFCF7] p-4 shadow-card sm:p-5">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#0D666A]">Step 3 · I-post</p>
+              <h2 className="mt-1 text-xl font-black text-[#163044]">Handa na ang gawain</h2>
+              <p className="mt-2 text-sm text-[#163044]/75">{service?.title} · budget {formatPHP(form.budget_php)} · minimum stage {minStage}</p>
+              <p className="mt-2 text-sm text-[#163044]/70">Pag na-post, makikita ito ng mga tasker. Yung antas na pinili mo ang lalabas sa detalye.</p>
+            </div>
+          ) : null}
+
           <aside className={cn("rounded-[1.25rem] bg-[#163044] text-[#F7F4EC] shadow-soft sm:rounded-[1.5rem] lg:sticky lg:top-24", stacked ? "p-3 lg:p-4" : "p-4")}>
             {stacked ? (
               <div className="flex items-center gap-3 lg:hidden">
@@ -723,7 +783,7 @@ function PostPage() {
                   <p className="text-sm font-black">{fee}</p>
                 </div>
                 <button type="submit" className="h-10 min-w-0 flex-1 rounded-full bg-[#E8DCC4] text-[13px] font-black text-[#163044]">
-                  I-post ang Gawain
+                  {postStep < 3 ? "Magpatuloy" : "I-post ang Gawain"}
                 </button>
               </div>
             ) : null}
@@ -759,7 +819,7 @@ function PostPage() {
               {BUDGET_DISCLAIMER}
             </p>
             <button type="submit" className="mt-4 h-11 w-full rounded-full bg-[#E8DCC4] text-sm font-black text-[#163044]">
-              {template?.layout === "stacked" ? "I-post ang Gawain (Post Job)" : "I-post ang gawain"}
+              {postStep < 3 ? "Magpatuloy" : "I-post ang gawain"}
             </button>
             </div>
           </aside>

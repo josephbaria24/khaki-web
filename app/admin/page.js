@@ -91,6 +91,10 @@ function AdminScreen() {
   const [transactions, setTransactions] = useState(() => adminCache.data?.transactions ?? []);
   const [disputes, setDisputes] = useState(() => adminCache.data?.disputes ?? []);
   const [ready, setReady] = useState(() => Boolean(adminCache.data));
+  const [query, setQuery] = useState("");
+  const [userFilter, setUserFilter] = useState("all");
+  const [memoFor, setMemoFor] = useState(null);
+  const [memoText, setMemoText] = useState("");
   const refresh = () => setTick((n) => n + 1);
 
   const selectTab = (id) => {
@@ -208,55 +212,19 @@ function AdminScreen() {
         )}
 
         {ready && tab === "users" && (
-          <div className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <MiniStat label="All accounts" value={users.length} />
-              <MiniStat label="Verified" value={users.filter((u) => u.verification_status === "verified").length} />
-              <MiniStat label="Pending review" value={pending.length} />
-              <MiniStat label="Suspended" value={users.filter((u) => u.status === "suspended").length} />
-            </div>
-            <div className="overflow-x-auto rounded-[1.75rem] bg-card shadow-card">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="border-b text-xs uppercase text-muted-foreground">
-                  <tr>
-                    <th className="p-4">Name</th>
-                    <th className="p-4">Role</th>
-                    <th className="p-4">Verification</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u) => (
-                    <tr key={u.id} className="border-b last:border-0">
-                      <td className="p-4">
-                        <p className="font-semibold">{u.full_name}</p>
-                        <p className="text-xs text-muted-foreground">{u.email}</p>
-                      </td>
-                      <td className="p-4">{ROLE_LABELS[u.role] || u.role}{u.poster_type ? ` · ${u.poster_type}` : ""}</td>
-                      <td className="p-4 capitalize">{u.verification_status}</td>
-                      <td className="p-4 capitalize">{u.status || "active"}</td>
-                      <td className="p-4">
-                        {u.role !== "admin" && (
-                          <button
-                            className="rounded-lg border px-3 py-1 text-xs font-bold"
-                            onClick={() =>
-                              act(
-                                () => api.admin.setStatus(u.id, u.status === "suspended" ? "active" : "suspended"),
-                                u.status === "suspended" ? "User activated" : "User suspended"
-                              )
-                            }
-                          >
-                            {u.status === "suspended" ? "Activate" : "Suspend"}
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <UsersDirectory
+            users={users}
+            pending={pending}
+            query={query}
+            setQuery={setQuery}
+            userFilter={userFilter}
+            setUserFilter={setUserFilter}
+            memoFor={memoFor}
+            setMemoFor={setMemoFor}
+            memoText={memoText}
+            setMemoText={setMemoText}
+            act={act}
+          />
         )}
 
         {ready && tab === "verification" && (
@@ -383,6 +351,146 @@ export default function AdminPage() {
     <Suspense fallback={<div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8"><PageSkeleton rows={5} /></div>}>
       <AdminScreen />
     </Suspense>
+  );
+}
+
+function initials(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || "•";
+}
+
+function verifyTone(status) {
+  if (status === "verified") return "bg-[#D7F0EA] text-[#0D666A]";
+  if (status === "pending") return "bg-[#FFF0C4] text-[#8A6410]";
+  return "bg-[#EEF2F6] text-[#3D4A5C]";
+}
+
+function UsersDirectory({ users, pending, query, setQuery, userFilter, setUserFilter, memoFor, setMemoFor, memoText, setMemoText, act }) {
+  const unverified = users.filter((u) => u.role !== "admin" && u.verification_status !== "verified" && u.verification_status !== "pending");
+  const needle = query.trim().toLowerCase();
+  const rows = users.filter((u) => {
+    if (userFilter === "verified" && u.verification_status !== "verified") return false;
+    if (userFilter === "pending" && u.verification_status !== "pending" && u.tasker_application?.review_state !== "reverify") return false;
+    if (userFilter === "unverified" && (u.verification_status === "verified" || u.verification_status === "pending" || u.role === "admin")) return false;
+    if (!needle) return true;
+    return `${u.full_name || ""} ${u.email || ""} ${u.role || ""}`.toLowerCase().includes(needle);
+  });
+  const filters = [
+    ["all", "All"],
+    ["verified", "Verified"],
+    ["pending", "Pending"],
+    ["unverified", "Unverified"],
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-black text-[#163044]">Users</h2>
+        <p className="text-sm text-[#163044]/65">Invite someone to verify, or send a memo when a job or payment looks off.</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <MiniStat label="All accounts" value={users.length} />
+        <MiniStat label="Verified" value={users.filter((u) => u.verification_status === "verified").length} />
+        <MiniStat label="Pending review" value={pending.length} />
+        <MiniStat label="Unverified" value={unverified.length} />
+      </div>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search name, role, or email"
+          className="h-11 flex-1 rounded-xl border border-[#E6DDD0] bg-white px-3 text-sm font-semibold text-[#163044] outline-none"
+        />
+        <div className="flex flex-wrap gap-1.5">
+          {filters.map(([id, label]) => (
+            <button key={id} type="button" onClick={() => setUserFilter(id)} className={`h-11 rounded-xl px-3 text-xs font-black ${userFilter === id ? "bg-[#163044] text-white" : "bg-[#F3EFE3] text-[#163044]"}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="overflow-x-auto rounded-[1.5rem] bg-white shadow-[0_8px_28px_rgba(22,48,68,0.08)]">
+        <table className="w-full min-w-[760px] text-left text-sm">
+          <thead className="border-b text-[11px] uppercase tracking-wide text-[#163044]/50">
+            <tr>
+              <th className="p-4">Name</th>
+              <th className="p-4">Role</th>
+              <th className="p-4">Verification</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((u) => (
+              <tr key={u.id} className="border-b last:border-0">
+                <td className="p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E8DCC4] text-xs font-black text-[#163044]">{initials(u.full_name)}</span>
+                    <div>
+                      <p className="font-black text-[#163044]">{u.full_name}</p>
+                      <p className="text-xs text-[#163044]/55">{u.email}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="p-4 font-semibold text-[#163044]">{ROLE_LABELS[u.role] || u.role}{u.poster_type ? ` · ${u.poster_type}` : ""}</td>
+                <td className="p-4">
+                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-black capitalize ${verifyTone(u.verification_status)}`}>
+                    {u.tasker_application?.review_state === "reverify" ? "Re-verifying" : u.verification_status || "unverified"}
+                  </span>
+                </td>
+                <td className="p-4 capitalize text-[#163044]">{u.status || "active"}</td>
+                <td className="p-4">
+                  <div className="flex flex-wrap gap-1.5">
+                    <Link href={`/u/${u.id}`} className="rounded-lg border border-[#163044]/15 px-2.5 py-1 text-[11px] font-black text-[#163044]">View badge</Link>
+                    {u.role !== "admin" && u.verification_status !== "verified" ? (
+                      <button type="button" className="rounded-lg bg-[#163044] px-2.5 py-1 text-[11px] font-black text-white" onClick={() => act(() => api.admin.inviteToVerify(u.id), "Invite sent")}>
+                        Invite to verify
+                      </button>
+                    ) : null}
+                    {u.role !== "admin" ? (
+                      <button type="button" className="rounded-lg bg-[#E8DCC4] px-2.5 py-1 text-[11px] font-black text-[#163044]" onClick={() => { setMemoFor(u); setMemoText(""); }}>
+                        Memo
+                      </button>
+                    ) : null}
+                    {u.role !== "admin" ? (
+                      <button
+                        type="button"
+                        className="rounded-lg border px-2.5 py-1 text-[11px] font-black"
+                        onClick={() => act(() => api.admin.setStatus(u.id, u.status === "suspended" ? "active" : "suspended"), u.status === "suspended" ? "User activated" : "User suspended")}
+                      >
+                        {u.status === "suspended" ? "Activate" : "Suspend"}
+                      </button>
+                    ) : null}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!rows.length ? <p className="p-4 text-sm text-[#163044]/60">No accounts match.</p> : null}
+      </div>
+      {memoFor ? (
+        <form
+          className="rounded-[1.35rem] bg-[#163044] p-4 text-white"
+          onSubmit={(e) => {
+            e.preventDefault();
+            act(async () => {
+              await api.admin.sendMemo(memoFor.id, memoText);
+              setMemoFor(null);
+              setMemoText("");
+            }, "Memo sent");
+          }}
+        >
+          <p className="text-sm font-black">Memo to {memoFor.full_name}</p>
+          <p className="mt-1 text-xs text-white/70">They get this in notifications. Use it for odd payments, changed job details, or a reminder.</p>
+          <textarea value={memoText} onChange={(e) => setMemoText(e.target.value)} className="mt-3 min-h-24 w-full rounded-xl bg-[#102636] p-3 text-sm outline-none" placeholder="What should they know?" />
+          <div className="mt-3 flex gap-2">
+            <button type="submit" className="h-10 rounded-xl bg-[#E8DCC4] px-4 text-sm font-black text-[#163044]">Send memo</button>
+            <button type="button" className="h-10 rounded-xl px-4 text-sm font-bold text-white/80" onClick={() => setMemoFor(null)}>Cancel</button>
+          </div>
+        </form>
+      ) : null}
+    </div>
   );
 }
 

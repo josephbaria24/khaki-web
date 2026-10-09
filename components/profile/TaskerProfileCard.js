@@ -264,9 +264,10 @@ export default function TaskerProfileCard({
             <div className="flex items-start gap-2">
               <div className="min-w-0 flex-1">
                 <h2 className="truncate text-base font-black leading-tight text-foreground min-[400px]:text-[20px] lg:text-[26px]">{card.displayName}</h2>
-                <p className="mt-0.5 truncate text-[13px] font-black text-[#163044] min-[400px]:text-[15px] lg:text-lg">
-                  {card.rateLabel}
+                <p className="mt-0.5 line-clamp-2 text-[13px] font-black leading-snug text-[#163044] min-[400px]:text-[15px] lg:text-lg">
+                  {card.roleLabel || "Tasker"}
                 </p>
+                <p className="mt-0.5 truncate text-[12px] font-bold text-[#163044]/70 min-[400px]:text-[13px]">{card.rateLabel}</p>
               </div>
               {canEdit ? (
                 <button
@@ -297,18 +298,42 @@ export default function TaskerProfileCard({
                 <span className="font-medium text-muted-foreground">No reviews yet</span>
               )}
             </p>
+            <div className="mt-2 grid grid-cols-3 gap-1.5">
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Tasker since</p>
+                <p className="truncate text-[11px] font-black text-[#163044]">{card.sinceLabel || "—"}</p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Completion</p>
+                <p className="truncate text-[11px] font-black text-[#1A7A58]">{card.completionLabel || "New"}</p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">Stage</p>
+                <p className="truncate text-[11px] font-black text-[#163044]">{card.stageLabel || "Registered"}</p>
+              </div>
+            </div>
             <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground min-[400px]:mt-2 min-[400px]:text-[11px] min-[400px]:tracking-[0.12em]">Verification</p>
             <div className="mt-1 flex flex-wrap gap-1 min-[400px]:mt-1.5 min-[400px]:gap-1.5">
               {card.verified ? (
                 <>
+                  {card.faceVerified ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[#163044]/15 bg-white px-2 py-0.5 text-[10px] font-bold text-[#163044] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
+                      Face Verified
+                    </span>
+                  ) : null}
                   <span className="inline-flex items-center gap-1 rounded-full bg-[#DCEFE6] px-2 py-0.5 text-[10px] font-bold text-[#1F6B4A] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
                     <IdBadge />
                     ID Check
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#DCEFE6] px-2 py-0.5 text-[10px] font-bold text-[#1F6B4A] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
-                    <CheckMini />
-                    Check
-                  </span>
+                  {card.pioneer ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#E8DCC4] px-2 py-0.5 text-[10px] font-bold text-[#102636] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
+                      Pioneer
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#D6E8FF] px-2 py-0.5 text-[10px] font-bold text-[#163044] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
+                      {card.stageLabel}
+                    </span>
+                  )}
                   {card.reverifying ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-[#F3E2B8] px-2 py-0.5 text-[10px] font-bold text-[#8A6A18] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">Re-verifying</span>
                   ) : null}

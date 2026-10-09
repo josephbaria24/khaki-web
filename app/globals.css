@@ -1201,6 +1201,11 @@
     animation: notif-sheet-out 0.22s ease-in both;
   }
 
+  .notif-sheet.is-dragging,
+  .notif-sheet.is-dragging.is-leaving {
+    animation: none !important;
+  }
+
   .khaki-landing button:not(:disabled),
   .khaki-landing [type="button"]:not(:disabled),
   .khaki-landing [type="submit"]:not(:disabled),
@@ -1221,6 +1226,11 @@
   .khaki-landing [type="submit"]:not(:disabled):active,
   .khaki-landing [role="button"]:active {
     transform: scale(0.97);
+  }
+
+  .khaki-landing button.track-sheet-handle:active,
+  .khaki-landing [role="button"].track-sheet-handle:active {
+    transform: none;
   }
 
   .khaki-landing a {

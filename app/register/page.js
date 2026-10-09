@@ -62,7 +62,7 @@ function RegisterForm() {
         company_name: companyName,
       });
       toast.success("Account created");
-      router.push(homePathFor(user));
+      router.push(user?.role === "admin" ? homePathFor(user) : "/verify");
     } catch (err) {
       const msg = err.message || "Registration failed";
       setError(msg);

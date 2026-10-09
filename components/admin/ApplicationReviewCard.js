@@ -172,9 +172,14 @@ export default function ApplicationReviewCard({ user, onApprove, onReject }) {
             <Row label="Barangay" value={app.barangay} />
             <Row label="Address" value={app.location_detail} />
           </Section>
-          <Section icon={ShieldCheck} title="Valid ID" tint="#FFFFFF" ink={tone.ink}>
+          <Section icon={ShieldCheck} title="Valid ID and face" tint="#FFFFFF" ink={tone.ink}>
             <Row label="ID type" value={app.id_type} />
             {app.id_document ? <DocumentView doc={app.id_document} /> : <Row label="ID file" value="" />}
+            {app.id_document?.selfie_url ? (
+              <img src={app.id_document.selfie_url} alt="Face photo" className="mt-2 max-h-64 w-full rounded-lg bg-[#F7F4EC] object-contain" />
+            ) : (
+              <Row label="Face photo" value="" />
+            )}
           </Section>
           <Section icon={Briefcase} title="Work" tint="#FFFFFF" ink={tone.ink}>
             <Row label="Skills" value={skills.length ? skills.join(", ") : ""} />

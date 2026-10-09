@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ShieldCheck, Wallet } from "@/components/icons";
 import CategoryCard from "@/components/landing/CategoryCard";
+import QualificationPath from "@/components/landing/QualificationPath";
 import CategoryBreakdown from "@/components/landing/CategoryBreakdown";
 import { formatPHP } from "@/lib/khaki";
 import {
@@ -325,6 +326,8 @@ export default function LandingHome() {
           </Link>
         </div>
       </section>
+
+      <QualificationPath href={isAuthenticated ? "/verify" : "/register"} />
 
       <section id="earn" className="landing-hero scroll-mt-24">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
