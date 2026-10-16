@@ -50,7 +50,8 @@ export default function ProfilePage() {
                 await refresh();
                 const keys = Object.keys(patch || {});
                 const vehicleOnly = keys.length > 0 && keys.every((key) => ["vehicle_type", "vehicle_model", "plate_number"].includes(key));
-                if (!vehicleOnly) toast.success("Profile saved");
+                const photoOnly = keys.length === 1 && keys[0] === "avatar_url";
+                if (!vehicleOnly && !photoOnly) toast.success("Profile saved");
               }}
               onResubmit={async (payload) => {
                 await api.verification.submit(payload);

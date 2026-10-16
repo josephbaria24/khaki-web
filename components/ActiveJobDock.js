@@ -47,10 +47,27 @@ export default function ActiveJobDock() {
   const [open, setOpen] = useState(false);
   const [bids, setBids] = useState([]);
   const [updates, setUpdates] = useState([]);
+  const [tablet, setTablet] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dockRef = useRef(null);
   const dragRef = useRef(null);
   const offsetRef = useRef({ x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    setMounted(true);
+    const mq = window.matchMedia("(min-width: 768px)");
+    const sync = () => {
+      const next = mq.matches;
+      setTablet(next);
+      // Reset drag offset when crossing breakpoints so default tablet corner sticks.
+      offsetRef.current = { x: 0, y: 0 };
+      setOffset({ x: 0, y: 0 });
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const place = (next) => {
     offsetRef.current = next;
@@ -137,6 +154,99 @@ export default function ActiveJobDock() {
 
   const status = STATUS_CONFIG[task.status]?.label || task.status;
 
+  const dock = (
+    <div
+      ref={dockRef}
+      className={cn(
+        "pointer-events-auto z-30 flex w-max max-w-[min(100%,320px)] flex-col items-end",
+        tablet
+          ? "fixed bottom-5 right-5 z-50 md:bottom-6 md:right-6"
+          : "absolute bottom-[calc(100%+10px)] right-1"
+      )}
+      style={{ transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` }}
+    >
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+          open ? "w-[min(78vw,320px)] grid-rows-[1fr]" : "grid-rows-[0fr]"
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="mb-2 max-h-[min(46vh,300px)] overflow-y-auto rounded-[1.35rem] bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#3D5C6E]">
+              {displayTaskCategory(task)}
+            </p>
+            <p className="mt-1 text-base font-black leading-snug text-[#2A3F4D]">{task.title}</p>
+            <p className="mt-0.5 text-xs font-semibold text-[#2A3F4D]/55">{timeAgo(task.created_at)}</p>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <span className="rounded-full bg-[#E8F6F4] px-2.5 py-1 text-[10px] font-bold text-[#0D666A]">{status}</span>
+              <span className="text-sm font-black text-[#2A3F4D]">{formatPHP(task.budget_php)}</span>
+            </div>
+
+            <p className="mt-4 text-[11px] font-bold uppercase tracking-wide text-[#2A3F4D]/45">Bids</p>
+            {bids.length === 0 ? (
+              <p className="mt-1 text-xs text-[#2A3F4D]/55">Walang bid pa.</p>
+            ) : (
+              <ul className="mt-1 space-y-1.5">
+                {bids.slice(0, 4).map((bid) => (
+                  <li key={bid.id} className="flex items-center justify-between gap-2 rounded-xl bg-[#FBF8F1] px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-bold text-[#2A3F4D]">{bid.tasker_name || "Tasker"}</p>
+                      <p className="truncate text-[11px] text-[#2A3F4D]/55">{bid.pitch || BID_LABEL[bid.status] || bid.status}</p>
+                    </div>
+                    <p className="shrink-0 text-xs font-black text-[#3D5C6E]">{formatPHP(bid.amount_php)}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <p className="mt-4 text-[11px] font-bold uppercase tracking-wide text-[#2A3F4D]/45">Updates</p>
+            {updates.length === 0 ? (
+              <p className="mt-1 text-xs text-[#2A3F4D]/55">Wala pang update.</p>
+            ) : (
+              <ul className="mt-1 space-y-1.5">
+                {updates.map((msg) => (
+                  <li key={msg.id} className="rounded-xl bg-[#FBF8F1] px-3 py-2">
+                    <p className="line-clamp-2 text-xs text-[#2A3F4D]">{msg.text}</p>
+                    <p className="mt-1 text-[10px] font-semibold text-[#2A3F4D]/45">
+                      {msg.sender_name || "Update"} · {timeAgo(msg.created_at)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <Link
+              href={`/task/${task.id}`}
+              className="mt-4 flex h-10 items-center justify-center rounded-full bg-[#3D5C6E] text-xs font-bold text-[#F7F4EC]"
+            >
+              Tingnan ang buong detalye
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        aria-expanded={open}
+        className="relative flex h-10 max-w-[240px] cursor-grab touch-none items-center gap-2 rounded-full bg-[#2A3F4D] px-3 text-left text-[#F7F4EC] shadow-[0_10px_24px_rgba(42,63,77,0.28)] active:cursor-grabbing"
+      >
+        <span className="relative flex h-2.5 w-2.5 shrink-0">
+          <span className="active-job-pulse absolute inset-0 rounded-full bg-[#3DDC97]" />
+          <span className="relative h-2.5 w-2.5 rounded-full bg-[#3DDC97]" />
+        </span>
+        <span className="min-w-0 flex-1 truncate text-xs font-bold">{task.title}</span>
+        {bids.length > 0 ? (
+          <span className="shrink-0 rounded-full bg-white/15 px-1.5 text-[10px] font-bold">{bids.length}</span>
+        ) : null}
+      </button>
+    </div>
+  );
+
   return (
     <>
       {open && typeof document !== "undefined"
@@ -150,91 +260,7 @@ export default function ActiveJobDock() {
             document.body
           )
         : null}
-    <div
-      ref={dockRef}
-      className="pointer-events-auto absolute bottom-[calc(100%+10px)] right-1 z-30 flex w-max max-w-[min(100%,320px)] flex-col items-end"
-      style={{ transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` }}
-    >
-      <div
-        className={cn(
-          "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-          open ? "w-[min(78vw,320px)] grid-rows-[1fr]" : "grid-rows-[0fr]"
-        )}
-      >
-          <div className="overflow-hidden">
-            <div className="mb-2 max-h-[min(46vh,300px)] overflow-y-auto rounded-[1.35rem] bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)]">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#3D5C6E]">
-                {displayTaskCategory(task)}
-              </p>
-              <p className="mt-1 text-base font-black leading-snug text-[#2A3F4D]">{task.title}</p>
-              <p className="mt-0.5 text-xs font-semibold text-[#2A3F4D]/55">{timeAgo(task.created_at)}</p>
-              <div className="mt-2 flex items-center justify-between gap-2">
-                <span className="rounded-full bg-[#E8F6F4] px-2.5 py-1 text-[10px] font-bold text-[#0D666A]">{status}</span>
-                <span className="text-sm font-black text-[#2A3F4D]">{formatPHP(task.budget_php)}</span>
-              </div>
-
-              <p className="mt-4 text-[11px] font-bold uppercase tracking-wide text-[#2A3F4D]/45">Bids</p>
-              {bids.length === 0 ? (
-                <p className="mt-1 text-xs text-[#2A3F4D]/55">Walang bid pa.</p>
-              ) : (
-                <ul className="mt-1 space-y-1.5">
-                  {bids.slice(0, 4).map((bid) => (
-                    <li key={bid.id} className="flex items-center justify-between gap-2 rounded-xl bg-[#FBF8F1] px-3 py-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-xs font-bold text-[#2A3F4D]">{bid.tasker_name || "Tasker"}</p>
-                        <p className="truncate text-[11px] text-[#2A3F4D]/55">{bid.pitch || BID_LABEL[bid.status] || bid.status}</p>
-                      </div>
-                      <p className="shrink-0 text-xs font-black text-[#3D5C6E]">{formatPHP(bid.amount_php)}</p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <p className="mt-4 text-[11px] font-bold uppercase tracking-wide text-[#2A3F4D]/45">Updates</p>
-              {updates.length === 0 ? (
-                <p className="mt-1 text-xs text-[#2A3F4D]/55">Wala pang update.</p>
-              ) : (
-                <ul className="mt-1 space-y-1.5">
-                  {updates.map((msg) => (
-                    <li key={msg.id} className="rounded-xl bg-[#FBF8F1] px-3 py-2">
-                      <p className="line-clamp-2 text-xs text-[#2A3F4D]">{msg.text}</p>
-                      <p className="mt-1 text-[10px] font-semibold text-[#2A3F4D]/45">
-                        {msg.sender_name || "Update"} · {timeAgo(msg.created_at)}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <Link
-                href={`/task/${task.id}`}
-                className="mt-4 flex h-10 items-center justify-center rounded-full bg-[#3D5C6E] text-xs font-bold text-[#F7F4EC]"
-              >
-                Tingnan ang buong detalye
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          aria-expanded={open}
-          className="relative flex h-10 max-w-[240px] cursor-grab touch-none items-center gap-2 rounded-full bg-[#2A3F4D] px-3 text-left text-[#F7F4EC] shadow-[0_10px_24px_rgba(42,63,77,0.28)] active:cursor-grabbing"
-        >
-          <span className="relative flex h-2.5 w-2.5 shrink-0">
-            <span className="active-job-pulse absolute inset-0 rounded-full bg-[#3DDC97]" />
-            <span className="relative h-2.5 w-2.5 rounded-full bg-[#3DDC97]" />
-          </span>
-          <span className="min-w-0 flex-1 truncate text-xs font-bold">{task.title}</span>
-          {bids.length > 0 ? (
-            <span className="shrink-0 rounded-full bg-white/15 px-1.5 text-[10px] font-bold">{bids.length}</span>
-          ) : null}
-        </button>
-    </div>
+      {tablet && mounted && typeof document !== "undefined" ? createPortal(dock, document.body) : dock}
     </>
   );
 }

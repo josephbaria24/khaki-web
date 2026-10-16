@@ -1,266 +1,280 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import AppShell from "@/components/AppShell";
 import PublicShell from "@/components/PublicShell";
-import { FadeIn, Stagger } from "@/components/ui/motion";
-import { CHIP_CATEGORIES, graphicForTask, shortCategory, taskMatchesChip } from "@/lib/catalog";
-import { cn, displayTaskCategory, formatPHP, scheduleLabel, skillFitsTask } from "@/lib/khaki";
+import BrowseTaskDetail from "@/components/browse/BrowseTaskDetail";
+import BrowseTaskListCard from "@/components/browse/BrowseTaskListCard";
+import { CHIP_CATEGORIES, shortCategory, taskMatchesChip } from "@/lib/catalog";
+import { cn, initials } from "@/lib/khaki";
 import { LANDING } from "@/lib/landingContent";
 import { isTaskerMode } from "@/lib/roles";
 import { useAuth } from "@/lib/AuthContext";
 import { api } from "@/lib/store";
-import { Plus, Search } from "@/components/icons";
+import { MapPin, Search, X } from "@/components/icons";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 
-function initials(name) {
-  return String(name || "K")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join("") || "K";
-}
-
-function JobCard({ task }) {
-  const graphic = graphicForTask(task);
-  const rating = (4.6 + ((String(task.id || "").length % 4) * 0.1)).toFixed(1);
-
-  return (
-    <Link
-      href={`/task/${task.id}`}
-      className="group block overflow-hidden rounded-[1.5rem] bg-white p-2.5 shadow-[0_8px_28px_rgba(42,63,77,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(42,63,77,0.12)]"
-    >
-      <div
-        className="relative aspect-[4/3] overflow-hidden rounded-[1.15rem]"
-        style={{ backgroundColor: graphic.bg }}
-      >
-        {graphic.image ? (
-          <Image
-            src={graphic.image}
-            alt=""
-            fill
-            className="object-contain p-3 transition duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, 280px"
-          />
-        ) : null}
-        <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-bold text-[#2A3F4D] shadow-sm dark:bg-[#1A1E27]/90">
-          <span className="text-[#C4A035]">★</span> {rating}
-        </span>
-      </div>
-      <div className="flex items-end justify-between gap-2 px-1.5 pb-1.5 pt-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-black text-[#2A3F4D]">{task.title}</p>
-          <p className="mt-0.5 truncate text-xs text-[#2A3F4D]/55">
-            {shortCategory(task.category) || "Gawain"}
-          </p>
-          <p className="mt-1.5 text-sm font-black text-[#163044]">
-            {formatPHP(task.budget_php)}
-          </p>
-        </div>
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#163044] text-white shadow-sm transition group-hover:bg-[#2A3F4D] dark:bg-[#F5F3EE] dark:text-[#11141A] dark:group-hover:bg-white">
-          <Plus className="h-4 w-4" color="currentColor" />
-        </span>
-      </div>
-    </Link>
-  );
-}
-
-function TaskerJobRow({ task, qualified }) {
-  const category = displayTaskCategory(task);
-  const meta = [scheduleLabel(task), formatPHP(task.budget_php), task.is_remote ? "Remote" : task.location_area].filter(Boolean).join(" · ");
-  return (
-    <article className="rounded-[1.25rem] bg-white p-3.5 shadow-[0_8px_28px_rgba(42,63,77,0.08)]">
-      <Link href={`/task/${task.id}`} className="block">
-        <div className="flex items-start justify-between gap-3">
-          <p className="min-w-0 text-[15px] font-black leading-snug text-[#163044]">{task.title}</p>
-          <span className={cn(
-            "shrink-0 rounded-full px-2 py-1 text-[10px] font-black tracking-wide",
-            qualified
-              ? "bg-[#D7F0EA] text-[#0D666A] dark:bg-[#0D666A]/30 dark:text-[#7FD3CF]"
-              : "bg-[#EFE8DC] text-[#8A6A32] dark:bg-[#8A6A32]/25 dark:text-[#E2C48A]"
-          )}>
-            {qualified ? "QUALIFIED" : "NOT QUALIFIED"}
-          </span>
-        </div>
-        <p className="mt-1 text-xs font-semibold text-[#2A3F4D]/55">{category}</p>
-        <p className="mt-1 text-[12px] font-semibold text-[#2A3F4D]/60">{meta}</p>
-      </Link>
-      {qualified ? (
-        <Link href={`/task/${task.id}`} className="mt-3 flex h-11 items-center justify-center rounded-xl bg-[#0D666A] text-sm font-black text-white">
-          Book · Accept Task
-        </Link>
-      ) : (
-        <button type="button" disabled className="mt-3 h-11 w-full cursor-not-allowed rounded-xl bg-[#E6DDD0] text-sm font-black text-[#6B6459] dark:bg-[#252A35] dark:text-[#F5F3EE]/45">
-          Book · Not Qualified
-        </button>
-      )}
-    </article>
-  );
-}
+const BrowseTasksMap = dynamic(() => import("@/components/browse/BrowseTasksMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full min-h-[20rem] items-center justify-center bg-[#E7EEF4] text-xs font-bold text-[#2A3F4D]/50 dark:bg-[#1A1E27] dark:text-[#F5F3EE]/45">
+      Loading map…
+    </div>
+  ),
+});
 
 function BrowseBody() {
   const { user, isAuthenticated } = useAuth();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [tasks, setTasks] = useState([]);
+  const [posters, setPosters] = useState({});
   const [ready, setReady] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [showMapMobile, setShowMapMobile] = useState(false);
 
   useEffect(() => {
-    api.tasks.list()
-      .then((list) => setTasks(list.filter((t) => t.status === "open")))
-      .catch(() => setTasks([]))
-      .finally(() => setReady(true));
+    let live = true;
+    api.tasks
+      .list()
+      .then((list) => {
+        if (!live) return;
+        setTasks(list.filter((t) => t.status === "open"));
+      })
+      .catch(() => {
+        if (live) setTasks([]);
+      })
+      .finally(() => {
+        if (live) setReady(true);
+      });
+    return () => {
+      live = false;
+    };
   }, []);
 
-  const filtered = tasks.filter((task) => {
-    if (search && !`${task.title} ${task.details}`.toLowerCase().includes(search.toLowerCase())) return false;
-    if (!taskMatchesChip(task.category, category, task)) return false;
-    return true;
-  });
+  const filtered = useMemo(
+    () =>
+      tasks.filter((task) => {
+        if (search && !`${task.title} ${task.details}`.toLowerCase().includes(search.toLowerCase())) return false;
+        if (!taskMatchesChip(task.category, category, task)) return false;
+        return true;
+      }),
+    [tasks, search, category]
+  );
 
+  useEffect(() => {
+    if (selectedId && !filtered.some((t) => t.id === selectedId)) {
+      setSelectedId(null);
+    }
+  }, [filtered, selectedId]);
+
+  useEffect(() => {
+    const ids = [...new Set(filtered.map((t) => t.client_id).filter(Boolean))];
+    if (!ids.length) {
+      setPosters({});
+      return;
+    }
+    let live = true;
+    api.profile
+      .getMany(ids)
+      .then((map) => {
+        if (live) setPosters(map || {});
+      })
+      .catch(() => {
+        if (live) setPosters({});
+      });
+    return () => {
+      live = false;
+    };
+  }, [filtered]);
+
+  const selected = filtered.find((t) => t.id === selectedId) || null;
   const firstName = (user?.full_name || "there").split(/\s+/)[0];
   const taskerFeed = isAuthenticated && isTaskerMode(user);
+  const detailOpen = Boolean(selected);
+
+  const selectTask = (id) => {
+    setSelectedId(id);
+    setShowMapMobile(false);
+  };
+
+  const returnToMap = () => {
+    setSelectedId(null);
+  };
 
   return (
-    <div className="browse-page min-h-screen bg-[#FBF8F1]">
-      <section className="mx-auto w-full max-w-6xl space-y-6 px-4 pb-12 pt-4 sm:px-6 lg:px-8 lg:pt-8">
-        {isAuthenticated ? (
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              {user?.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt=""
-                  className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm dark:ring-[#1A1E27]"
-                />
-              ) : (
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#C9D6E0] text-sm font-black text-[#2A3F4D] shadow-sm">
-                  {initials(user?.full_name)}
-                </span>
-              )}
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#2A3F4D]/55">Welcome</p>
-                <p className="truncate text-base font-black text-[#2A3F4D]">Hello {firstName}</p>
+    <div
+      className="browse-page khaki-landing flex h-[calc(100svh-4rem)] flex-col overflow-hidden md:h-[calc(100svh-4.25rem)]"
+      style={{ background: LANDING.page }}
+    >
+      <div
+        className="shrink-0 border-b border-[#E6DDD0]/80 px-4 py-3 backdrop-blur sm:px-6 dark:border-white/10"
+        style={{ background: `${LANDING.page}f2` }}
+      >
+        <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-3">
+          {isAuthenticated ? (
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt=""
+                    className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm dark:ring-[#1A1E27]"
+                  />
+                ) : (
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#C9D6E0] text-sm font-black text-[#2A3F4D] shadow-sm">
+                    {initials(user?.full_name)}
+                  </span>
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-[#2A3F4D]/55 dark:text-[#F5F3EE]/50">Welcome</p>
+                  <p className="truncate text-sm font-black text-[#2A3F4D] dark:text-[#F5F3EE]">Hello {firstName}</p>
+                </div>
               </div>
+              <p className="text-xs font-bold text-[#2A3F4D]/45 dark:text-[#F5F3EE]/40">{filtered.length} open</p>
             </div>
-            <p className="text-xs font-bold text-[#2A3F4D]/45">{filtered.length} open</p>
-          </div>
-        ) : null}
-
-        <div>
-          <h1 className="text-2xl font-black leading-tight tracking-tight text-[#2A3F4D] sm:text-3xl">
-            {taskerFeed ? "Browsing feed" : <>Anong gawain ang<br className="sm:hidden" /> hanap mo?</>}
-          </h1>
-          {taskerFeed ? (
-            <p className="mt-1 text-sm font-semibold text-[#2A3F4D]/55">All tasks visible · Book only if qualified</p>
           ) : null}
-        </div>
 
-        <form
-          onSubmit={(e) => e.preventDefault()}
-          className="flex h-14 items-center gap-3 rounded-[1.25rem] bg-white px-4 shadow-[0_8px_28px_rgba(42,63,77,0.08)]"
-        >
-          <Search className="h-4 w-4 shrink-0 text-[#163044]/55" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search for your services"
-            className="flex-1 bg-transparent text-sm text-[#2A3F4D] outline-none placeholder:text-[#2A3F4D]/40"
-          />
-        </form>
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="search-pill flex h-11 flex-1 items-center gap-2.5 rounded-xl border border-[#E6DDD0] bg-[#FFFCF7] px-3 shadow-sm dark:border-white/10 dark:bg-[#1A1E27]"
+            >
+              <Search className="h-4 w-4 shrink-0 text-[#163044]/55 dark:text-[#F5F3EE]/50" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search for a task"
+                className="flex-1 bg-transparent text-sm text-[#2A3F4D] outline-none placeholder:text-[#2A3F4D]/40 dark:text-[#F5F3EE] dark:placeholder:text-[#F5F3EE]/40"
+              />
+            </form>
+            <div className="no-scrollbar flex gap-2 overflow-x-auto lg:max-w-[55%]">
+              {CHIP_CATEGORIES.map((c) => {
+                const on = category === c;
+                const label = c === "All" ? "All" : shortCategory(c);
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCategory(c)}
+                    className={cn(
+                      "shrink-0 rounded-full px-3.5 py-2 text-xs font-bold transition",
+                      on ? "chip-active" : "chip-inactive"
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-        <div
-          className="relative overflow-hidden rounded-[1.75rem] px-6 py-7 text-white sm:px-8"
-          style={{
-            background: `linear-gradient(115deg, ${LANDING.olive} 0%, ${LANDING.oliveMid} 48%, ${LANDING.oliveDeep} 100%)`,
-          }}
-        >
-          <div className="relative z-10 max-w-sm">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/70">Promo</p>
-            <h2 className="mt-2 text-xl font-black leading-snug sm:text-2xl">
-              Mag-post ng gawain sa Palawan
-            </h2>
-            <p className="mt-2 text-sm text-white/80">
-              Mag-post ng gawain — bayad diretso sa tasker.
+          {taskerFeed ? (
+            <p className="text-xs font-semibold text-[#2A3F4D]/55 dark:text-[#F5F3EE]/50">
+              All tasks visible · Book only if qualified
             </p>
+          ) : null}
+
+          <div className="flex items-center justify-between gap-2 md:hidden">
+            <p className="text-xs font-bold text-[#2A3F4D]/50 dark:text-[#F5F3EE]/45">
+              {filtered.length} task{filtered.length === 1 ? "" : "s"}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowMapMobile((v) => !v);
+                if (!showMapMobile) setSelectedId(null);
+              }}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#163044] px-3.5 text-xs font-black text-[#F7F4EC] dark:bg-[#F5F3EE] dark:text-[#11141A]"
+            >
+              <MapPin className="h-3.5 w-3.5" color="currentColor" />
+              {showMapMobile ? "List" : "Map"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col overflow-hidden md:flex-row">
+        {/* List column */}
+        <aside
+          className={cn(
+            "flex min-h-0 w-full flex-col overflow-hidden border-[#E6DDD0]/80 dark:border-white/10 md:w-[min(100%,24rem)] md:shrink-0 md:border-r lg:w-[26rem]",
+            showMapMobile && !detailOpen ? "hidden md:flex" : "flex",
+            detailOpen ? "hidden md:flex" : ""
+          )}
+        >
+          <div className="hidden items-center justify-between border-b border-[#E6DDD0]/80 px-4 py-2.5 md:flex dark:border-white/10">
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-[#2A3F4D]/50 dark:text-[#F5F3EE]/45">
+              Browse tasks
+            </p>
+            <p className="text-xs font-bold text-[#2A3F4D]/45 dark:text-[#F5F3EE]/40">{filtered.length}</p>
+          </div>
+          <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto p-3 sm:p-4">
+            {!ready ? (
+              <PageSkeleton rows={6} />
+            ) : filtered.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-[#C9D6E0] bg-[#FFFCF7]/70 px-4 py-12 text-center text-sm text-[#2A3F4D]/50 dark:border-white/10 dark:bg-[#1A1E27] dark:text-[#F5F3EE]/45">
+                Walang open jobs na tumugma sa filter.
+              </p>
+            ) : (
+              filtered.map((task) => (
+                <BrowseTaskListCard
+                  key={task.id}
+                  task={task}
+                  poster={posters[task.client_id]}
+                  selected={task.id === selectedId}
+                  onSelect={selectTask}
+                />
+              ))
+            )}
+          </div>
+          <div className="border-t border-[#E6DDD0]/80 p-3 dark:border-white/10">
             <Link
               href="/post"
-              className="mt-5 inline-flex h-10 items-center rounded-full bg-white px-5 text-xs font-bold text-[#2A3F4D] transition hover:bg-[#F7F4EC]"
+              className="flex h-11 items-center justify-center rounded-xl bg-[#163044] text-sm font-black text-white dark:bg-[#F5F3EE] dark:text-[#11141A]"
             >
-              Post now
+              Post a task
             </Link>
           </div>
-          <div className="pointer-events-none absolute -right-4 bottom-0 top-0 hidden w-44 items-end justify-center sm:flex md:w-56">
-            <div className="relative h-full w-full">
-              <Image
-                src="/images/cards/featured-errands.png"
-                alt=""
-                fill
-                className="object-contain object-bottom drop-shadow-lg"
-                sizes="220px"
-              />
-            </div>
-          </div>
-        </div>
+        </aside>
 
-        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-          {CHIP_CATEGORIES.map((c) => {
-            const on = category === c;
-            const label = c === "All" ? "All" : shortCategory(c);
-            return (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setCategory(c)}
-                className={cn(
-                  "shrink-0 rounded-full px-4 py-2 text-xs font-bold transition",
-                  on
-                    ? "bg-[#163044] text-[#F7F4EC] shadow-sm dark:bg-[#F5F3EE] dark:text-[#11141A]"
-                    : "bg-white text-[#2A3F4D] shadow-[0_2px_10px_rgba(42,63,77,0.06)]"
-                )}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div>
-          <div className="mb-4 flex items-end justify-between">
-            <h2 className="text-lg font-black text-[#2A3F4D]">Services</h2>
-            <p className="text-xs font-semibold text-[#2A3F4D]/45">{filtered.length} available</p>
-          </div>
-
-          {!ready ? (
-            <PageSkeleton rows={6} />
-          ) : (
-          <FadeIn delay={40}>
-            {taskerFeed ? (
-              <div className="space-y-3">
-                {filtered.map((task) => (
-                  <TaskerJobRow key={task.id} task={task} qualified={skillFitsTask(user?.skills, task)} />
-                ))}
-              </div>
-            ) : (
-            <Stagger className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
-              {filtered.map((task) => (
-                <JobCard key={task.id} task={task} />
-              ))}
-            </Stagger>
-            )}
-          </FadeIn>
+        {/* Map / detail pane — tablet+ always; mobile when map toggle or detail */}
+        <section
+          className={cn(
+            "relative min-h-0 min-w-0 flex-1 overflow-hidden",
+            detailOpen || showMapMobile ? "flex" : "hidden md:flex",
+            detailOpen && "fixed inset-0 z-40 md:static md:z-auto"
           )}
-
-          {ready && filtered.length === 0 ? (
-            <p className="rounded-[1.5rem] border border-dashed border-[#C9D6E0] bg-white/70 py-14 text-center text-sm text-[#2A3F4D]/50 dark:border-white/10 dark:bg-[#1A1E27]">
-              Walang open jobs na tumugma sa filter.
-            </p>
-          ) : null}
-        </div>
-      </section>
+          style={detailOpen ? { background: LANDING.page } : undefined}
+        >
+          {detailOpen ? (
+            <>
+              <button
+                type="button"
+                onClick={returnToMap}
+                className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-md md:hidden dark:bg-[#1A1E27]"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" color="currentColor" />
+              </button>
+              <BrowseTaskDetail
+                task={selected}
+                poster={posters[selected.client_id]}
+                user={user}
+                isAuthenticated={isAuthenticated}
+                onReturnToMap={returnToMap}
+                className="h-full w-full"
+              />
+            </>
+          ) : (
+            <div className="absolute inset-0">
+              <BrowseTasksMap tasks={filtered} selectedId={selectedId} onSelect={selectTask} />
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

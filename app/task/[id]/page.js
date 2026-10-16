@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, CircleAlert, Lock, MessageSquare } from "@/components/icons";
 import AppShell from "@/components/AppShell";
+import PublicShell from "@/components/PublicShell";
 import Container from "@/components/Container";
 import StatusPill from "@/components/StatusPill";
 import StarRating from "@/components/StarRating";
@@ -23,10 +24,23 @@ import ReportGawain from "@/components/ReportGawain";
 import { toast } from "@/lib/toast";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 
+function TaskShell({ children }) {
+  const { ready, isAuthenticated } = useAuth();
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FBF8F1]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#C9D6E0] border-t-[#163044]" />
+      </div>
+    );
+  }
+  if (isAuthenticated) return <AppShell>{children}</AppShell>;
+  return <PublicShell>{children}</PublicShell>;
+}
+
 export default function TaskDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [tick, setTick] = useState(0);
   const [pitch, setPitch] = useState("");
   const [amount, setAmount] = useState("");
@@ -128,19 +142,19 @@ export default function TaskDetailPage() {
 
   if (loading) {
     return (
-      <AppShell>
+      <TaskShell>
         <Container className="py-8">
           <PageSkeleton rows={4} />
         </Container>
-      </AppShell>
+      </TaskShell>
     );
   }
 
   if (!task) {
     return (
-      <AppShell>
+      <TaskShell>
         <p className="p-8 text-center">Hindi mahanap ang gawain</p>
-      </AppShell>
+      </TaskShell>
     );
   }
 
@@ -276,7 +290,7 @@ export default function TaskDetailPage() {
     const meta = [scheduleLabel(task), formatPHP(task.budget_php), task.is_remote ? "Remote" : task.location_area].filter(Boolean).join(" · ");
     const registered = skillSummary(user?.skills);
     return (
-      <AppShell>
+      <TaskShell>
         <Container className="max-w-lg py-5 lg:max-w-xl lg:py-8">
           <button onClick={() => router.back()} className="mb-3 inline-flex items-center gap-1 text-xs font-semibold text-[#2A3F4D]/60 hover:text-[#163044]">
             <ChevronLeft className="h-4 w-4" /> Back
@@ -317,13 +331,13 @@ export default function TaskDetailPage() {
             <p className="mt-4 text-sm font-medium leading-relaxed text-[#2A3F4D]/70">{task.details}</p>
           ) : null}
         </Container>
-      </AppShell>
+      </TaskShell>
     );
   }
 
   if (isClient) {
     return (
-      <AppShell>
+      <TaskShell>
         <Container className={cn("max-w-lg lg:max-w-xl", (featured || canComplete || (!featured && canCancel)) ? "pt-5 pb-72 lg:pt-8 lg:pb-72" : "py-5 lg:py-8")}>
           <button onClick={() => router.back()} className="mb-3 inline-flex items-center gap-1 text-xs font-semibold text-[#2A3F4D]/60 hover:text-[#163044]">
             <ChevronLeft className="h-4 w-4" /> Back
@@ -606,12 +620,12 @@ export default function TaskDetailPage() {
             </div>
           ) : null}
         </Container>
-      </AppShell>
+      </TaskShell>
     );
   }
 
   return (
-    <AppShell>
+    <TaskShell>
       <Container className="py-6 lg:py-10">
         <div className="mb-4 flex items-center justify-between gap-3">
           <button onClick={() => router.back()} className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground">
@@ -723,7 +737,20 @@ export default function TaskDetailPage() {
               </form>
             ) : null}
 
-            {canBid && (
+            {canBid && !isAuthenticated ? (
+              <div className="space-y-3 rounded-2xl border bg-card p-6 shadow-sm">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#2A3F4D]/45">Task budget</p>
+                <p className="text-3xl font-black text-[#163044]">{formatPHP(task.budget_php)}</p>
+                <Link
+                  href={`/login?next=${encodeURIComponent(`/task/${task.id}`)}`}
+                  className="flex h-11 w-full items-center justify-center rounded-xl bg-[#2F8AD4] font-bold text-white"
+                >
+                  Log in to make an offer
+                </Link>
+              </div>
+            ) : null}
+
+            {canBid && isAuthenticated && (
               canAcceptJobs(user) ? (
               skillFitsTask(user?.skills, task) ? (
               <form onSubmit={submitOffer} className="space-y-3 rounded-2xl border bg-card p-6">
@@ -963,7 +990,7 @@ export default function TaskDetailPage() {
               )}
             </div>
             ) : null}
-            {!isClient && task.status !== "cancelled" ? (
+            {isAuthenticated && !isClient && task.status !== "cancelled" ? (
               <ReportGawain
                 taskId={task.id}
                 alreadyReported={myReports.some((row) => ["pending_review", "under_review"].includes(row.status))}
@@ -981,7 +1008,7 @@ export default function TaskDetailPage() {
           </aside>
         </div>
       </Container>
-    </AppShell>
+    </TaskShell>
   );
 }
 

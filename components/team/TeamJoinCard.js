@@ -1,15 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
+import { cn } from "@/lib/khaki";
 import { activeMode } from "@/lib/roles";
 import { api } from "@/lib/store";
 import { MEMBER_STATUS_LABEL } from "@/lib/teams";
 import { toast } from "@/lib/toast";
 
+function shouldHighlightRiderTeam() {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("highlight") === "rider-team" || window.location.hash === "#rider-team";
+}
+
 export default function TeamJoinCard({ className = "", onChange }) {
   const { user } = useAuth();
+  const cardRef = useRef(null);
   const online = activeMode(user) === "tasker";
   // undefined while loading, null when the user has no team.
   const [team, setTeam] = useState(undefined);
@@ -17,6 +25,7 @@ export default function TeamJoinCard({ className = "", onChange }) {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [highlight, setHighlight] = useState(false);
   const eligible = Boolean(user?.id) && user?.role !== "admin";
 
   const load = useCallback(async () => {
@@ -31,6 +40,19 @@ export default function TeamJoinCard({ className = "", onChange }) {
   useEffect(() => {
     if (eligible) load();
   }, [eligible, user?.id, load]);
+
+  useEffect(() => {
+    if (team === undefined || !shouldHighlightRiderTeam()) return undefined;
+    setHighlight(true);
+    const frame = window.requestAnimationFrame(() => {
+      cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    const clear = window.setTimeout(() => setHighlight(false), 3800);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(clear);
+    };
+  }, [team]);
 
   if (!eligible || unavailable || team === undefined) return null;
 
@@ -68,7 +90,15 @@ export default function TeamJoinCard({ className = "", onChange }) {
   };
 
   return (
-    <section className={`mx-auto w-full max-w-[420px] rounded-[1.5rem] bg-white p-4 shadow-[0_8px_28px_rgba(22,48,68,0.08)] md:max-w-[560px] lg:max-w-[640px] lg:p-5 dark:bg-[#1A1E27] ${className}`}>
+    <section
+      ref={cardRef}
+      id="rider-team"
+      className={cn(
+        "mx-auto w-full max-w-[420px] rounded-[1.5rem] bg-white p-4 shadow-[0_8px_28px_rgba(22,48,68,0.08)] md:max-w-[560px] lg:max-w-[640px] lg:p-5 dark:bg-[#1A1E27]",
+        highlight && "rider-team-highlight",
+        className
+      )}
+    >
       <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0D666A]">Rider team</p>
 
       {!team ? (

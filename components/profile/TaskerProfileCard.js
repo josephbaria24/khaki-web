@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { MapPin, ShieldCheck } from "@/components/icons";
 import { LOCATIONS, SERVICE_CATEGORIES, hasServiceSkill, toggleServiceSkill } from "@/lib/khaki";
@@ -10,6 +10,8 @@ import { buildTaskerCard, PRICE_TYPES, pricingModelLabel } from "@/lib/taskerPro
 import { VEHICLE_OPTIONS, vehicleLabel } from "@/lib/serviceTemplates";
 import TaskerApplicationForm from "@/components/verify/TaskerApplicationForm";
 import { api } from "@/lib/store";
+import { uploadToCloudinary } from "@/lib/uploadFile";
+import { toast } from "@/lib/toast";
 
 const OLIVE = LANDING.olive;
 const OLIVE_DEEP = LANDING.oliveDeep;
@@ -27,6 +29,15 @@ function CheckMini() {
   return (
     <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2">
       <path d="m5 12 5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function CameraBadgeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h2l1.2-1.6A1.5 1.5 0 0 1 10.9 4h2.2a1.5 1.5 0 0 1 1.2.4L15.5 6h2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z" strokeLinejoin="round" />
+      <circle cx="12" cy="12.5" r="3.2" />
     </svg>
   );
 }
@@ -130,6 +141,10 @@ export default function TaskerProfileCard({
   const [skillsForm, setSkillsForm] = useState({ skills: [], price_type: "Per Hour", price_amount: "", price_description: "" });
   const [idDocument, setIdDocument] = useState(profile?.id_document || null);
   const [teamBadge, setTeamBadge] = useState(null);
+  const [photoMenu, setPhotoMenu] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const photoInputRef = useRef(null);
+  const photoWrapRef = useRef(null);
 
   useEffect(() => {
     if (!profile?.id) return undefined;
@@ -139,6 +154,22 @@ export default function TaskerProfileCard({
     });
     return () => { live = false; };
   }, [profile?.id]);
+
+  useEffect(() => {
+    if (!photoMenu) return undefined;
+    const onPointer = (e) => {
+      if (!photoWrapRef.current?.contains(e.target)) setPhotoMenu(false);
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") setPhotoMenu(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [photoMenu]);
 
   useEffect(() => {
     setHeaderForm({
@@ -235,6 +266,54 @@ export default function TaskerProfileCard({
     setSkillsForm((prev) => ({ ...prev, skills: toggleServiceSkill(prev.skills, service) }));
   };
 
+  const openPhotoPicker = () => {
+    setPhotoMenu(false);
+    photoInputRef.current?.click();
+  };
+
+  const onPhotoPicked = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !onSave) return;
+    setPhotoBusy(true);
+    setError("");
+    try {
+      const uploaded = await uploadToCloudinary(file, "khaki/avatars");
+      await onSave({ avatar_url: uploaded.url });
+      toast.success("Photo updated");
+    } catch (err) {
+      const msg = err.message || "Could not update photo.";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+
+  const removePhoto = async () => {
+    if (!onSave || !profile?.avatar_url) return;
+    if (!window.confirm("Remove your profile photo?")) return;
+    setPhotoMenu(false);
+    setPhotoBusy(true);
+    setError("");
+    try {
+      await onSave({ avatar_url: null });
+      toast.success("Photo removed");
+    } catch (err) {
+      const msg = err.message || "Could not remove photo.";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+
+  const onCameraClick = () => {
+    if (photoBusy) return;
+    if (profile?.avatar_url) setPhotoMenu((v) => !v);
+    else openPhotoPicker();
+  };
+
   return (
     <Stagger className="mx-auto w-full max-w-[420px] space-y-3 md:max-w-[560px] lg:max-w-[640px] lg:space-y-4">
       <div className="flex items-center justify-between gap-2 rounded-[1.2rem] px-3 py-2.5 text-white shadow-[0_8px_24px_rgba(42,63,77,0.18)] min-[400px]:rounded-[1.35rem] min-[400px]:px-4 min-[400px]:py-3 lg:px-5 lg:py-3.5" style={{ background: OLIVE_DEEP }}>
@@ -260,16 +339,55 @@ export default function TaskerProfileCard({
 
       <SectionCard>
         <div className="flex items-start gap-2.5 min-[400px]:gap-3 lg:gap-4">
-          <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E4D9B8] min-[400px]:h-[72px] min-[400px]:w-[72px] lg:h-[96px] lg:w-[96px]"
-            style={{ boxShadow: `0 0 0 2px #fff, 0 0 0 3.5px ${OLIVE}55` }}
-          >
-            {profile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <PersonFallback />
-            )}
+          <div className="relative shrink-0" ref={photoWrapRef}>
+            <div
+              className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#E4D9B8] min-[400px]:h-[72px] min-[400px]:w-[72px] lg:h-[96px] lg:w-[96px]"
+              style={{ boxShadow: `0 0 0 2px #fff, 0 0 0 3.5px ${OLIVE}55` }}
+            >
+              {profile.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <PersonFallback />
+              )}
+            </div>
+            {canEdit ? (
+              <>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={onPhotoPicked}
+                />
+                <button
+                  type="button"
+                  onClick={onCameraClick}
+                  disabled={photoBusy}
+                  className="absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#163044] text-white shadow-[0_2px_8px_rgba(22,48,68,0.28)] transition hover:scale-105 active:scale-95 disabled:opacity-60 min-[400px]:h-8 min-[400px]:w-8 lg:h-9 lg:w-9"
+                  aria-label={profile?.avatar_url ? "Change or remove photo" : "Add photo"}
+                >
+                  {photoBusy ? (
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  ) : (
+                    <CameraBadgeIcon />
+                  )}
+                </button>
+                {photoMenu ? (
+                  <div
+                    role="menu"
+                    className="absolute left-0 top-[calc(100%+8px)] z-20 w-44 overflow-hidden rounded-xl border border-black/5 bg-[#FFFCF7] py-1 shadow-[0_12px_28px_rgba(22,48,68,0.16)]"
+                  >
+                    <button type="button" role="menuitem" onClick={openPhotoPicker} className="block w-full px-3 py-2.5 text-left text-xs font-bold text-[#163044] hover:bg-[#F3EFE3]">
+                      Change photo
+                    </button>
+                    <button type="button" role="menuitem" onClick={removePhoto} className="block w-full px-3 py-2.5 text-left text-xs font-bold text-[#C94B78] hover:bg-[#F8D5E0]/70">
+                      Remove photo
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
           </div>
           <div className="min-w-0 flex-1 pt-0.5">
             <div className="flex items-start gap-2">

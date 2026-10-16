@@ -1,7 +1,7 @@
 import { cn } from "@/lib/khaki";
 
 export function Skeleton({ className }) {
-  return <div className={cn("animate-pulse rounded-lg bg-[#C9D6E0]/55", className)} />;
+  return <div className={cn("skeleton-shine rounded-lg", className)} />;
 }
 
 export function ChatSkeleton() {
@@ -18,11 +18,13 @@ export function ChatSkeleton() {
 
 export function NoticeSkeleton() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5" aria-hidden>
-      <Skeleton className="h-3 w-24" />
-      <Skeleton className="mt-3 h-4 w-full" />
-      <Skeleton className="mt-2 h-4 w-3/4" />
-      <Skeleton className="mt-3 h-3 w-16" />
+    <div className="flex w-full items-start gap-2.5 px-2 py-2.5" aria-hidden>
+      <Skeleton className="mt-0.5 h-9 w-9 shrink-0 rounded-full" />
+      <div className="min-w-0 flex-1 space-y-2 pt-0.5">
+        <Skeleton className="h-3.5 w-[88%] rounded-md" />
+        <Skeleton className="h-3.5 w-[62%] rounded-md" />
+        <Skeleton className="h-2.5 w-14 rounded-md" />
+      </div>
     </div>
   );
 }

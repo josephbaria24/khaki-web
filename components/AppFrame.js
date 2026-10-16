@@ -5,6 +5,7 @@ import AppHeader from "@/components/AppHeader";
 import AdminPreviewBanner from "@/components/AdminPreviewBanner";
 import BottomNav from "@/components/BottomNav";
 import ModeSwitchOverlay from "@/components/ModeSwitchOverlay";
+import TeamLeadWelcomeDialog from "@/components/team/TeamLeadWelcomeDialog";
 import { useAuth } from "@/lib/AuthContext";
 import { useAdminPreview } from "@/lib/AdminPreviewContext";
 import { cn, isConversationPath, isFillPage, isTaskDetailPath, isTrackPath } from "@/lib/khaki";
@@ -35,7 +36,14 @@ export default function AppFrame({ children }) {
   const lockScroll = isFillPage(pathname);
   const showUserChrome = !onAdmin || previewing;
 
-  if (!showChrome) return children;
+  if (!showChrome) {
+    return (
+      <>
+        {children}
+        {isAuthenticated ? <TeamLeadWelcomeDialog /> : null}
+      </>
+    );
+  }
 
   return (
     <div
@@ -53,6 +61,7 @@ export default function AppFrame({ children }) {
       </div>
       {showUserChrome ? <BottomNav hidden={hideNav} /> : null}
       {showUserChrome ? <ModeSwitchOverlay /> : null}
+      {isAuthenticated ? <TeamLeadWelcomeDialog /> : null}
     </div>
   );
 }
