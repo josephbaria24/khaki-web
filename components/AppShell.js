@@ -5,9 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { PageEnter } from "@/components/ui/motion";
 import { isFillPage } from "@/lib/khaki";
+import { mustCompleteVerification } from "@/lib/roles";
 
 export default function AppShell({ children }) {
-  const { ready, isAuthenticated } = useAuth();
+  const { ready, isAuthenticated, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const seenAuth = useRef(false);
@@ -16,6 +17,13 @@ export default function AppShell({ children }) {
   useEffect(() => {
     if (ready && !isAuthenticated) router.replace("/login");
   }, [ready, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!ready || !isAuthenticated || !user) return;
+    if (!mustCompleteVerification(user)) return;
+    if (pathname === "/verify" || pathname?.startsWith("/verify/")) return;
+    router.replace("/verify");
+  }, [ready, isAuthenticated, user, pathname, router]);
 
   if (!seenAuth.current && (!ready || !isAuthenticated)) {
     return (

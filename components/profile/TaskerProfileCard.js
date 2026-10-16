@@ -9,6 +9,7 @@ import { Collapse, Stagger } from "@/components/ui/motion";
 import { buildTaskerCard, PRICE_TYPES, pricingModelLabel } from "@/lib/taskerProfile";
 import { VEHICLE_OPTIONS, vehicleLabel } from "@/lib/serviceTemplates";
 import TaskerApplicationForm from "@/components/verify/TaskerApplicationForm";
+import { api } from "@/lib/store";
 
 const OLIVE = LANDING.olive;
 const OLIVE_DEEP = LANDING.oliveDeep;
@@ -128,6 +129,16 @@ export default function TaskerProfileCard({
   const [aboutForm, setAboutForm] = useState({ bio: "", headline: "" });
   const [skillsForm, setSkillsForm] = useState({ skills: [], price_type: "Per Hour", price_amount: "", price_description: "" });
   const [idDocument, setIdDocument] = useState(profile?.id_document || null);
+  const [teamBadge, setTeamBadge] = useState(null);
+
+  useEffect(() => {
+    if (!profile?.id) return undefined;
+    let live = true;
+    api.teams.badges([profile.id]).then((map) => {
+      if (live) setTeamBadge(map[profile.id] || null);
+    });
+    return () => { live = false; };
+  }, [profile?.id]);
 
   useEffect(() => {
     setHeaderForm({
@@ -347,6 +358,13 @@ export default function TaskerProfileCard({
                 <span className="inline-flex items-center gap-1 rounded-full bg-[#E8DCC4] px-2 py-0.5 text-[10px] font-bold text-[#2A3F4D] min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
                   <ShieldCheck className="h-3 w-3 min-[400px]:h-3.5 min-[400px]:w-3.5" color="#2A3F4D" />
                   Admin
+                </span>
+              ) : null}
+              {teamBadge ? (
+                <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-[#163044] px-2 py-0.5 text-[10px] font-bold text-white min-[400px]:px-2.5 min-[400px]:py-1 min-[400px]:text-[11px]">
+                  <span>{teamBadge.is_lead ? "Team lead" : "Team"}</span>
+                  <span aria-hidden>·</span>
+                  <span className="truncate" data-no-translate>{teamBadge.team_name}</span>
                 </span>
               ) : null}
             </div>

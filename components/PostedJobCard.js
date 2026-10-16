@@ -112,7 +112,7 @@ export default function PostedJobCard({ task, tasker, review, onCancel, bidCount
 
       {phase === "confirm" ? (
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-          <p className="w-full text-xs font-semibold text-destructive">Cancel this gawain? The posting fee is not refunded.</p>
+          <p className="w-full text-xs font-semibold text-destructive">Cancel this gawain? It will leave Browse and pending bids will be declined.</p>
           <button
             type="button"
             onClick={confirmCancel}

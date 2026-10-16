@@ -5,6 +5,7 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
 import TaskerProfileCard from "@/components/profile/TaskerProfileCard";
+import TeamJoinCard from "@/components/team/TeamJoinCard";
 import { useAuth } from "@/lib/AuthContext";
 import { LANDING } from "@/lib/landingContent";
 import { needsTaskerVerification } from "@/lib/roles";
@@ -60,6 +61,7 @@ export default function ProfilePage() {
               }}
             />
             )}
+            {ready ? <TeamJoinCard className="mt-3 lg:mt-4" /> : null}
             {(user?.role === "admin" || needsTaskerVerification(user) || user?.verification_status === "pending" || user?.id) && (
               <div className="mx-auto mt-4 flex w-full max-w-[420px] flex-wrap justify-center gap-2 md:max-w-[560px] lg:max-w-[640px]">
                 {user?.role === "admin" && (

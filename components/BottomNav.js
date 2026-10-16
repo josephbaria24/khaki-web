@@ -27,9 +27,9 @@ export default function BottomNav({ hidden = false }) {
 
   const items = ITEMS.map((item) => {
     if (!item.center) return item;
+    if (needsTaskerVerification(user)) return { ...item, href: "/verify", label: "Verify" };
     if (canOpenPost(user)) return { ...item, label: "Post" };
     if (isAdmin(user)) return { ...item, href: "/admin", label: "Admin" };
-    if (needsTaskerVerification(user)) return { ...item, href: "/verify", label: "Verify" };
     return { ...item, href: "/browse", label: "Hanap", icon: Search };
   });
   const postItem = items.find((item) => item.center);

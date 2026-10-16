@@ -9,7 +9,7 @@ export default function QualificationPath({ href = "/verify" }) {
         <p className="text-xs font-black uppercase tracking-[0.18em]" style={{ color: LANDING.oliveMid }}>Tasker qualification</p>
         <h2 className="mt-2 max-w-3xl text-3xl font-black tracking-tight text-[#163044] sm:text-4xl">Five stages. Same Palawan colors.</h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#163044]/70">
-          Register, confirm your email, then add an ID and a face photo. Later jobs, a license number, and strong reviews move the badge forward. The posting fee stays 2%.
+          Register, confirm your email, then add an ID and a face photo. Later jobs, a license number, and strong reviews move the badge forward.
         </p>
 
         <div className="mt-8 grid gap-3 lg:grid-cols-5">

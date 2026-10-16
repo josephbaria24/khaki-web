@@ -1,18 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
-import { activeMode } from "@/lib/roles";
+import { activeMode, mustCompleteVerification } from "@/lib/roles";
 import { toast } from "@/lib/toast";
 
 export default function ModeToggle({ className = "" }) {
   const { user, setMode, modeFlash } = useAuth();
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const mode = activeMode(user);
   const locked = busy || Boolean(modeFlash);
+  const needsVerify = mustCompleteVerification(user);
 
   const switchTo = async (next) => {
     if (!user || next === mode || locked) return;
+    if (needsVerify) {
+      toast.error("Verify your account first before switching to Poster or Tasker.");
+      router.push("/verify");
+      return;
+    }
     setBusy(true);
     try {
       await setMode(next);

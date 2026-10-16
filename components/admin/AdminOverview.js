@@ -33,12 +33,20 @@ export default function AdminOverview({ overview, users, logs, transactions, onO
         </div>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <Kpi icon={User} label="Users" value={data.users} hint={`${data.suspended} suspended`} />
-        <Kpi icon={Briefcase} label="Tasks" value={data.tasks} hint={`${data.openTasks} open`} />
-        <Kpi icon={ShieldCheck} label="Pending apps" value={data.pendingVerifications} hint="Verification queue" warn={data.pendingVerifications > 0} onClick={() => onOpenTab?.("verification")} />
-        <Kpi icon={Bell} label="Open gawain" value={data.openTasks} hint="Live on marketplace" />
-        <Kpi icon={Wallet} label="Fees this month" value={formatPHP(data.feesThisMonth)} hint="2% posting fee" />
+      <section className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-5">
+        <Kpi theme="users" icon={User} label="Users" value={data.users} hint={`${data.suspended} suspended`} />
+        <Kpi theme="tasks" icon={Briefcase} label="Tasks" value={data.tasks} hint={`${data.openTasks} open`} />
+        <Kpi
+          theme="pending"
+          icon={ShieldCheck}
+          label="Pending apps"
+          value={data.pendingVerifications}
+          hint="Verification queue"
+          pulse={data.pendingVerifications > 0}
+          onClick={() => onOpenTab?.("verification")}
+        />
+        <Kpi theme="open" icon={Bell} label="Open gawain" value={data.openTasks} hint="Live on marketplace" />
+        <Kpi theme="fees" icon={Wallet} label="Fees this month" value={formatPHP(data.feesThisMonth)} hint="From posted gawain" className="col-span-2 xl:col-span-1" />
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -124,7 +132,7 @@ export default function AdminOverview({ overview, users, logs, transactions, onO
             </ul>
           )}
         </Card>
-        <Card title="Recent posting fees" sub="2% recorded when gawain are posted" action={{ label: "View all", onClick: () => onOpenTab?.("transactions") }}>
+        <Card title="Recent posting fees" sub="Recorded when gawain are posted" action={{ label: "View all", onClick: () => onOpenTab?.("transactions") }}>
           {data.recentTx.length === 0 ? (
             <Empty>No transactions yet.</Empty>
           ) : (
@@ -155,22 +163,100 @@ function HeroMini({ label, value, accent }) {
   );
 }
 
-function Kpi({ icon: Icon, label, value, hint, warn, onClick }) {
+const KPI_THEMES = {
+  users: {
+    bg: "linear-gradient(145deg, #E8F1F8 0%, #D4E6FF 55%, #C5DBF5 100%)",
+    ink: "#163044",
+    muted: "rgba(22,48,68,0.62)",
+    iconBg: "#FFFFFF",
+    iconFg: "#3A73C4",
+    blob: "rgba(58,115,196,0.22)",
+    ring: "rgba(58,115,196,0.28)",
+  },
+  tasks: {
+    bg: "linear-gradient(145deg, #E7F3EA 0%, #CFF5D6 55%, #B8EBC6 100%)",
+    ink: "#1A4D32",
+    muted: "rgba(26,77,50,0.62)",
+    iconBg: "#FFFFFF",
+    iconFg: "#2E8A5A",
+    blob: "rgba(46,138,90,0.22)",
+    ring: "rgba(46,138,90,0.28)",
+  },
+  pending: {
+    bg: "linear-gradient(145deg, #FFF6DC 0%, #FFE4A3 55%, #F6C56B 100%)",
+    ink: "#7A4A00",
+    muted: "rgba(122,74,0,0.65)",
+    iconBg: "#FFFFFF",
+    iconFg: "#B45309",
+    blob: "rgba(180,83,9,0.2)",
+    ring: "rgba(180,83,9,0.35)",
+  },
+  open: {
+    bg: "linear-gradient(145deg, #E4F4F2 0%, #C5EBE6 55%, #9FDED6 100%)",
+    ink: "#0D4F4C",
+    muted: "rgba(13,79,76,0.62)",
+    iconBg: "#FFFFFF",
+    iconFg: "#0D666A",
+    blob: "rgba(13,102,106,0.2)",
+    ring: "rgba(13,102,106,0.28)",
+  },
+  fees: {
+    bg: "linear-gradient(145deg, #F3EDE0 0%, #E8DCC4 55%, #DCC9A4 100%)",
+    ink: "#3F3420",
+    muted: "rgba(63,52,32,0.62)",
+    iconBg: "#FFFFFF",
+    iconFg: "#8A6A18",
+    blob: "rgba(138,106,24,0.2)",
+    ring: "rgba(138,106,24,0.28)",
+  },
+};
+
+function Kpi({ theme = "users", icon: Icon, label, value, hint, pulse, onClick, className = "" }) {
+  const tone = KPI_THEMES[theme] || KPI_THEMES.users;
   const Tag = onClick ? "button" : "div";
   return (
     <Tag
       type={onClick ? "button" : undefined}
       onClick={onClick}
-      className={`rounded-2xl bg-card p-5 text-left shadow-card ${onClick ? "transition hover:shadow-soft" : ""} ${warn ? "ring-1 ring-amber-300" : ""}`}
+      className={`relative overflow-hidden rounded-2xl p-3 text-left shadow-card sm:p-4 ${
+        onClick ? "transition hover:-translate-y-0.5 hover:shadow-soft" : ""
+      } ${pulse ? "ring-2 ring-offset-1" : ""} ${className}`}
+      style={{
+        background: tone.bg,
+        color: tone.ink,
+        ...(pulse ? { boxShadow: `0 0 0 2px ${tone.ring}` } : {}),
+      }}
     >
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#E8DCC4] text-[#2A3F4D]">
-          <Icon className="h-4 w-4" />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-4 -top-5 h-20 w-20 rounded-full sm:h-24 sm:w-24"
+        style={{ background: tone.blob }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-6 -left-3 h-16 w-16 rounded-full opacity-70"
+        style={{ background: tone.blob }}
+      />
+      <div className="relative flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] sm:text-[11px]" style={{ color: tone.muted }}>
+            {label}
+          </p>
+          <p className="mt-1 text-xl font-black tabular-nums leading-none sm:text-2xl xl:text-[1.7rem]">{value}</p>
+          <p className="mt-1.5 text-[11px] font-semibold leading-tight sm:text-xs" style={{ color: tone.muted }}>
+            {hint}
+          </p>
+        </div>
+        <span
+          className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm sm:h-10 sm:w-10"
+          style={{ background: tone.iconBg, color: tone.iconFg }}
+        >
+          <Icon className="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" color="currentColor" />
+          {pulse ? (
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#B45309] ring-2 ring-white" />
+          ) : null}
         </span>
-        <p className="text-[11px] font-bold uppercase tracking-wide">{label}</p>
       </div>
-      <p className="mt-3 text-2xl font-black tabular-nums xl:text-3xl">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
     </Tag>
   );
 }

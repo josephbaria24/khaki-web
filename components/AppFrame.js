@@ -2,10 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import AppHeader from "@/components/AppHeader";
+import AdminPreviewBanner from "@/components/AdminPreviewBanner";
 import BottomNav from "@/components/BottomNav";
 import ModeSwitchOverlay from "@/components/ModeSwitchOverlay";
 import { useAuth } from "@/lib/AuthContext";
-import { cn, isConversationPath, isTaskDetailPath, isTrackPath } from "@/lib/khaki";
+import { useAdminPreview } from "@/lib/AdminPreviewContext";
+import { cn, isConversationPath, isFillPage, isTaskDetailPath, isTrackPath } from "@/lib/khaki";
+import { isAdmin } from "@/lib/roles";
 
 const PUBLIC_EXACT = new Set(["/", "/about", "/privacy", "/terms", "/jobs"]);
 
@@ -19,11 +22,18 @@ function isPublicPath(pathname) {
 }
 
 export default function AppFrame({ children }) {
-  const { ready, isAuthenticated } = useAuth();
+  const { ready, isAuthenticated, user } = useAuth();
+  const { previewing } = useAdminPreview();
   const pathname = usePathname();
   const showChrome = ready && isAuthenticated && !isPublicPath(pathname);
-  const hideNav = isConversationPath(pathname) || isTrackPath(pathname) || isTaskDetailPath(pathname);
-  const lockScroll = isConversationPath(pathname);
+  const onAdmin = pathname?.startsWith("/admin");
+  const hideNav =
+    onAdmin ||
+    isConversationPath(pathname) ||
+    isTrackPath(pathname) ||
+    isTaskDetailPath(pathname);
+  const lockScroll = isFillPage(pathname);
+  const showUserChrome = !onAdmin || previewing;
 
   if (!showChrome) return children;
 
@@ -35,13 +45,14 @@ export default function AppFrame({ children }) {
       )}
     >
       <div className="shrink-0">
+        {isAdmin(user) && previewing ? <AdminPreviewBanner /> : null}
         <AppHeader />
       </div>
       <div className={cn("relative min-h-0 flex-1", lockScroll ? "overflow-hidden" : "overflow-y-auto")}>
         {children}
       </div>
-      <BottomNav hidden={hideNav} />
-      <ModeSwitchOverlay />
+      {showUserChrome ? <BottomNav hidden={hideNav} /> : null}
+      {showUserChrome ? <ModeSwitchOverlay /> : null}
     </div>
   );
 }

@@ -12,7 +12,7 @@ import SectionIntro from "@/components/SectionIntro";
 import { FadeIn } from "@/components/ui/motion";
 import { CHIP_CATEGORIES, taskMatchesChip } from "@/lib/catalog";
 import { LANDING, LANDING_CATEGORIES } from "@/lib/landingContent";
-import { displayTaskCategory, formatPHP } from "@/lib/khaki";
+import { displayTaskCategory, formatPHP, skillFitsTask } from "@/lib/khaki";
 import { useAuth } from "@/lib/AuthContext";
 import { canOpenPost, isPosterMode, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -157,11 +157,11 @@ export default function DashboardPage() {
                   <div>
                     <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#F7F4EC]/55">{poster ? "Poster" : "Tasker"}</p>
                     <p className="mt-1 text-base font-black leading-tight text-[#F7F4EC] sm:text-lg">
-                      {poster ? "Mag-post ng gawain — 2% posting fee lang" : "Maghanap ng gawain sa Palawan"}
+                      {poster ? "Mag-post ng gawain" : "Maghanap ng gawain sa Palawan"}
                     </p>
                     <p className="mt-1 text-sm leading-snug text-[#F7F4EC]/80">
                       {poster
-                        ? "Charged when you post. Job payment stays between you and the tasker."
+                        ? "Job payment stays between you and the tasker."
                         : "Sumali sa bidding, i-adjust ang fee mo, at tingnan ang feedback ng poster."}
                     </p>
                   </div>
@@ -278,7 +278,12 @@ export default function DashboardPage() {
               <FadeIn delay={80}>
                 <div className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory sm:mx-0 sm:px-0">
                   {filtered.map((task) => {
-                    const badge = interactionBadge(task, user?.id, bidsByTask.get(task.id));
+                    const badge = interactionBadge(task, user?.id, bidsByTask.get(task.id))
+                      || (!poster
+                        ? (skillFitsTask(user?.skills, task)
+                          ? { label: "Qualified", bg: "#D7F0EA", fg: "#0D666A" }
+                          : { label: "Not qualified", bg: "#EFE8DC", fg: "#8A6A32" })
+                        : null);
                     return (
                     <Link
                       key={task.id}

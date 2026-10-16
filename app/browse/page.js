@@ -7,14 +7,13 @@ import AppShell from "@/components/AppShell";
 import PublicShell from "@/components/PublicShell";
 import { FadeIn, Stagger } from "@/components/ui/motion";
 import { CHIP_CATEGORIES, graphicForTask, shortCategory, taskMatchesChip } from "@/lib/catalog";
-import { cn, formatPHP } from "@/lib/khaki";
+import { cn, displayTaskCategory, formatPHP, scheduleLabel, skillFitsTask } from "@/lib/khaki";
 import { LANDING } from "@/lib/landingContent";
+import { isTaskerMode } from "@/lib/roles";
 import { useAuth } from "@/lib/AuthContext";
 import { api } from "@/lib/store";
 import { Plus, Search } from "@/components/icons";
 import { PageSkeleton } from "@/components/ui/Skeleton";
-
-const PAGE_BG = LANDING.page;
 
 function initials(name) {
   return String(name || "K")
@@ -47,7 +46,7 @@ function JobCard({ task }) {
             sizes="(max-width: 640px) 50vw, 280px"
           />
         ) : null}
-        <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-bold text-[#2A3F4D] shadow-sm">
+        <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-bold text-[#2A3F4D] shadow-sm dark:bg-[#1A1E27]/90">
           <span className="text-[#C4A035]">★</span> {rating}
         </span>
       </div>
@@ -61,11 +60,44 @@ function JobCard({ task }) {
             {formatPHP(task.budget_php)}
           </p>
         </div>
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#163044] text-white shadow-sm transition group-hover:bg-[#2A3F4D]">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#163044] text-white shadow-sm transition group-hover:bg-[#2A3F4D] dark:bg-[#F5F3EE] dark:text-[#11141A] dark:group-hover:bg-white">
           <Plus className="h-4 w-4" color="currentColor" />
         </span>
       </div>
     </Link>
+  );
+}
+
+function TaskerJobRow({ task, qualified }) {
+  const category = displayTaskCategory(task);
+  const meta = [scheduleLabel(task), formatPHP(task.budget_php), task.is_remote ? "Remote" : task.location_area].filter(Boolean).join(" · ");
+  return (
+    <article className="rounded-[1.25rem] bg-white p-3.5 shadow-[0_8px_28px_rgba(42,63,77,0.08)]">
+      <Link href={`/task/${task.id}`} className="block">
+        <div className="flex items-start justify-between gap-3">
+          <p className="min-w-0 text-[15px] font-black leading-snug text-[#163044]">{task.title}</p>
+          <span className={cn(
+            "shrink-0 rounded-full px-2 py-1 text-[10px] font-black tracking-wide",
+            qualified
+              ? "bg-[#D7F0EA] text-[#0D666A] dark:bg-[#0D666A]/30 dark:text-[#7FD3CF]"
+              : "bg-[#EFE8DC] text-[#8A6A32] dark:bg-[#8A6A32]/25 dark:text-[#E2C48A]"
+          )}>
+            {qualified ? "QUALIFIED" : "NOT QUALIFIED"}
+          </span>
+        </div>
+        <p className="mt-1 text-xs font-semibold text-[#2A3F4D]/55">{category}</p>
+        <p className="mt-1 text-[12px] font-semibold text-[#2A3F4D]/60">{meta}</p>
+      </Link>
+      {qualified ? (
+        <Link href={`/task/${task.id}`} className="mt-3 flex h-11 items-center justify-center rounded-xl bg-[#0D666A] text-sm font-black text-white">
+          Book · Accept Task
+        </Link>
+      ) : (
+        <button type="button" disabled className="mt-3 h-11 w-full cursor-not-allowed rounded-xl bg-[#E6DDD0] text-sm font-black text-[#6B6459] dark:bg-[#252A35] dark:text-[#F5F3EE]/45">
+          Book · Not Qualified
+        </button>
+      )}
+    </article>
   );
 }
 
@@ -90,9 +122,10 @@ function BrowseBody() {
   });
 
   const firstName = (user?.full_name || "there").split(/\s+/)[0];
+  const taskerFeed = isAuthenticated && isTaskerMode(user);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: PAGE_BG }}>
+    <div className="browse-page min-h-screen bg-[#FBF8F1]">
       <section className="mx-auto w-full max-w-6xl space-y-6 px-4 pb-12 pt-4 sm:px-6 lg:px-8 lg:pt-8">
         {isAuthenticated ? (
           <div className="flex items-center justify-between gap-3">
@@ -101,7 +134,7 @@ function BrowseBody() {
                 <img
                   src={user.avatar_url}
                   alt=""
-                  className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm"
+                  className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm dark:ring-[#1A1E27]"
                 />
               ) : (
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#C9D6E0] text-sm font-black text-[#2A3F4D] shadow-sm">
@@ -119,8 +152,11 @@ function BrowseBody() {
 
         <div>
           <h1 className="text-2xl font-black leading-tight tracking-tight text-[#2A3F4D] sm:text-3xl">
-            Anong gawain ang<br className="sm:hidden" /> hanap mo?
+            {taskerFeed ? "Browsing feed" : <>Anong gawain ang<br className="sm:hidden" /> hanap mo?</>}
           </h1>
+          {taskerFeed ? (
+            <p className="mt-1 text-sm font-semibold text-[#2A3F4D]/55">All tasks visible · Book only if qualified</p>
+          ) : null}
         </div>
 
         <form
@@ -145,7 +181,7 @@ function BrowseBody() {
           <div className="relative z-10 max-w-sm">
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/70">Promo</p>
             <h2 className="mt-2 text-xl font-black leading-snug sm:text-2xl">
-              2% posting fee lang hanggang Feb 2027
+              Mag-post ng gawain sa Palawan
             </h2>
             <p className="mt-2 text-sm text-white/80">
               Mag-post ng gawain — bayad diretso sa tasker.
@@ -182,7 +218,7 @@ function BrowseBody() {
                 className={cn(
                   "shrink-0 rounded-full px-4 py-2 text-xs font-bold transition",
                   on
-                    ? "bg-[#163044] text-[#F7F4EC] shadow-sm"
+                    ? "bg-[#163044] text-[#F7F4EC] shadow-sm dark:bg-[#F5F3EE] dark:text-[#11141A]"
                     : "bg-white text-[#2A3F4D] shadow-[0_2px_10px_rgba(42,63,77,0.06)]"
                 )}
               >
@@ -202,16 +238,24 @@ function BrowseBody() {
             <PageSkeleton rows={6} />
           ) : (
           <FadeIn delay={40}>
+            {taskerFeed ? (
+              <div className="space-y-3">
+                {filtered.map((task) => (
+                  <TaskerJobRow key={task.id} task={task} qualified={skillFitsTask(user?.skills, task)} />
+                ))}
+              </div>
+            ) : (
             <Stagger className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
               {filtered.map((task) => (
                 <JobCard key={task.id} task={task} />
               ))}
             </Stagger>
+            )}
           </FadeIn>
           )}
 
           {ready && filtered.length === 0 ? (
-            <p className="rounded-[1.5rem] border border-dashed border-[#C9D6E0] bg-white/70 py-14 text-center text-sm text-[#2A3F4D]/50">
+            <p className="rounded-[1.5rem] border border-dashed border-[#C9D6E0] bg-white/70 py-14 text-center text-sm text-[#2A3F4D]/50 dark:border-white/10 dark:bg-[#1A1E27]">
               Walang open jobs na tumugma sa filter.
             </p>
           ) : null}

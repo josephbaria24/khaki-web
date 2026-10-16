@@ -9,7 +9,7 @@ const geistSans = Geist({
 
 export const metadata = {
   title: "Khaki — Jobs & Services in Palawan",
-  description: "Post a task or find work. Connect with trusted locals across Palawan. 2% posting fee.",
+  description: "Post a task or find work. Connect with trusted locals across Palawan.",
   icons: {
     icon: "/images/logo.png",
     apple: "/icons/apple-touch-icon.png",

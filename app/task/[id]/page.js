@@ -10,13 +10,13 @@ import Container from "@/components/Container";
 import StatusPill from "@/components/StatusPill";
 import StarRating from "@/components/StarRating";
 import { useAuth } from "@/lib/AuthContext";
-import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, TASKER_LOCKED_NOTICE, cn, displayTaskCategory, formatPHP, postingFee, scheduleLabel, serviceByKey, serviceForTaskCategory, timeAgo } from "@/lib/khaki";
+import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, TASKER_LOCKED_NOTICE, cn, displayTaskCategory, formatPHP, scheduleLabel, serviceByKey, serviceForTaskCategory, skillFitsTask, skillSummary, timeAgo } from "@/lib/khaki";
 import { distanceLabel, townDistanceKm } from "@/lib/palawanLocations";
 import { canTrack } from "@/lib/deliveryTrack";
 import { describeExtras, describePins, vehicleLabel } from "@/lib/serviceTemplates";
 import { displayName } from "@/lib/taskerProfile";
 import { LANDING } from "@/lib/landingContent";
-import { canAcceptJobs, needsTaskerVerification } from "@/lib/roles";
+import { canAcceptJobs, isTaskerMode, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
 import PinPreviewMap from "@/components/task/PinPreviewMap";
 import ReportGawain from "@/components/ReportGawain";
@@ -163,6 +163,12 @@ export default function TaskDetailPage() {
   const submitOffer = async (e) => {
     e.preventDefault();
     setError("");
+    if (isTaskerMode(user) && !skillFitsTask(user?.skills, task)) {
+      const msg = `Not qualified for ${displayTaskCategory(task)}. You can only book the skills on your profile.`;
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
     try {
       await api.offers.create({ task_id: task.id, amount_php: amount, pitch });
       refresh();
@@ -212,7 +218,7 @@ export default function TaskDetailPage() {
   };
 
   const cancelTask = async () => {
-    const ok = window.confirm("Cancel this gawain? It will leave Browse and pending bids will be declined. The 2% posting fee is not refunded.");
+    const ok = window.confirm("Cancel this gawain? It will leave Browse and pending bids will be declined.");
     if (!ok) return;
     try {
       await api.tasks.cancel(task.id);
@@ -263,6 +269,57 @@ export default function TaskDetailPage() {
   const bidAccepted = Boolean(task.accepted_tasker_id) || offers.some((o) => o.status === "accepted");
   const canEditDetails = isClient && task.status === "open" && !bidAccepted;
   const canCancel = isClient && (task.status === "open" || awaiting);
+  const categoryName = displayTaskCategory(task);
+  const lockedOut = !isClient && isTaskerMode(user) && task.status === "open" && !skillFitsTask(user?.skills, task);
+
+  if (lockedOut) {
+    const meta = [scheduleLabel(task), formatPHP(task.budget_php), task.is_remote ? "Remote" : task.location_area].filter(Boolean).join(" · ");
+    const registered = skillSummary(user?.skills);
+    return (
+      <AppShell>
+        <Container className="max-w-lg py-5 lg:max-w-xl lg:py-8">
+          <button onClick={() => router.back()} className="mb-3 inline-flex items-center gap-1 text-xs font-semibold text-[#2A3F4D]/60 hover:text-[#163044]">
+            <ChevronLeft className="h-4 w-4" /> Back
+          </button>
+          <h1 className="text-center text-[1.35rem] font-black tracking-tight text-[#163044]">Task Detail: {categoryName}</h1>
+          <article className="mt-4 rounded-[1.25rem] border border-[#E6DDD0] bg-white p-4 shadow-[0_8px_28px_rgba(42,63,77,0.08)]">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EFE8DC] text-sm font-black text-[#8A6A32]">{categoryName.slice(0, 1) || "K"}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-[15px] font-black leading-snug text-[#163044]">{task.title}</p>
+                  <span className="shrink-0 rounded-full bg-[#EFE8DC] px-2 py-1 text-[10px] font-black tracking-wide text-[#8A6A32]">NOT QUALIFIED</span>
+                </div>
+                <p className="mt-1 text-xs font-semibold text-[#2A3F4D]/55">{categoryName}</p>
+                <p className="mt-1 text-[12px] font-semibold text-[#2A3F4D]/60">{meta}</p>
+              </div>
+            </div>
+          </article>
+          <div className="mt-3 rounded-[1.25rem] border border-[#E6DDD0] bg-[#FFFCF7] p-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#EFE8DC] text-[#8A6A32]">
+                <CircleAlert className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-lg font-black leading-tight text-[#163044]">Not qualified for {categoryName}</h2>
+                <p className="mt-1.5 text-sm font-medium leading-snug text-[#2A3F4D]/70">
+                  {registered
+                    ? `You are registered for ${registered}. You cannot accept ${categoryName}.`
+                    : "Add a skill on your profile. You can only book gawain that match it."}
+                </p>
+              </div>
+            </div>
+            <button type="button" disabled className="mt-4 h-11 w-full cursor-not-allowed rounded-xl bg-[#E6DDD0] text-sm font-black text-[#6B6459]">
+              View Only · Not Qualified
+            </button>
+          </div>
+          {task.details ? (
+            <p className="mt-4 text-sm font-medium leading-relaxed text-[#2A3F4D]/70">{task.details}</p>
+          ) : null}
+        </Container>
+      </AppShell>
+    );
+  }
 
   if (isClient) {
     return (
@@ -334,7 +391,7 @@ export default function TaskDetailPage() {
             ) : null}
             {task.status === "cancelled" ? (
               <p className="mt-3 rounded-xl bg-destructive/10 px-3 py-2 text-sm font-semibold text-destructive">
-                Cancelled. This gawain is off Browse. Posting fee was not refunded.
+                Cancelled. This gawain is off Browse.
               </p>
             ) : null}
             {task.status === "disputed" ? (
@@ -507,7 +564,6 @@ export default function TaskDetailPage() {
               ) : null}
               <textarea className="min-h-24 w-full rounded-xl border p-3 text-sm" value={edit.details} onChange={(e) => setEdit({ ...edit, details: e.target.value })} />
               <input className="h-11 w-full rounded-xl border px-3" type="number" min={50} value={edit.budget_php} onChange={(e) => setEdit({ ...edit, budget_php: e.target.value })} />
-              <p className="text-xs text-muted-foreground">Posting fee was already charged. Changing budget won&apos;t refund or re-charge.</p>
               <button className="h-11 w-full rounded-xl bg-[#163044] font-bold text-white">I-save</button>
             </form>
           ) : null}
@@ -626,7 +682,7 @@ export default function TaskDetailPage() {
               )}
               {task.status === "cancelled" ? (
                 <p className="mt-4 rounded-xl bg-destructive/10 px-3 py-2 text-sm font-semibold text-destructive">
-                  Cancelled. This gawain is off Browse. Posting fee was not refunded.
+                  Cancelled. This gawain is off Browse.
                 </p>
               ) : null}
               {task.status === "disputed" ? (
@@ -663,22 +719,36 @@ export default function TaskDetailPage() {
                 ) : null}
                 <textarea className="min-h-24 w-full rounded-xl border p-3 text-sm" value={edit.details} onChange={(e) => setEdit({ ...edit, details: e.target.value })} />
                 <input className="h-11 w-full rounded-xl border px-3" type="number" min={50} value={edit.budget_php} onChange={(e) => setEdit({ ...edit, budget_php: e.target.value })} />
-                <p className="text-xs text-muted-foreground">Posting fee was already charged. Changing budget won&apos;t refund or re-charge.</p>
                 <button className="h-11 w-full rounded-xl bg-primary font-bold text-white">I-save</button>
               </form>
             ) : null}
 
             {canBid && (
               canAcceptJobs(user) ? (
+              skillFitsTask(user?.skills, task) ? (
               <form onSubmit={submitOffer} className="space-y-3 rounded-2xl border bg-card p-6">
                 <h2 className="text-lg font-black">{myOffer ? "I-adjust ang bid mo" : "Sumali sa bidding"}</h2>
                 <p className="text-xs text-muted-foreground">I-set ang tasker fee mo. Puwede mong i-baba o i-adjust habang pending. Direct payment with the poster.</p>
                 <input className="h-11 w-full rounded-xl border px-3" type="number" min={50} placeholder="Tasker fee (PHP)" value={amount} onChange={(e) => setAmount(e.target.value)} required />
                 <textarea className="min-h-24 w-full rounded-xl border p-3 text-sm" placeholder="Bakit ikaw ang tama para dito" value={pitch} onChange={(e) => setPitch(e.target.value)} />
-                <button className="h-11 w-full rounded-xl bg-primary font-bold text-white">
-                  {myOffer ? "I-update ang bid" : "Mag-offer (Bid now)"}
+                <button className="h-11 w-full rounded-xl bg-[#0D666A] font-bold text-white">
+                  {myOffer ? "I-update ang bid" : "Accept Task"}
                 </button>
               </form>
+              ) : (
+              <div className="rounded-2xl border border-[#E6DDD0] bg-[#FFFCF7] p-5">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#8A6A32]">View only</p>
+                <h2 className="mt-1 text-lg font-black text-[#163044]">Not qualified for {displayTaskCategory(task)}</h2>
+                <p className="mt-1.5 text-sm font-medium leading-snug text-[#2A3F4D]/70">
+                  {skillSummary(user?.skills)
+                    ? `You are registered for ${skillSummary(user?.skills)}. You cannot accept ${displayTaskCategory(task)}.`
+                    : "Add a skill on your profile. You can only book gawain that match it."}
+                </p>
+                <button type="button" disabled className="mt-4 h-11 w-full cursor-not-allowed rounded-xl bg-[#E6DDD0] text-sm font-black text-[#6B6459]">
+                  View Only · Not Qualified
+                </button>
+              </div>
+              )
               ) : (
               needsTaskerVerification(user) ? (
               <div className="rounded-2xl border border-[#F0C36A] bg-[#FFF4D6] p-5">
@@ -867,19 +937,17 @@ export default function TaskDetailPage() {
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-              <h3 className="text-sm font-bold">Payment</h3>
-              <p className="mt-2 text-2xl font-extrabold text-khaki">{formatPHP(task.deposit_amount || postingFee(task.budget_php))}</p>
-              <p className="mt-1 text-xs text-muted-foreground">Posting fee already paid to Khaki (2% of listed budget). The job fee is negotiated and paid directly between poster and tasker.</p>
+            {(canComplete || (isClient && (task.status === "open" || awaiting))) ? (
+            <div className="space-y-3 rounded-2xl border border-border bg-card p-6 shadow-sm">
               {canComplete && (
-                <button onClick={complete} className="mt-4 h-11 w-full rounded-xl bg-khaki font-bold text-white">
+                <button onClick={complete} className="h-11 w-full rounded-xl bg-khaki font-bold text-white">
                   Mark complete / Tapos na
                 </button>
               )}
               {isClient && task.status === "open" && (
                 <Link
                   href={`/task/${task.id}/taskers`}
-                  className="mt-3 flex h-11 w-full items-center justify-center rounded-xl bg-[#C9D6E0] text-sm font-bold text-[#2A3F4D]"
+                  className="flex h-11 w-full items-center justify-center rounded-xl bg-[#C9D6E0] text-sm font-bold text-[#2A3F4D]"
                 >
                   Maghanap ng tasker
                 </Link>
@@ -888,12 +956,13 @@ export default function TaskDetailPage() {
                 <button
                   type="button"
                   onClick={cancelTask}
-                  className="mt-3 h-11 w-full rounded-xl border-2 border-destructive text-sm font-bold text-destructive"
+                  className="h-11 w-full rounded-xl border-2 border-destructive text-sm font-bold text-destructive"
                 >
                   Cancel gawain
                 </button>
               )}
             </div>
+            ) : null}
             {!isClient && task.status !== "cancelled" ? (
               <ReportGawain
                 taskId={task.id}

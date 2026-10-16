@@ -20,7 +20,7 @@ import {
   LANDING_TRUST,
 } from "@/lib/landingContent";
 import { useAuth } from "@/lib/AuthContext";
-import { canOpenPost } from "@/lib/roles";
+import { canOpenPost, needsTaskerVerification } from "@/lib/roles";
 import { Collapse } from "@/components/ui/motion";
 import InstallAppBanner from "@/components/InstallAppBanner";
 
@@ -131,7 +131,9 @@ function TaskPreviewCard({ task }) {
 export default function LandingHome() {
   const { isAuthenticated, user } = useAuth();
   const [tab, setTab] = useState(LANDING_TASK_TABS[0]);
-  const postHref = isAuthenticated ? (canOpenPost(user) ? "/post" : "/browse") : "/register";
+  const postHref = isAuthenticated
+    ? (needsTaskerVerification(user) ? "/verify" : canOpenPost(user) ? "/post" : "/browse")
+    : "/register";
   const earnHref = "/register?role=tasker";
   const visibleTasks = useMemo(() => LANDING_TASKS.filter((t) => t.tab === tab), [tab]);
 
@@ -195,24 +197,12 @@ export default function LandingHome() {
               </span>
               <div className="text-left">
                 <p className="text-sm font-bold leading-none text-white">Palawan-wide</p>
-                <p className="mt-1 text-[11px] font-medium leading-none text-white/65">Every town · 2% until Feb 2027</p>
+                <p className="mt-1 text-[11px] font-medium leading-none text-white/65">Every town, one marketplace</p>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      <div className="landing-promo">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-4 px-4 py-4 sm:flex-row sm:items-center sm:px-6 lg:px-8">
-          <div>
-            <p className="text-sm font-black text-[#F7F4EC]">2% posting fee until February 2027</p>
-            <p className="text-sm text-[#F7F4EC]/80">Charged when you post. The task payment is between you and the tasker.</p>
-          </div>
-          <Link href="/register" className="btn-sand inline-flex h-10 items-center px-5 text-xs">
-            Join now
-          </Link>
-        </div>
-      </div>
 
       <SectionWrap id="how-it-works" className="scroll-mt-24 bg-background py-16 lg:py-20">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#163044]">

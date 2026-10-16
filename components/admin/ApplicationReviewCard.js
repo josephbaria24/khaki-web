@@ -97,7 +97,7 @@ const TONES = {
   unverified: { bar: "#8A94A6", bg: "#EEF2F6", ink: "#3D4A5C", soft: "#F7F8FA" },
 };
 
-export default function ApplicationReviewCard({ user, onApprove, onReject }) {
+export default function ApplicationReviewCard({ user, onApprove, onReject, onDelete }) {
   const [open, setOpen] = useState(false);
   const app = readSubmittedApplication(user);
   const skills = (app.skills || []).filter((skill) => skill && skill !== app.other_skill);
@@ -210,16 +210,27 @@ export default function ApplicationReviewCard({ user, onApprove, onReject }) {
               ))}
             </Section>
           ) : null}
-          {statusKey === "pending" || statusKey === "reverify" ? (
-            <div className="flex flex-wrap gap-2 lg:col-span-2">
-              <button type="button" className="h-9 rounded-xl px-4 text-sm font-bold text-white" style={{ background: tone.bar }} onClick={onApprove}>
-                Approve
+          <div className="flex flex-wrap gap-2 lg:col-span-2">
+            {statusKey === "pending" || statusKey === "reverify" ? (
+              <>
+                <button type="button" className="h-9 rounded-xl px-4 text-sm font-bold text-white" style={{ background: tone.bar }} onClick={onApprove}>
+                  Approve
+                </button>
+                <button type="button" className="h-9 rounded-xl border bg-white px-4 text-sm font-bold" onClick={onReject}>
+                  Reject
+                </button>
+              </>
+            ) : null}
+            {onDelete && user?.role !== "admin" ? (
+              <button
+                type="button"
+                className="h-9 rounded-xl border border-[#B42318]/25 bg-[#FEE2E2] px-4 text-sm font-bold text-[#991B1B]"
+                onClick={onDelete}
+              >
+                Delete user
               </button>
-              <button type="button" className="h-9 rounded-xl border bg-white px-4 text-sm font-bold" onClick={onReject}>
-                Reject
-              </button>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </Collapse>
     </article>

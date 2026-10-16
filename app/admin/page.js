@@ -10,14 +10,18 @@ import { formatPHP, DISPUTE_STATUS_LABEL, reportReasonLabel } from "@/lib/khaki"
 import { ROLE_LABELS } from "@/lib/roles";
 import { api } from "@/lib/store";
 import { PageSkeleton } from "@/components/ui/Skeleton";
-import ApplicationReviewCard from "@/components/admin/ApplicationReviewCard";
 import AdminOverview from "@/components/admin/AdminOverview";
+import AdminSideNav, { AdminSectionChip } from "@/components/admin/AdminSideNav";
+import DeleteUserConfirm from "@/components/admin/DeleteUserConfirm";
+import TeamsPanel from "@/components/admin/TeamsPanel";
+import VerificationInbox from "@/components/admin/VerificationInbox";
 import { toast } from "@/lib/toast";
 
 const TABS = [
   { id: "overview", label: "Overview" },
   { id: "users", label: "Users" },
   { id: "verification", label: "Verification" },
+  { id: "teams", label: "Teams" },
   { id: "reports", label: "Reports" },
   { id: "transactions", label: "Transactions" },
   { id: "activity", label: "Activity" },
@@ -95,7 +99,34 @@ function AdminScreen() {
   const [userFilter, setUserFilter] = useState("all");
   const [memoFor, setMemoFor] = useState(null);
   const [memoText, setMemoText] = useState("");
+  const [teamFilter, setTeamFilter] = useState("all");
+  const [queueTeam, setQueueTeam] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const refresh = () => setTick((n) => n + 1);
+
+  const requestDelete = (target) => {
+    if (!target || target.role === "admin") return;
+    setDeleteTarget(target);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget || deleteBusy) return;
+    setDeleteBusy(true);
+    setError("");
+    try {
+      await api.admin.deleteUser(deleteTarget.id);
+      setDeleteTarget(null);
+      refresh();
+      toast.success("User deleted");
+    } catch (err) {
+      const msg = err.message || "Could not delete user";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
 
   const selectTab = (id) => {
     const next = readTab(id);
@@ -163,7 +194,10 @@ function AdminScreen() {
       return rankOf(a) - rankOf(b);
     });
   const openReports = disputes.filter((d) => ["pending_review", "under_review"].includes(d.status));
-
+  const applicationTeams = [...new Map([
+    ...applications.filter((u) => u.team).map((u) => [u.team.id, u.team]),
+    ...(queueTeam ? [[queueTeam.id, queueTeam]] : []),
+  ]).values()];
   const act = async (fn, successMessage) => {
     setError("");
     try {
@@ -179,24 +213,32 @@ function AdminScreen() {
 
   return (
     <AppShell>
-      <Container className="space-y-6 py-6 lg:py-10">
-        <div>
-          <h1 className="page-title">Admin</h1>
+      <Container
+        className={
+          tab === "verification"
+            ? "flex h-full min-h-0 flex-col gap-6 overflow-hidden py-6 lg:py-8"
+            : "h-full min-h-0 space-y-6 overflow-y-auto py-6 lg:py-10"
+        }
+      >
+        <div className="shrink-0">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="page-title mb-0">Admin</h1>
+            <AdminSectionChip label={TABS.find((item) => item.id === tab)?.label || "Overview"} />
+          </div>
           <p className="page-sub">Review applications, reports, users, and marketplace activity.</p>
         </div>
-        {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
-        <div className="flex flex-wrap gap-2">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => selectTab(t.id)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold ${tab === t.id ? "bg-foreground text-background" : "bg-card text-muted-foreground"}`}
-            >
-              {t.label}
-              {t.id === "verification" && pending.length > 0 ? ` (${pending.length})` : ""}
-              {t.id === "reports" && openReports.length > 0 ? ` (${openReports.length})` : ""}
-            </button>
-          ))}
+        {error && <p className="shrink-0 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+        <div className="shrink-0">
+          <AdminSideNav
+            tabs={TABS}
+            activeId={tab}
+            onSelect={selectTab}
+            hideChip
+            badges={{
+              verification: pending.length > 0 ? pending.length : undefined,
+              reports: openReports.length > 0 ? openReports.length : undefined,
+            }}
+          />
         </div>
 
         {!ready ? <PageSkeleton rows={5} /> : null}
@@ -224,21 +266,61 @@ function AdminScreen() {
             memoText={memoText}
             setMemoText={setMemoText}
             act={act}
+            onRequestDelete={requestDelete}
           />
         )}
 
         {ready && tab === "verification" && (
-          <div className="space-y-4">
-            {applications.length === 0 && <p className="text-sm text-muted-foreground">No verification submissions yet. Forms from /verify appear here with the ID, details, and signature.</p>}
-            {applications.map((u) => (
-              <ApplicationReviewCard
-                key={u.id}
-                user={u}
-                onApprove={() => act(() => api.admin.decideVerification(u.id, "verified"), "Application approved")}
-                onReject={() => act(() => api.admin.decideVerification(u.id, "rejected", "Please resubmit a clearer government ID."), "Application rejected")}
-              />
-            ))}
-          </div>
+          <VerificationInbox
+            applications={applications}
+            teams={applicationTeams}
+            teamFilter={teamFilter}
+            setTeamFilter={setTeamFilter}
+            onApprove={(u) => act(() => api.admin.decideVerification(u.id, "verified"), "Application approved")}
+            onReject={(u) => act(() => api.admin.decideVerification(u.id, "rejected", "Please resubmit a clearer government ID."), "Application rejected")}
+            onDelete={requestDelete}
+            onApproveSelected={async (list) => {
+              if (!list?.length) return;
+              if (!window.confirm(`Approve ${list.length} selected pending applications?`)) return;
+              let done = 0;
+              for (const u of list) {
+                try {
+                  await api.admin.decideVerification(u.id, "verified");
+                  done += 1;
+                } catch {
+                  // Keep going.
+                }
+              }
+              refresh();
+              if (done === list.length) toast.success("Applications approved");
+              else toast.error("Some applications could not be approved");
+            }}
+            onDeleteSelected={(list) => {
+              if (!list?.length) return;
+              if (list.length === 1) {
+                requestDelete(list[0]);
+                return;
+              }
+              if (!window.confirm(`Delete ${list.length} selected users? This cannot be undone.`)) return;
+              act(async () => {
+                for (const u of list) {
+                  if (u.role === "admin") continue;
+                  await api.admin.deleteUser(u.id);
+                }
+              }, "Users deleted");
+            }}
+          />
+        )}
+
+        {ready && tab === "teams" && (
+          <TeamsPanel
+            users={users}
+            onOpenQueue={(team) => {
+              setQueueTeam({ id: team.id, name: team.name });
+              setTeamFilter(team.id);
+              selectTab("verification");
+            }}
+          />
         )}
 
         {ready && tab === "reports" && (
@@ -342,6 +424,14 @@ function AdminScreen() {
           </div>
         )}
       </Container>
+      {deleteTarget ? (
+        <DeleteUserConfirm
+          user={deleteTarget}
+          busy={deleteBusy}
+          onCancel={() => !deleteBusy && setDeleteTarget(null)}
+          onConfirm={confirmDelete}
+        />
+      ) : null}
     </AppShell>
   );
 }
@@ -365,7 +455,7 @@ function verifyTone(status) {
   return "bg-[#EEF2F6] text-[#3D4A5C]";
 }
 
-function UsersDirectory({ users, pending, query, setQuery, userFilter, setUserFilter, memoFor, setMemoFor, memoText, setMemoText, act }) {
+function UsersDirectory({ users, pending, query, setQuery, userFilter, setUserFilter, memoFor, setMemoFor, memoText, setMemoText, act, onRequestDelete }) {
   const unverified = users.filter((u) => u.role !== "admin" && u.verification_status !== "verified" && u.verification_status !== "pending");
   const needle = query.trim().toLowerCase();
   const rows = users.filter((u) => {
@@ -459,6 +549,15 @@ function UsersDirectory({ users, pending, query, setQuery, userFilter, setUserFi
                         onClick={() => act(() => api.admin.setStatus(u.id, u.status === "suspended" ? "active" : "suspended"), u.status === "suspended" ? "User activated" : "User suspended")}
                       >
                         {u.status === "suspended" ? "Activate" : "Suspend"}
+                      </button>
+                    ) : null}
+                    {u.role !== "admin" ? (
+                      <button
+                        type="button"
+                        className="rounded-lg border border-[#B42318]/25 bg-[#FEE2E2] px-2.5 py-1 text-[11px] font-black text-[#991B1B]"
+                        onClick={() => onRequestDelete?.(u)}
+                      >
+                        Delete
                       </button>
                     ) : null}
                   </div>

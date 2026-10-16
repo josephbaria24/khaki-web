@@ -6,6 +6,7 @@ import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
 import OnboardingFlow from "@/components/verify/OnboardingFlow";
 import TaskerApplicationForm from "@/components/verify/TaskerApplicationForm";
+import TeamJoinCard from "@/components/team/TeamJoinCard";
 import { useAuth } from "@/lib/AuthContext";
 import { canSubmitVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -65,6 +66,7 @@ export default function VerifyPage() {
             done={done && !fullForm}
             onEdit={() => { setDone(false); setFullForm(false); }}
           />
+          <TeamJoinCard className="mt-4" />
           <button type="button" onClick={() => setFullForm((value) => !value)} className="mx-auto mt-4 block text-center text-sm font-bold text-[#163044]/60">
             {fullForm ? "Hide the full application" : "Need the full work application?"}
           </button>

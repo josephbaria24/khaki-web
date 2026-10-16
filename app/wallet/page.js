@@ -31,7 +31,7 @@ export default function PostingFeesPage() {
         <div>
           <h1 className="page-title">Posting fees</h1>
           <p className="page-sub">
-            Khaki records a 2% fee when you post a gawain. Job pay stays between you and the tasker — no Khaki wallet, no GCash withdraw.
+            Job pay stays between you and the tasker — no Khaki wallet, no GCash withdraw.
           </p>
         </div>
         {error ? <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
@@ -44,13 +44,13 @@ export default function PostingFeesPage() {
           {!ready ? <PageSkeleton rows={3} /> : null}
           {ready && fees.length === 0 && !error ? (
             <p className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">
-              Wala pang posting fee. Mag-post ng gawain at mare-record ang 2%.
+              Wala pang naka-record. Mag-post ng gawain para lumabas dito.
             </p>
           ) : null}
           {fees.map((row) => (
             <div key={row.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-card p-4 shadow-card">
               <div>
-                <p className="font-bold">{formatPHP(row.fee_php)} · 2% of {formatPHP(row.budget_php)}</p>
+                <p className="font-bold">{formatPHP(row.fee_php)} · budget {formatPHP(row.budget_php)}</p>
                 <p className="text-xs text-muted-foreground">
                   {row.created_at ? new Date(row.created_at).toLocaleString() : ""}
                 </p>

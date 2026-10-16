@@ -57,7 +57,7 @@ export default function DashboardShortcuts({ user, postingFees = 0, myTasks = []
         href: "/wallet",
         title: "Posting fees",
         value: formatPHP(postingFees),
-        label: "2% when you mag-post",
+        label: "From posted gawain",
         icon: "wallet",
         iconColor: "#3A73C4",
         bg: "#D4E6FF",

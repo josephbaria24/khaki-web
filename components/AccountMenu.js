@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/components/LanguageProvider";
 import { useAuth } from "@/lib/AuthContext";
+import { LANGS } from "@/lib/i18n";
 import { cn } from "@/lib/khaki";
 import { toast } from "@/lib/toast";
 
 export default function AccountMenu() {
   const { user, logout } = useAuth();
+  const { lang, setLanguage } = useLanguage();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [shown, setShown] = useState(false);
@@ -68,6 +71,16 @@ export default function AccountMenu() {
           >
             Profile
           </Link>
+          {user?.role !== "admin" ? (
+            <Link
+              href="/team"
+              role="menuitem"
+              className="block px-3.5 py-2.5 text-sm font-bold text-[#163044] hover:bg-[#F3EFE3]"
+              onClick={() => setOpen(false)}
+            >
+              Team
+            </Link>
+          ) : null}
           <Link
             href="/settings"
             role="menuitem"
@@ -76,6 +89,35 @@ export default function AccountMenu() {
           >
             Settings
           </Link>
+          <div className="mx-2 my-1 rounded-xl bg-[#F3EFE3] p-1.5">
+            <p className="px-1.5 pb-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/55">Language</p>
+            <div className="grid grid-cols-2 gap-1" role="radiogroup" aria-label="Language">
+              {LANGS.map((option) => {
+                const on = lang === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    data-no-translate
+                    onClick={() => {
+                      setOpen(false);
+                      setLanguage(option.id);
+                    }}
+                    className={cn(
+                      "h-8 rounded-lg text-xs font-black transition-colors",
+                      on
+                        ? "bg-[#163044] text-white dark:bg-[#F5F3EE] dark:text-[#11141A]"
+                        : "text-[#163044]/70 hover:bg-white/70 dark:hover:bg-white/10"
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <button
             type="button"
             role="menuitem"

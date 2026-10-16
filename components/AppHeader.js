@@ -1,17 +1,20 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus } from "@/components/icons";
 import Container from "@/components/Container";
 import Logo from "@/components/Logo";
+import AdminMenuButton from "@/components/AdminMenuButton";
 import ModeToggle from "@/components/ModeToggle";
 import AccountMenu from "@/components/AccountMenu";
 import NotificationsBell from "@/components/NotificationsBell";
 import { ThemeModeButton } from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
+import { useAdminPreview } from "@/lib/AdminPreviewContext";
 import { cn } from "@/lib/khaki";
-import { canOpenPost, isAdmin, needsTaskerVerification } from "@/lib/roles";
+import { canPostTask, isAdmin, needsTaskerVerification } from "@/lib/roles";
 
 const NAV = [
   { href: "/dashboard", label: "Home" },
@@ -23,37 +26,67 @@ const NAV = [
 export default function AppHeader() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { previewing } = useAdminPreview();
+  const headerRef = useRef(null);
+  const admin = isAdmin(user);
+  const onAdmin = pathname?.startsWith("/admin");
+  const showUserNav = !admin || previewing || !onAdmin;
+  const showModeToggle = !admin || previewing;
+  const showAdminToggle = admin && onAdmin && !previewing;
+
+  useLayoutEffect(() => {
+    const node = headerRef.current;
+    if (!node || typeof window === "undefined") return undefined;
+    const sync = () => {
+      const height = Math.ceil(node.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--khaki-header-offset", `${height + 12}px`);
+    };
+    sync();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(sync) : null;
+    observer?.observe(node);
+    window.addEventListener("resize", sync);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", sync);
+    };
+  }, [showAdminToggle, showModeToggle, previewing]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1] dark:border-white/10 dark:bg-[#11141A]">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1] dark:border-white/10 dark:bg-[#11141A]"
+    >
       <Container className="flex h-16 items-center justify-between gap-4 lg:h-[72px]">
-        <div className="flex min-w-0 items-center gap-8">
-          <Logo href="/dashboard" />
-          <nav className="hidden items-center gap-1 lg:flex">
-            {NAV.map((item) => {
-              const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "rounded-full px-4 py-2 text-sm font-semibold transition",
-                    active ? "bg-[#163044] text-[#F7F4EC]" : "text-muted-foreground hover:text-foreground hover:bg-[#C9D6E0]/40"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+        <div className="flex min-w-0 items-center gap-3 sm:gap-6 lg:gap-8">
+          {showAdminToggle ? <AdminMenuButton /> : null}
+          <Logo href={admin && onAdmin && !previewing ? "/admin" : "/dashboard"} />
+          {showUserNav ? (
+            <nav className="hidden items-center gap-1 lg:flex">
+              {NAV.map((item) => {
+                const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "rounded-full px-4 py-2 text-sm font-semibold transition",
+                      active ? "bg-[#163044] text-[#F7F4EC]" : "text-muted-foreground hover:text-foreground hover:bg-[#C9D6E0]/40"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          ) : null}
         </div>
-        <div className="hidden sm:flex">
-          <ModeToggle />
+        <div className="hidden items-center gap-2 sm:flex">
+          {showModeToggle ? <ModeToggle /> : null}
         </div>
         <div className="flex items-center gap-2 text-[#2A3F4D]">
           <ThemeModeButton />
-          <NotificationsBell />
-          {canOpenPost(user) && (
+          {showUserNav ? <NotificationsBell /> : null}
+          {showUserNav && canPostTask(user) && (
           <Link
             href="/post"
             className="btn-olive hidden h-10 items-center gap-1.5 px-4 text-sm lg:inline-flex"
@@ -61,22 +94,19 @@ export default function AppHeader() {
             <Plus className="h-4 w-4" color="currentColor" /> Post
           </Link>
           )}
-          {isAdmin(user) && (
-            <Link href="/admin" className="hidden h-10 items-center rounded-full bg-[#FFFCF7] px-4 text-sm font-semibold text-[#2A3F4D] shadow-card lg:inline-flex">
-              Admin
-            </Link>
-          )}
           {needsTaskerVerification(user) && (
-            <Link href="/verify" className="hidden h-10 items-center rounded-full bg-[#FFFCF7] px-4 text-sm font-semibold text-[#2A3F4D] shadow-card lg:inline-flex">
+            <Link href="/verify" className="btn-olive hidden h-10 items-center rounded-full px-4 text-sm font-semibold lg:inline-flex">
               Verify
             </Link>
           )}
           <AccountMenu />
         </div>
       </Container>
-      <div className="flex justify-center px-4 pb-2 sm:hidden">
-        <ModeToggle />
-      </div>
+      {showModeToggle ? (
+        <div className="flex justify-center gap-2 px-4 pb-2 sm:hidden">
+          <ModeToggle />
+        </div>
+      ) : null}
     </header>
   );
 }

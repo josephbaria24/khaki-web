@@ -75,7 +75,7 @@ function RegisterForm() {
   return (
     <AuthShell
       title="Create your account"
-        subtitle="One account for posting and taking gawain. Switch Poster or Tasker anytime after you sign in."
+        subtitle="One account for posting and taking gawain. Verify first, then switch Poster or Tasker anytime."
       footer={
         <>
           Already have an account?{" "}
@@ -102,7 +102,7 @@ function RegisterForm() {
           )}
         </div>
         <p className="rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">
-          After signup, i-submit ang government ID once. Admin verifies it before you can post or accept gawain. Switch Poster or Tasker anytime.
+          After signup, verify your email and government ID. Admin approval unlocks Poster and Tasker — you can post or accept gawain after that.
         </p>
         <input className="auth-field" placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
         <input className="auth-field" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />

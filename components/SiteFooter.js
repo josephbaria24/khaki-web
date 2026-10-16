@@ -45,7 +45,6 @@ export default function SiteFooter() {
       <div className="border-t border-white/10 py-4">
         <Container className="flex flex-col gap-1 text-xs text-[#F7F4EC]/55 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Khaki Palawan</p>
-          <p>2% posting fee until Feb 2027</p>
         </Container>
       </div>
     </footer>
