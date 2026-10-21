@@ -8,6 +8,7 @@ import LanguageProvider from "@/components/LanguageProvider";
 import ThemeProvider from "@/components/ThemeProvider";
 import ToastProvider from "@/components/ToastProvider";
 import "@/lib/installApp";
+import "@/lib/lockViewportScale";
 
 export default function Providers({ children }) {
   return (

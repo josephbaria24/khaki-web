@@ -23,6 +23,23 @@ export const metadata = {
     title: "Khaki",
     statusBarStyle: "default",
   },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+/** Keep installed Safari/Chrome PWAs at 1× — no auto-zoom on navigate/focus. */
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  minimumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FBF8F1" },
+    { media: "(prefers-color-scheme: dark)", color: "#11141A" },
+  ],
 };
 
 export default function RootLayout({ children }) {

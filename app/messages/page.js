@@ -5,6 +5,7 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import ChatAvatar from "@/components/chat/Avatar";
 import { Search } from "@/components/icons";
+import Refreshable from "@/components/Refreshable";
 import { JobSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/AuthContext";
 import { timeAgo } from "@/lib/khaki";
@@ -140,7 +141,7 @@ export default function MessagesPage() {
           </label>
 
           <p className="mt-6 shrink-0 text-sm font-black text-foreground">Conversations</p>
-          <div className="mt-3 min-h-0 flex-1 space-y-1 overflow-y-auto pb-8">
+          <Refreshable className="mt-3 min-h-0 flex-1 space-y-1 overflow-y-auto pb-8">
             {!ready ? (
               <>
                 <JobSkeleton />
@@ -188,7 +189,7 @@ export default function MessagesPage() {
                 );
               })
             )}
-          </div>
+          </Refreshable>
         </div>
       </div>
     </AppShell>

@@ -8,6 +8,7 @@ import AppShell from "@/components/AppShell";
 import PublicShell from "@/components/PublicShell";
 import BrowseTaskDetail from "@/components/browse/BrowseTaskDetail";
 import BrowseTaskListCard from "@/components/browse/BrowseTaskListCard";
+import Refreshable from "@/components/Refreshable";
 import { CHIP_CATEGORIES, shortCategory, taskMatchesChip } from "@/lib/catalog";
 import ChatAvatar from "@/components/chat/Avatar";
 import { cn } from "@/lib/khaki";
@@ -246,7 +247,7 @@ function BrowseBody() {
             </p>
             <p className="text-xs font-bold text-[#2A3F4D]/45 dark:text-[#F5F3EE]/40">{filtered.length}</p>
           </div>
-          <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto p-3 sm:p-4">
+          <Refreshable className="min-h-0 flex-1 space-y-2.5 overflow-y-auto p-3 sm:p-4">
             {!ready ? (
               <PageSkeleton rows={6} />
             ) : filtered.length === 0 ? (
@@ -264,7 +265,7 @@ function BrowseBody() {
                 />
               ))
             )}
-          </div>
+          </Refreshable>
           <div className="border-t border-[#E6DDD0]/80 p-3 dark:border-white/10">
             <Link
               href="/post"

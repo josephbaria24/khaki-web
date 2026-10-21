@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
+import Refreshable from "@/components/Refreshable";
 import { useAuth } from "@/lib/AuthContext";
 import { formatPHP, DISPUTE_STATUS_LABEL, reportReasonLabel } from "@/lib/khaki";
 import { ROLE_LABELS } from "@/lib/roles";
@@ -217,6 +218,7 @@ function AdminScreen() {
   return (
     <AppShell>
       <Container
+        as={tab === "verification" || tab === "users" ? "div" : Refreshable}
         className={
           tab === "verification" || tab === "users"
             ? "flex h-full min-h-0 flex-col gap-6 overflow-hidden py-6 lg:py-8"
@@ -539,7 +541,7 @@ function UsersDirectory({ users, pending, query, setQuery, userFilter, setUserFi
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#F4F7FB]/80 p-2 sm:p-3 dark:bg-[#11141A]">
+      <Refreshable className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#F4F7FB]/80 p-2 sm:p-3 dark:bg-[#11141A]">
         {!rows.length ? (
           <p className="p-4 text-center text-sm font-semibold text-[#163044]/55 dark:text-[#F5F3EE]/55">No accounts match.</p>
         ) : (
@@ -674,7 +676,7 @@ function UsersDirectory({ users, pending, query, setQuery, userFilter, setUserFi
             </div>
           </>
         )}
-      </div>
+      </Refreshable>
 
       {memoFor ? (
         <form

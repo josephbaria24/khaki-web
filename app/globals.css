@@ -86,6 +86,9 @@
     @apply scroll-smooth;
     color-scheme: light;
     background: #FBF8F1;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
   }
 
   html.dark {
@@ -96,6 +99,8 @@
     @apply bg-background font-sans text-foreground antialiased;
     min-height: 100vh;
     background-color: #FBF8F1;
+    touch-action: manipulation;
+    overscroll-behavior-y: contain;
   }
 
   html.dark body {
@@ -142,6 +147,17 @@
   select,
   textarea {
     @apply outline-none transition text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-foreground/10;
+  }
+
+  /* iOS Safari/Chrome zoom when focused fields are < 16px — lock to 16px on touch. */
+  @media (hover: none) and (pointer: coarse) {
+    input,
+    select,
+    textarea,
+    .auth-field,
+    .search-pill input {
+      font-size: 16px !important;
+    }
   }
 
   input:-webkit-autofill,

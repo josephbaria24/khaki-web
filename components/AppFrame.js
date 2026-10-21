@@ -1,15 +1,18 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { usePathname } from "next/navigation";
 import AppHeader from "@/components/AppHeader";
 import AdminPreviewBanner from "@/components/AdminPreviewBanner";
 import BottomNav from "@/components/BottomNav";
 import ModeSwitchOverlay from "@/components/ModeSwitchOverlay";
+import PullToRefresh from "@/components/PullToRefresh";
 import TeamLeadWelcomeDialog from "@/components/team/TeamLeadWelcomeDialog";
 import { useAuth } from "@/lib/AuthContext";
 import { useAdminPreview } from "@/lib/AdminPreviewContext";
 import { cn, isConversationPath, isFillPage, isTaskDetailPath, isTrackPath } from "@/lib/khaki";
 import { isAdmin } from "@/lib/roles";
+import { api } from "@/lib/store";
 
 const PUBLIC_EXACT = new Set(["/", "/about", "/privacy", "/terms", "/jobs"]);
 
@@ -23,9 +26,10 @@ function isPublicPath(pathname) {
 }
 
 export default function AppFrame({ children }) {
-  const { ready, isAuthenticated, user } = useAuth();
+  const { ready, isAuthenticated, user, refresh: refreshAuth } = useAuth();
   const { previewing } = useAdminPreview();
   const pathname = usePathname();
+  const [refreshKey, setRefreshKey] = useState(0);
   const showChrome = ready && isAuthenticated && !isPublicPath(pathname);
   const onAdmin = pathname?.startsWith("/admin");
   const hideNav =
@@ -36,12 +40,19 @@ export default function AppFrame({ children }) {
   const lockScroll = isFillPage(pathname);
   const showUserChrome = !onAdmin || previewing;
 
+  const handleRefresh = useCallback(async () => {
+    api.clearCaches();
+    await Promise.allSettled([refreshAuth?.() ?? Promise.resolve()]);
+    setRefreshKey((k) => k + 1);
+    await new Promise((r) => setTimeout(r, 350));
+  }, [refreshAuth]);
+
   if (!showChrome) {
     return (
-      <>
-        {children}
+      <PullToRefresh windowScroll onRefresh={handleRefresh}>
+        <div key={refreshKey}>{children}</div>
         {isAuthenticated ? <TeamLeadWelcomeDialog /> : null}
-      </>
+      </PullToRefresh>
     );
   }
 
@@ -56,9 +67,13 @@ export default function AppFrame({ children }) {
         {isAdmin(user) && previewing ? <AdminPreviewBanner /> : null}
         <AppHeader />
       </div>
-      <div className={cn("relative min-h-0 flex-1", lockScroll ? "overflow-hidden" : "overflow-y-auto")}>
-        {children}
-      </div>
+      <PullToRefresh
+        className={cn("relative min-h-0 flex-1", lockScroll ? "overflow-hidden" : "overflow-y-auto")}
+        onRefresh={handleRefresh}
+        disabled={lockScroll}
+      >
+        <div key={refreshKey}>{children}</div>
+      </PullToRefresh>
       {showUserChrome ? <BottomNav hidden={hideNav} /> : null}
       {showUserChrome ? <ModeSwitchOverlay /> : null}
       {isAuthenticated ? <TeamLeadWelcomeDialog /> : null}
