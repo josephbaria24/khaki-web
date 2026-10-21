@@ -2,13 +2,15 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import PublicShell from "@/components/PublicShell";
 import BrowseTaskDetail from "@/components/browse/BrowseTaskDetail";
 import BrowseTaskListCard from "@/components/browse/BrowseTaskListCard";
 import { CHIP_CATEGORIES, shortCategory, taskMatchesChip } from "@/lib/catalog";
-import { cn, initials } from "@/lib/khaki";
+import ChatAvatar from "@/components/chat/Avatar";
+import { cn } from "@/lib/khaki";
 import { LANDING } from "@/lib/landingContent";
 import { isTaskerMode } from "@/lib/roles";
 import { useAuth } from "@/lib/AuthContext";
@@ -94,15 +96,53 @@ function BrowseBody() {
   const firstName = (user?.full_name || "there").split(/\s+/)[0];
   const taskerFeed = isAuthenticated && isTaskerMode(user);
   const detailOpen = Boolean(selected);
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   const selectTask = (id) => {
     setSelectedId(id);
-    setShowMapMobile(false);
+    // Keep map visible briefly on phone so flyTo / pin pop can finish.
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches && showMapMobile) {
+      window.setTimeout(() => setShowMapMobile(false), 380);
+    } else {
+      setShowMapMobile(false);
+    }
   };
 
   const returnToMap = () => {
     setSelectedId(null);
   };
+
+  const mobileDetail =
+    detailOpen && portalReady
+      ? createPortal(
+          <div
+            className="browse-mobile-detail fixed inset-0 z-[90] flex flex-col bg-[#FBF8F1] md:hidden dark:bg-[#11141A]"
+            style={{ height: "100dvh" }}
+          >
+            <button
+              type="button"
+              onClick={returnToMap}
+              className="absolute right-3 top-[max(0.75rem,env(safe-area-inset-top))] z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-md transition hover:scale-105 dark:bg-[#1A1E27]"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" color="currentColor" />
+            </button>
+            <BrowseTaskDetail
+              task={selected}
+              poster={posters[selected.client_id]}
+              user={user}
+              isAuthenticated={isAuthenticated}
+              onReturnToMap={returnToMap}
+              className="h-full min-h-0 w-full"
+            />
+          </div>,
+          document.body
+        )
+      : null;
 
   return (
     <div
@@ -117,17 +157,12 @@ function BrowseBody() {
           {isAuthenticated ? (
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                {user?.avatar_url ? (
-                  <img
-                    src={user.avatar_url}
-                    alt=""
-                    className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm dark:ring-[#1A1E27]"
-                  />
-                ) : (
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#C9D6E0] text-sm font-black text-[#2A3F4D] shadow-sm">
-                    {initials(user?.full_name)}
-                  </span>
-                )}
+                <ChatAvatar
+                  name={user?.full_name}
+                  src={user?.avatar_url}
+                  size="sm"
+                  className="h-10 w-10 text-sm ring-2 ring-white shadow-sm dark:ring-[#1A1E27]"
+                />
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-[#2A3F4D]/55 dark:text-[#F5F3EE]/50">Welcome</p>
                   <p className="truncate text-sm font-black text-[#2A3F4D] dark:text-[#F5F3EE]">Hello {firstName}</p>
@@ -240,25 +275,31 @@ function BrowseBody() {
           </div>
         </aside>
 
-        {/* Map / detail pane — tablet+ always; mobile when map toggle or detail */}
+        {/* Map stays mounted; detail crossfades over it on tablet+ (mobile detail uses portal) */}
         <section
           className={cn(
             "relative min-h-0 min-w-0 flex-1 overflow-hidden",
-            detailOpen || showMapMobile ? "flex" : "hidden md:flex",
-            detailOpen && "fixed inset-0 z-40 md:static md:z-auto"
+            detailOpen ? "hidden md:flex" : showMapMobile ? "flex" : "hidden md:flex"
           )}
-          style={detailOpen ? { background: LANDING.page } : undefined}
         >
-          {detailOpen ? (
-            <>
-              <button
-                type="button"
-                onClick={returnToMap}
-                className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-md md:hidden dark:bg-[#1A1E27]"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" color="currentColor" />
-              </button>
+          <div
+            className={cn(
+              "absolute inset-0 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              detailOpen ? "opacity-40 md:opacity-30" : "opacity-100"
+            )}
+          >
+            <BrowseTasksMap
+              tasks={filtered}
+              selectedId={selectedId}
+              onSelect={selectTask}
+              onExit={() => setShowMapMobile(false)}
+            />
+          </div>
+          {detailOpen && selected ? (
+            <div
+              key={selected.id}
+              className="browse-detail-panel absolute inset-0 z-10 bg-[#FBF8F1]/96 backdrop-blur-[2px] dark:bg-[#11141A]/96"
+            >
               <BrowseTaskDetail
                 task={selected}
                 poster={posters[selected.client_id]}
@@ -267,14 +308,11 @@ function BrowseBody() {
                 onReturnToMap={returnToMap}
                 className="h-full w-full"
               />
-            </>
-          ) : (
-            <div className="absolute inset-0">
-              <BrowseTasksMap tasks={filtered} selectedId={selectedId} onSelect={selectTask} />
             </div>
-          )}
+          ) : null}
         </section>
       </div>
+      {mobileDetail}
     </div>
   );
 }

@@ -6,7 +6,8 @@ import { DECLARATION_TEXT, readSubmittedApplication } from "@/lib/taskerApplicat
 import { ROLE_LABELS } from "@/lib/roles";
 import { SignaturePreview } from "@/components/verify/SignaturePad";
 import { Collapse } from "@/components/ui/motion";
-import { Briefcase, Calendar, Mail, MapPin, ShieldCheck, User, Wallet } from "@/components/icons";
+import ChatAvatar from "@/components/chat/Avatar";
+import { Briefcase, Calendar, Mail, MapPin, User, Wallet } from "@/components/icons";
 
 function shown(value) {
   if (value === 0) return "0";
@@ -128,9 +129,7 @@ export default function ApplicationReviewCard({ user, onApprove, onReject, onDel
         aria-expanded={open}
         className="flex w-full items-center gap-3 px-3 py-2.5 text-left"
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: tone.bg, color: tone.ink }}>
-          <ShieldCheck className="h-4 w-4" />
-        </span>
+        <ChatAvatar name={name} src={user?.avatar_url} size="sm" className="h-9 w-9 rounded-xl text-[11px]" />
         <span className="min-w-0 flex-1">
           <span className="flex min-w-0 items-center gap-2">
             <span className="truncate text-sm font-black text-foreground">{name}</span>

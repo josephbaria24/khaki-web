@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, MessageSquare } from "@/components/icons";
 import AppShell from "@/components/AppShell";
+import ChatAvatar from "@/components/chat/Avatar";
 import DeliveryRouteMap from "@/components/task/DeliveryRouteMap";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/AuthContext";
@@ -221,7 +222,7 @@ export default function TaskTrackPage() {
           />
           <p className="mt-2 text-[11px] font-semibold text-[#163044]/50">
             {shared
-              ? "The marker is the last spot the tasker shared. It stays there until they share again."
+              ? "The marker is the tasker’s last shared spot (auto while Online, or from Share where I am). Always last seen — not live GPS."
               : start && end
                 ? "Until the tasker shares a location, the marker sits on this job’s step along the posted route."
                 : "This job has no pick-up and drop-off pins, so the map stays on the town."}
@@ -230,11 +231,7 @@ export default function TaskTrackPage() {
 
         <section className="mt-4 rounded-[1.2rem] border border-[#E6DDD0] bg-white p-3.5 dark:border-white/10 dark:bg-[#1A1E27]">
           <div className="flex items-center gap-3">
-            {tasker?.avatar_url ? (
-              <img src={tasker.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
-            ) : (
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#163044] text-sm font-black text-white">{name.slice(0, 1)}</span>
-            )}
+            <ChatAvatar name={name} src={tasker?.avatar_url} size="md" className="h-12 w-12 text-sm" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-base font-black text-[#163044]">{name}</p>
               <p className="truncate text-xs font-semibold text-[#163044]/60">{riderMeta(task, tasker)}</p>

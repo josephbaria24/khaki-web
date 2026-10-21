@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import ChatAvatar from "@/components/chat/Avatar";
 import { api } from "@/lib/store";
-import { initials, lastSeenLabel, MEMBER_STATUS_LABEL, vehicleLine, verifyColors, verifyLabel } from "@/lib/teams";
+import { lastSeenLabel, MEMBER_STATUS_LABEL, vehicleLine, verifyColors, verifyLabel } from "@/lib/teams";
 import { toast } from "@/lib/toast";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 
@@ -144,12 +145,7 @@ function RiderRow({ row, showStatus = false, children }) {
   return (
     <div className="flex flex-col gap-3 rounded-[1.25rem] bg-white p-3 shadow-[0_6px_20px_rgba(22,48,68,0.06)] sm:flex-row sm:items-center dark:bg-[#1A1E27]">
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        {row.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={row.avatar_url} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
-        ) : (
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E8DCC4] text-xs font-black text-[#163044]">{initials(row.full_name)}</span>
-        )}
+        <ChatAvatar name={row.full_name} src={row.avatar_url} size="sm" className="h-10 w-10 text-xs" />
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <p className="truncate font-black text-[#163044] dark:text-[#F5F3EE]">{row.full_name || "Rider"}</p>

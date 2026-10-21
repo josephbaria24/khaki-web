@@ -1,11 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import ChatAvatar from "@/components/chat/Avatar";
 import { PageSkeleton } from "@/components/ui/Skeleton";
+import { timeAgo } from "@/lib/khaki";
 import { api } from "@/lib/store";
 import {
-  initials,
   jobsTodayLabel,
   lastSeenLabel,
   pauseEndsLabel,
@@ -18,9 +20,18 @@ import {
 } from "@/lib/teams";
 import { toast } from "@/lib/toast";
 
+const TeamMonitorMap = dynamic(() => import("@/components/team/TeamMonitorMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[16rem] items-center justify-center rounded-[1.25rem] border border-dashed border-[#E6DDD0] text-xs font-bold text-[#163044]/50 sm:h-[20rem] dark:border-white/10">
+      Loading map…
+    </div>
+  ),
+});
+
 const EMPTY_SUMMARY = {
   waiting: 0, online: 0, busy: 0, inactive: 0, paused: 0, offline: 0,
-  jobs_today: 0, inactive_warnings: 0, offline_warnings: 0,
+  jobs_today: 0, inactive_warnings: 0, offline_warnings: 0, on_map: 0,
 };
 
 export default function TeamMonitor({ teamId, onChange }) {
@@ -136,6 +147,21 @@ export default function TeamMonitor({ teamId, onChange }) {
         </div>
       ) : null}
 
+      <section className="space-y-2">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h3 className="text-base font-black text-[#163044] dark:text-[#F5F3EE]">Team map</h3>
+            <p className="text-xs font-semibold text-[#163044]/55 dark:text-[#F5F3EE]/55">
+              Pins update while riders are Online. Always “last seen” — not live GPS.
+            </p>
+          </div>
+          <p className="text-xs font-bold text-[#163044]/55 dark:text-[#F5F3EE]/55">
+            {Number(summary.on_map || 0)} with a pin
+          </p>
+        </div>
+        <TeamMonitorMap riders={active} />
+      </section>
+
       {waiting.length ? (
         <section className="space-y-2">
           <h3 className="text-base font-black text-[#163044] dark:text-[#F5F3EE]">Waiting for approval</h3>
@@ -222,12 +248,7 @@ function RiderCard({ row, monitor = false, children }) {
   return (
     <div className="flex flex-col gap-3 rounded-[1.25rem] bg-white p-3 shadow-[0_6px_20px_rgba(22,48,68,0.06)] sm:flex-row sm:items-center dark:bg-[#1A1E27]">
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        {row.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={row.avatar_url} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
-        ) : (
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E8DCC4] text-xs font-black text-[#163044]">{initials(row.full_name)}</span>
-        )}
+        <ChatAvatar name={row.full_name} src={row.avatar_url} size="sm" className="h-10 w-10 text-xs" />
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <p className="truncate font-black text-[#163044] dark:text-[#F5F3EE]">{row.full_name || "Rider"}</p>
@@ -242,6 +263,7 @@ function RiderCard({ row, monitor = false, children }) {
               {jobsTodayLabel(row.jobs_today)}
               {" · "}
               {ratingLabel(row.avg_rating, row.review_count)}
+              {row.last_location_at ? ` · Pin ${timeAgo(row.last_location_at)}` : ""}
             </p>
           ) : (
             <p className="truncate text-xs text-[#163044]/55 dark:text-[#F5F3EE]/55">

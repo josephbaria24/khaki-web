@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import ChatAvatar from "@/components/chat/Avatar";
 import { Bell } from "@/components/icons";
 import { NoticeSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/AuthContext";
@@ -212,12 +213,12 @@ export function NotificationsSheet({ open, onClose }) {
         onClickCapture={swallowClick}
       >
         <div data-sheet-handle className="mx-auto mb-2 flex w-full touch-none justify-center py-1">
-          <span className="h-1 w-9 rounded-full bg-[#C9D6E0]" />
+          <span className="h-1 w-9 rounded-full bg-[#C9D6E0] dark:bg-white/20" />
         </div>
         <div data-sheet-handle className="mb-1 flex touch-none items-center justify-between gap-2">
-          <p className="text-base font-black tracking-tight text-[#163044]">Notifications</p>
+          <p className="text-base font-black tracking-tight text-[#163044] dark:text-[#F5F3EE]">Notifications</p>
           {freshIds.size > 0 ? (
-            <button type="button" onClick={markAll} className="rounded-lg px-2 py-1 text-[12px] font-black text-[#0D666A]">
+            <button type="button" onClick={markAll} className="rounded-lg px-2 py-1 text-[12px] font-black text-[#0D666A] dark:text-[#7FD3CF]">
               Mark all as read
             </button>
           ) : null}
@@ -230,7 +231,7 @@ export function NotificationsSheet({ open, onClose }) {
               <NoticeSkeleton />
             </>
           ) : feed.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-[#C9D6E0] px-4 py-10 text-center text-sm text-muted-foreground">
+            <p className="rounded-2xl border border-dashed border-[#C9D6E0] px-4 py-10 text-center text-sm text-muted-foreground dark:border-white/15 dark:text-[#F5F3EE]/55">
               You&apos;re all caught up.
             </p>
           ) : (
@@ -246,7 +247,7 @@ export function NotificationsSheet({ open, onClose }) {
                 <Fragment key={n.id}>
                 {showDay ? (
                   <div className="flex items-center gap-2 px-2 pb-1 pt-3">
-                    <span className="text-[11px] font-black uppercase tracking-[0.08em] text-[#2A3F4D]/50">{day}</span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.08em] text-[#2A3F4D]/50 dark:text-[#F5F3EE]/45">{day}</span>
                     <span className="h-px flex-1 bg-[#E6DDD0] dark:bg-white/15" />
                   </div>
                 ) : null}
@@ -255,18 +256,36 @@ export function NotificationsSheet({ open, onClose }) {
                   onClick={() => go(n)}
                   className={cn(
                     "flex w-full items-start gap-2.5 rounded-xl px-2 py-2 text-left",
-                    unread ? "bg-[#E7F4F4] dark:bg-[#163044]/40" : "bg-transparent"
+                    unread ? "bg-[#E7F4F4] dark:bg-[#252A35]" : "bg-transparent"
                   )}
                 >
-                  <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#163044] text-xs font-black text-white">{parts.initial}</span>
+                  <ChatAvatar
+                    name={parts.name || parts.actorName || parts.body || "K"}
+                    src={parts.avatar_url || n.avatar_url}
+                    size="sm"
+                    className="mt-0.5 h-9 w-9 text-xs"
+                  />
                   <span className="min-w-0 flex-1">
-                    <span className={cn("block text-[13px] leading-snug", unread ? "text-[#163044]" : "text-[#2A3F4D]/70")}>
+                    <span
+                      className={cn(
+                        "block text-[13px] leading-snug",
+                        unread
+                          ? "text-[#163044] dark:text-[#F5F3EE]"
+                          : "text-[#2A3F4D]/70 dark:text-[#F5F3EE]/70"
+                      )}
+                    >
                       {parts.name ? <span className="font-black">{parts.name} </span> : null}
                       {parts.body}
                     </span>
-                    <span className="mt-0.5 block text-[11px] font-semibold text-[#2A3F4D]/45">{timeAgo(n.created_at)}</span>
+                    <span className="mt-0.5 block text-[11px] font-semibold text-[#2A3F4D]/45 dark:text-[#F5F3EE]/45">
+                      {timeAgo(n.created_at)}
+                    </span>
                   </span>
-                  {unread ? <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-[#0D666A]" /> : <span className="mt-2 h-2.5 w-2.5 shrink-0" />}
+                  {unread ? (
+                    <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-[#0D666A] dark:bg-[#7FD3CF]" />
+                  ) : (
+                    <span className="mt-2 h-2.5 w-2.5 shrink-0" />
+                  )}
                 </button>
                 </Fragment>
               );

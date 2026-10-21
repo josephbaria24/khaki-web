@@ -925,6 +925,39 @@
     animation: fade-in 0.4s ease-out both;
   }
 
+  .overview-tablist {
+    position: relative;
+  }
+
+  .overview-tab-pill {
+    transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  .overview-panel {
+    animation: overview-panel-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes overview-panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .overview-tab-pill {
+      transition: none;
+    }
+    .overview-panel {
+      animation: none;
+    }
+  }
+
   @keyframes mode-switch-overlay {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -1456,6 +1489,9 @@
     flex-direction: column;
     border-radius: 1.75rem 1.75rem 0 0;
     background: #FFFCF7;
+    color: #163044;
+    border: 1px solid transparent;
+    border-bottom: 0;
     padding: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom));
     box-shadow: 0 -16px 48px rgba(22, 48, 68, 0.18);
     animation: notif-sheet-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -1468,6 +1504,18 @@
   .notif-sheet.is-dragging,
   .notif-sheet.is-dragging.is-leaving {
     animation: none !important;
+  }
+
+  /* Portaled to body — not under .khaki-landing, so dark styles must be global. */
+  html.dark .notif-backdrop {
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  html.dark .notif-sheet {
+    background: #151922 !important;
+    color: #F5F3EE !important;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.45);
   }
 
   .khaki-landing button:not(:disabled),
@@ -1788,10 +1836,69 @@ html.dark .khaki-landing .bg-\[\#C8F0D8\] {
   color: #163044 !important;
 }
 
+/* Pastel admin KPI cards: keep theme ink on light gradients in dark mode. */
+html.dark .khaki-landing .admin-kpi {
+  color: var(--kpi-ink) !important;
+}
+html.dark .khaki-landing .admin-kpi .admin-kpi-muted {
+  color: var(--kpi-muted) !important;
+}
+html.dark .khaki-landing .admin-kpi .admin-kpi-icon {
+  background-color: var(--kpi-icon-bg) !important;
+  color: var(--kpi-icon-fg) !important;
+}
+
+/* Admin drawer portals to body — outside .khaki-landing — so force dark surfaces. */
+html.dark #admin-side-nav.admin-side-nav {
+  background-color: #151922 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #F5F3EE !important;
+}
+html.dark #admin-side-nav.admin-side-nav [class*="text-[#2A3F4D]"],
+html.dark #admin-side-nav.admin-side-nav [class*="text-[#163044]"] {
+  color: #E8E4DC !important;
+}
+html.dark #admin-side-nav.admin-side-nav button.bg-\[\#163044\],
+html.dark #admin-side-nav.admin-side-nav [class*="bg-[#163044]"] {
+  color: #F7F4EC !important;
+}
+
 html.dark .khaki-landing .bento-widget,
 html.dark .khaki-landing .bento-widget [class*="text-[#163044]"],
 html.dark .khaki-landing .bento-widget [class*="text-[#2A3F4D]"] {
   color: #163044 !important;
+}
+
+/* Lime wallet card keeps dark ink on bright green in dark mode. */
+html.dark .khaki-landing .wallet-balance-card,
+html.dark .khaki-landing .wallet-balance-card [class*="text-[#163044]"],
+html.dark .khaki-landing .wallet-balance-card [class*="text-[#2A3F4D]"] {
+  color: #163044 !important;
+}
+
+/* Accent labels that stay readable on dark account menu / wallet surfaces. */
+html.dark .khaki-landing [class*="text-[#0D666A]"] {
+  color: #7FD3CF !important;
+}
+
+html.dark .khaki-landing [class*="text-[#C94B78]"] {
+  color: #F0A3BC !important;
+}
+
+html.dark .khaki-landing [class*="text-[#D97706]"] {
+  color: #FBBF24 !important;
+}
+
+html.dark .khaki-landing [class*="text-[#DC2626]"] {
+  color: #F87171 !important;
+}
+
+html.dark .khaki-landing [class*="text-[#16A34A]"] {
+  color: #4ADE80 !important;
+}
+
+html.dark .khaki-landing [class*="text-[#5A9A12]"] {
+  color: #C8F560 !important;
 }
 
 html.dark .khaki-landing .bento-pill {
@@ -1850,6 +1957,114 @@ html.dark .khaki-landing .browse-page :is([class*="text-[#2A3F4D]/"], [class*="t
   width: 100%;
   height: 100%;
   background: #FBF8F1;
+}
+
+.browse-tasks-map .leaflet-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.browse-map-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  transform: translateZ(0) scale(1);
+  transform-origin: bottom center;
+  filter: drop-shadow(0 3px 6px rgba(22, 48, 68, 0.42));
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.32s ease;
+  will-change: transform;
+}
+
+.browse-map-pin__body {
+  min-width: inherit;
+  background: var(--pin-fill, #163044);
+  border: 2px solid #fff;
+  border-radius: 16px;
+  padding: 6px 8px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: background-color 0.28s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.browse-map-pin__price {
+  color: #F7F4EC;
+  font: 900 10px/1.1 system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.browse-map-pin__tip {
+  width: 0;
+  height: 0;
+  margin-top: -1px;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid var(--pin-fill, #163044);
+  transition: border-top-color 0.28s ease;
+}
+
+.browse-map-pin.is-selected {
+  transform: translateZ(0) scale(1.12);
+  filter: drop-shadow(0 6px 12px rgba(47, 138, 212, 0.45));
+  animation: browse-pin-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 2;
+}
+
+@keyframes browse-pin-pop {
+  0% { transform: translateZ(0) scale(0.92); }
+  55% { transform: translateZ(0) scale(1.16); }
+  100% { transform: translateZ(0) scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browse-map-pin,
+  .browse-map-pin__body,
+  .browse-map-pin__tip,
+  .browse-map-pin.is-selected {
+    transition: none;
+    animation: none;
+  }
+}
+
+.browse-detail-panel {
+  animation: browse-detail-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes browse-detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.browse-mobile-detail {
+  animation: browse-mobile-detail-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes browse-mobile-detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browse-detail-panel,
+  .browse-mobile-detail {
+    animation: none;
+  }
 }
 
 @keyframes rider-team-glow {

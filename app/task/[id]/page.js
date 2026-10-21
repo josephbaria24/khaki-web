@@ -6,12 +6,13 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, CircleAlert, Lock, MessageSquare } from "@/components/icons";
 import AppShell from "@/components/AppShell";
+import ChatAvatar from "@/components/chat/Avatar";
 import PublicShell from "@/components/PublicShell";
 import Container from "@/components/Container";
 import StatusPill from "@/components/StatusPill";
 import StarRating from "@/components/StarRating";
 import { useAuth } from "@/lib/AuthContext";
-import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, TASKER_LOCKED_NOTICE, cn, displayTaskCategory, formatPHP, scheduleLabel, serviceByKey, serviceForTaskCategory, skillFitsTask, skillSummary, timeAgo } from "@/lib/khaki";
+import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, TASKER_LOCKED_NOTICE, cn, displayTaskCategory, formatDateTime, formatPHP, scheduleLabel, serviceByKey, serviceForTaskCategory, skillFitsTask, skillSummary, timeAgo } from "@/lib/khaki";
 import { distanceLabel, townDistanceKm } from "@/lib/palawanLocations";
 import { canTrack } from "@/lib/deliveryTrack";
 import { describeExtras, describePins, vehicleLabel } from "@/lib/serviceTemplates";
@@ -22,6 +23,8 @@ import { api } from "@/lib/store";
 import PinPreviewMap from "@/components/task/PinPreviewMap";
 import ReportGawain from "@/components/ReportGawain";
 import { toast } from "@/lib/toast";
+import ClientPayCard from "@/components/escrow/ClientPayCard";
+import RiderPayoutCard from "@/components/escrow/RiderPayoutCard";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 
 function TaskShell({ children }) {
@@ -346,12 +349,20 @@ export default function TaskDetailPage() {
           <p className="mt-1 text-center text-xs font-semibold text-[#2A3F4D]/55">
             {displayTaskCategory(task)} · Posted {timeAgo(task.created_at)}
           </p>
+          {task.created_at ? (
+            <p className="mt-0.5 text-center text-[11px] font-semibold text-[#2A3F4D]/45">
+              {formatDateTime(task.created_at)}
+            </p>
+          ) : null}
           {canTrack(task, user?.id) ? (
             <Link href={`/task/${task.id}/track`} className="mt-4 flex h-12 items-center justify-center rounded-2xl bg-[#163044] text-sm font-black text-white">
               Track this job
             </Link>
           ) : null}
           {error ? <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
+          {task.accepted_tasker_id ? (
+            <ClientPayCard task={task} amount={featured?.amount_php || task.budget_php} />
+          ) : null}
 
           <section className="mt-4 rounded-[1.35rem] border border-[#E6D9C4] bg-white p-4 shadow-[0_10px_28px_rgba(42,63,77,0.16)]">
             <h2 className="text-base font-black text-[#163044]">Job Details</h2>
@@ -393,6 +404,15 @@ export default function TaskDetailPage() {
                   {scheduleLabel(task)}
                 </span>
               </div>
+              <div className="grid grid-cols-[5.5rem_1fr] items-center gap-2">
+                <span className="font-semibold text-[#2A3F4D]/70">Posted:</span>
+                <span className="font-black text-[#163044]">
+                  {formatDateTime(task.created_at) || "—"}
+                  {task.created_at ? (
+                    <span className="ml-1.5 font-semibold text-[#2A3F4D]/55">({timeAgo(task.created_at)})</span>
+                  ) : null}
+                </span>
+              </div>
             </div>
             <p className="mt-2 text-[11px] font-medium text-[#2A3F4D]/50">
               Listed budget (guide). Task payment is arranged privately.
@@ -425,14 +445,12 @@ export default function TaskDetailPage() {
                 {featuredLive ? "Bagong Bid Natanggap!" : featured.status === "accepted" ? "Tinanggap na ang bid" : "Bid"}
               </h2>
               <div className="mt-2 flex items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#D4E6FF] text-[#3A73C4]">
-                  {featuredBidder?.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={featuredBidder.avatar_url} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <PersonIcon />
-                  )}
-                </span>
+                <ChatAvatar
+                  name={featuredName}
+                  src={featuredBidder?.avatar_url}
+                  size="sm"
+                  className="h-9 w-9 text-xs"
+                />
                 <div className="min-w-0">
                   <Link href={`/u/${featured.tasker_id}`} className="block truncate text-sm font-black text-[#163044]">
                     {featuredName}
@@ -656,35 +674,61 @@ export default function TaskDetailPage() {
                 <span className="text-xs font-semibold text-muted-foreground">{displayTaskCategory(task)}</span>
                 <span className="text-xs font-semibold text-muted-foreground">· Posted {timeAgo(task.created_at)}</span>
               </div>
+              {task.created_at ? (
+                <p className="mb-3 text-xs font-semibold text-muted-foreground">
+                  Posted on {formatDateTime(task.created_at)}
+                </p>
+              ) : null}
               <h1 className="text-2xl font-black sm:text-3xl">{task.title}</h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{task.details}</p>
-              {taskExtras.length > 0 ? (
-                <dl className="mt-4 grid gap-2 rounded-2xl bg-[#F3EFE3] p-4 sm:grid-cols-2">
-                  {taskExtras.map((row) => (
-                    <div key={row.key}>
-                      <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50">{row.label}</dt>
-                      <dd className="mt-0.5 text-sm font-bold text-[#163044]">{row.value}</dd>
-                      {row.desc ? <dd className="text-[11px] font-medium leading-snug text-[#2A3F4D]/55">{row.desc}</dd> : null}
-                    </div>
-                  ))}
-                  <div>
-                    <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50">Kailan</dt>
-                    <dd className="mt-0.5 text-sm font-bold text-[#163044]">{scheduleLabel(task)}</dd>
+              <dl className="mt-4 grid gap-2 rounded-2xl bg-[#F3EFE3] p-4 sm:grid-cols-2">
+                <div>
+                  <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50">Posted</dt>
+                  <dd className="mt-0.5 text-sm font-bold text-[#163044]">{formatDateTime(task.created_at) || "—"}</dd>
+                  {task.created_at ? (
+                    <dd className="text-[11px] font-medium leading-snug text-[#2A3F4D]/55">{timeAgo(task.created_at)}</dd>
+                  ) : null}
+                </div>
+                <div>
+                  <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50">Kailan</dt>
+                  <dd className="mt-0.5 text-sm font-bold text-[#163044]">{scheduleLabel(task)}</dd>
+                </div>
+                {taskExtras.map((row) => (
+                  <div key={row.key}>
+                    <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50">{row.label}</dt>
+                    <dd className="mt-0.5 text-sm font-bold text-[#163044]">{row.value}</dd>
+                    {row.desc ? <dd className="text-[11px] font-medium leading-snug text-[#2A3F4D]/55">{row.desc}</dd> : null}
                   </div>
-                </dl>
-              ) : null}
+                ))}
+              </dl>
               <p className="mt-4 text-3xl font-black text-primary">{formatPHP(task.budget_php)}</p>
               <p className="mt-1 text-xs text-muted-foreground">Listed budget (guide). Task payment is arranged privately.</p>
               <p className="mt-1 text-sm text-muted-foreground">{task.is_remote ? "Remote · Palawan-wide" : `${task.location_area}${task.barangay ? ` · ${task.barangay}` : ""}`}</p>
               <PinnedLocations pins={taskPins} />
-              <p className="mt-2 text-sm">
-                Posted by{" "}
-                <Link href={`/u/${task.client_id}`} className="font-bold underline-offset-2 hover:underline">
-                  {poster?.full_name || task.client_name}
-                  {isClient ? " (me)" : ""}
-                </Link>
-                {posterAvg ? ` · ${posterAvg}★ from ${posterReviews.length} review${posterReviews.length === 1 ? "" : "s"}` : ""}
-              </p>
+              <Link
+                href={`/u/${task.client_id}`}
+                className="mt-3 flex items-center gap-2.5 text-sm"
+              >
+                <ChatAvatar
+                  name={poster?.full_name || task.client_name || "K"}
+                  src={poster?.avatar_url || poster?.profile_photo}
+                  size="sm"
+                  className="h-9 w-9 text-xs"
+                />
+                <span className="min-w-0">
+                  <span className="text-muted-foreground">Posted by </span>
+                  <span className="font-bold underline-offset-2 hover:underline">
+                    {poster?.full_name || task.client_name}
+                    {isClient ? " (me)" : ""}
+                  </span>
+                  {posterAvg ? (
+                    <span className="text-muted-foreground">
+                      {" "}
+                      · {posterAvg}★ from {posterReviews.length} review{posterReviews.length === 1 ? "" : "s"}
+                    </span>
+                  ) : null}
+                </span>
+              </Link>
               {canEditDetails && (
                 <button
                   type="button"
@@ -853,6 +897,13 @@ export default function TaskDetailPage() {
                   </div>
                 ) : null}
               </div>
+            ) : null}
+
+            {isHiredTasker ? (
+              <RiderPayoutCard
+                task={task}
+                amount={offers.find((row) => row.status === "accepted")?.amount_php || task.budget_php}
+              />
             ) : null}
 
             {awaiting && isHiredTasker ? (
@@ -1133,12 +1184,12 @@ function PinnedLocations({ pins }) {
           href={pin.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 rounded-xl bg-white/70 px-3 py-2 text-sm font-bold text-[#163044] hover:bg-white"
+          className="flex items-center gap-2 rounded-xl bg-[#F3EFE3] px-3 py-2 text-sm font-bold text-[#163044] hover:bg-[#E8E0D2] dark:bg-[#252A35] dark:text-[#F5F3EE] dark:hover:bg-[#2A303C]"
         >
           <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: pin.color }} />
-          <span className="text-xs font-semibold text-[#2A3F4D]/60">{pin.label}</span>
-          <span className="min-w-0 flex-1 truncate">{pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}</span>
-          <span className="shrink-0 text-xs font-bold text-[#3A73C4]">Buksan sa Maps →</span>
+          <span className="text-xs font-semibold text-[#2A3F4D]/60 dark:text-[#F5F3EE]/55">{pin.label}</span>
+          <span className="min-w-0 flex-1 truncate dark:text-[#F5F3EE]">{pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}</span>
+          <span className="shrink-0 text-xs font-bold text-[#3A73C4] dark:text-[#7EB6F0]">Buksan sa Maps →</span>
         </a>
       ))}
     </div>

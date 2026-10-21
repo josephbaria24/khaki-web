@@ -6,11 +6,10 @@ import { isPosterMode } from "@/lib/roles";
 import Reicon from "@/components/icons/Reicon";
 import SectionIntro from "@/components/SectionIntro";
 
-export default function DashboardShortcuts({ user, postingFees = 0, myTasks = [] }) {
+export default function DashboardShortcuts({ user, postingFees = 0, releasedPayouts = 0, myTasks = [] }) {
   const poster = isPosterMode(user);
   const mine = myTasks.filter((t) => t.client_id === user?.id || t.accepted_tasker_id === user?.id);
   const active = mine.filter((t) => !["released", "cancelled"].includes(t.status)).length;
-  const completed = mine.filter((t) => t.status === "released").length;
 
   const hero = poster
     ? {
@@ -55,20 +54,20 @@ export default function DashboardShortcuts({ user, postingFees = 0, myTasks = []
   const right = poster
     ? {
         href: "/wallet",
-        title: "Posting fees",
+        title: "Wallet",
         value: formatPHP(postingFees),
-        label: "From posted gawain",
+        label: "Posting fees",
         icon: "wallet",
         iconColor: "#3A73C4",
         bg: "#D4E6FF",
       }
     : {
-        href: "/profile",
-        title: "Profile",
-        value: String(completed),
-        label: "Jobs completed",
-        icon: "user",
-        iconColor: "#163044",
+        href: "/wallet",
+        title: "Wallet",
+        value: formatPHP(releasedPayouts),
+        label: "Released payouts",
+        icon: "wallet",
+        iconColor: "#3A73C4",
         bg: "#D4E6FF",
       };
 

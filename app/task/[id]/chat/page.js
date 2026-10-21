@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowRight, ChevronLeft } from "@/components/icons";
 import AppShell from "@/components/AppShell";
@@ -159,7 +160,17 @@ export default function TaskChatPage() {
                         <div className={`flex items-end gap-2 ${mine ? "justify-end" : ""}`}>
                           {!mine ? (
                             showAvatar ? (
-                              <ChatAvatar name={m.sender_name} size="sm" />
+                              m.sender_id || other?.id ? (
+                                <Link
+                                  href={`/u/${m.sender_id || other.id}`}
+                                  className="shrink-0 rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#163044]/40"
+                                  aria-label={`View ${m.sender_name || otherName}'s profile`}
+                                >
+                                  <ChatAvatar name={m.sender_name} src={other?.avatar_url} size="sm" />
+                                </Link>
+                              ) : (
+                                <ChatAvatar name={m.sender_name} src={other?.avatar_url} size="sm" />
+                              )
                             ) : (
                               <span className="h-8 w-8 shrink-0" aria-hidden />
                             )

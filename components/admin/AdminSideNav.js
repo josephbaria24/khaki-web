@@ -8,9 +8,9 @@ import { useAdminNav } from "@/lib/AdminNavContext";
 
 export function AdminSectionChip({ label, className = "" }) {
   return (
-    <div className={`min-w-0 rounded-2xl border border-[#163044]/10 bg-card px-3 py-1.5 shadow-card sm:px-3.5 sm:py-2 ${className}`}>
+    <div className={`min-w-0 rounded-2xl border border-[#163044]/10 bg-card px-3 py-1.5 shadow-card sm:px-3.5 sm:py-2 dark:border-white/10 ${className}`}>
       <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground sm:text-[10px]">Section</p>
-      <p className="truncate text-sm font-black leading-tight text-[#163044]">{label}</p>
+      <p className="truncate text-sm font-black leading-tight text-foreground">{label}</p>
     </div>
   );
 }
@@ -102,7 +102,7 @@ export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hi
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`absolute left-3 top-[4.5rem] flex w-[min(18.5rem,calc(100vw-1.5rem))] max-h-[calc(100dvh-5.25rem)] origin-top-left flex-col overflow-hidden rounded-[1.75rem] border border-white/40 bg-[#FBF8F1]/95 shadow-[0_24px_60px_rgba(22,48,68,0.28)] backdrop-blur-xl transition-[transform,opacity] ${ease} ${motion} sm:left-4 sm:top-[4.75rem] sm:max-h-[calc(100dvh-5.5rem)] lg:top-[5rem] dark:border-white/10 dark:bg-[#151922]/96 ${
+        className={`admin-side-nav absolute left-3 top-[4.5rem] flex w-[min(18.5rem,calc(100vw-1.5rem))] max-h-[calc(100dvh-5.25rem)] origin-top-left flex-col overflow-hidden rounded-[1.75rem] border border-[#163044]/12 bg-[#FBF8F1] text-[#163044] shadow-[0_24px_60px_rgba(22,48,68,0.28)] backdrop-blur-xl transition-[transform,opacity] ${ease} ${motion} sm:left-4 sm:top-[4.75rem] sm:max-h-[calc(100dvh-5.5rem)] lg:top-[5rem] dark:border-white/12 dark:bg-[#151922] dark:text-[#F5F3EE] dark:shadow-[0_24px_60px_rgba(0,0,0,0.55)] ${
           entered
             ? "translate-x-0 scale-100 opacity-100"
             : "-translate-x-5 scale-[0.96] opacity-0"
@@ -118,7 +118,7 @@ export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hi
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#163044]/08 text-[#163044] transition hover:bg-[#163044]/14 dark:bg-white/10 dark:text-[#F7F4EC]"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#163044]/08 text-[#163044] transition hover:bg-[#163044]/14 dark:bg-white/10 dark:text-[#F5F3EE] dark:hover:bg-white/16"
             aria-label="Close"
           >
             <X className="h-4 w-4" color="currentColor" />
@@ -139,15 +139,15 @@ export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hi
                   entered ? "translate-x-0 opacity-100" : "-translate-x-3 opacity-0"
                 } ${
                   on
-                    ? "bg-[#163044] text-[#F7F4EC] shadow-sm"
-                    : "text-[#2A3F4D] hover:bg-[#C9D6E0]/45 dark:text-[#E8E4DC] dark:hover:bg-white/8"
+                    ? "bg-[#163044] text-[#F7F4EC] shadow-sm dark:bg-[#2A3544]"
+                    : "text-[#2A3F4D] hover:bg-[#C9D6E0]/45 dark:text-[#E8E4DC] dark:hover:bg-white/10"
                 }`}
               >
                 <span>{tab.label}</span>
                 {badge ? (
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-black tabular-nums ${
-                      on ? "bg-[#F6C56B] text-[#7A4A00]" : "bg-[#FFF4D6] text-[#B45309]"
+                      on ? "bg-[#F6C56B] text-[#7A4A00]" : "bg-[#FFF4D6] text-[#B45309] dark:bg-[#3A2E14] dark:text-[#F6C56B]"
                     }`}
                   >
                     {badge}

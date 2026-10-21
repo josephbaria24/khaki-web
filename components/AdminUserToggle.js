@@ -39,7 +39,9 @@ export default function AdminUserToggle({ className = "" }) {
         aria-selected={onAdmin}
         onClick={goAdmin}
         className={`rounded-full px-3.5 py-1.5 text-xs font-black transition sm:px-4 ${
-          onAdmin ? "bg-[#163044] text-[#F7F4EC] shadow-sm" : "text-[#2A3F4D] hover:bg-white/50"
+          onAdmin
+            ? "bg-[#163044] text-[#F7F4EC] shadow-sm dark:bg-[#3A4656]"
+            : "text-[#2A3F4D] hover:bg-white/50 dark:text-[#E8E4DC]/75 dark:hover:bg-white/10"
         }`}
       >
         Admin
@@ -50,7 +52,9 @@ export default function AdminUserToggle({ className = "" }) {
         aria-selected={!onAdmin}
         onClick={goUser}
         className={`rounded-full px-3.5 py-1.5 text-xs font-black transition sm:px-4 ${
-          !onAdmin ? "bg-[#163044] text-[#F7F4EC] shadow-sm" : "text-[#2A3F4D] hover:bg-white/50"
+          !onAdmin
+            ? "bg-[#163044] text-[#F7F4EC] shadow-sm dark:bg-[#3A4656]"
+            : "text-[#2A3F4D] hover:bg-white/50 dark:text-[#E8E4DC]/75 dark:hover:bg-white/10"
         }`}
       >
         User

@@ -15,7 +15,10 @@ import AdminSideNav, { AdminSectionChip } from "@/components/admin/AdminSideNav"
 import DeleteUserConfirm from "@/components/admin/DeleteUserConfirm";
 import TeamsPanel from "@/components/admin/TeamsPanel";
 import VerificationInbox from "@/components/admin/VerificationInbox";
+import ChatAvatar from "@/components/chat/Avatar";
 import { toast } from "@/lib/toast";
+import EscrowDashboard from "@/components/admin/EscrowDashboard";
+import PostingFees from "@/components/admin/PostingFees";
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -23,7 +26,7 @@ const TABS = [
   { id: "verification", label: "Verification" },
   { id: "teams", label: "Teams" },
   { id: "reports", label: "Reports" },
-  { id: "transactions", label: "Transactions" },
+  { id: "transactions", label: "Payments" },
   { id: "activity", label: "Activity" },
 ];
 const TAB_IDS = new Set(TABS.map((item) => item.id));
@@ -215,7 +218,7 @@ function AdminScreen() {
     <AppShell>
       <Container
         className={
-          tab === "verification"
+          tab === "verification" || tab === "users"
             ? "flex h-full min-h-0 flex-col gap-6 overflow-hidden py-6 lg:py-8"
             : "h-full min-h-0 space-y-6 overflow-y-auto py-6 lg:py-10"
         }
@@ -383,31 +386,9 @@ function AdminScreen() {
         )}
 
         {ready && tab === "transactions" && (
-          <div className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-3">
-              <MiniStat label="Posting fees" value={transactions.length} />
-              <MiniStat label="Total recorded" value={formatPHP(transactions.reduce((s, t) => s + Number(t.amount || 0), 0))} />
-              <MiniStat
-                label="Average fee"
-                value={formatPHP(
-                  transactions.length
-                    ? transactions.reduce((s, t) => s + Number(t.amount || 0), 0) / transactions.length
-                    : 0
-                )}
-              />
-            </div>
-            <div className="grid gap-3 xl:grid-cols-2">
-              {transactions.length === 0 && <p className="text-sm text-muted-foreground">No transactions yet.</p>}
-              {transactions.map((t) => (
-                <div key={t.id} className="flex flex-wrap items-center justify-between gap-2 rounded-[1.5rem] bg-card p-4 text-sm shadow-card">
-                  <div>
-                    <p className="font-bold capitalize">{t.kind} · {t.status}</p>
-                    <p className="text-muted-foreground">{t.from} → {t.to}{t.reference ? ` · ${t.reference}` : ""}</p>
-                  </div>
-                  <p className="font-black">{formatPHP(t.amount)}</p>
-                </div>
-              ))}
-            </div>
+          <div className="space-y-3">
+            <EscrowDashboard />
+            <PostingFees transactions={transactions} />
           </div>
         )}
 
@@ -444,133 +425,260 @@ export default function AdminPage() {
   );
 }
 
-function initials(name) {
-  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
-  return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || "•";
-}
-
 function verifyTone(status) {
   if (status === "verified") return "bg-[#D7F0EA] text-[#0D666A]";
   if (status === "pending") return "bg-[#FFF0C4] text-[#8A6410]";
   return "bg-[#EEF2F6] text-[#3D4A5C]";
 }
 
+function userNeedsReview(u) {
+  return u.verification_status === "pending" || u.tasker_application?.review_state === "reverify";
+}
+
+function userStatusRank(u) {
+  if (userNeedsReview(u)) return 0;
+  if (u.verification_status === "verified") return 2;
+  return 1;
+}
+
+function userStamp(u) {
+  const stamp = u.created_at || u.updated_at || u.tasker_application?.submitted_at || "";
+  return new Date(stamp || 0).getTime() || 0;
+}
+
 function UsersDirectory({ users, pending, query, setQuery, userFilter, setUserFilter, memoFor, setMemoFor, memoText, setMemoText, act, onRequestDelete }) {
+  const [sortBy, setSortBy] = useState("priority");
   const unverified = users.filter((u) => u.role !== "admin" && u.verification_status !== "verified" && u.verification_status !== "pending");
+  const verified = users.filter((u) => u.verification_status === "verified").length;
   const needle = query.trim().toLowerCase();
-  const rows = users.filter((u) => {
-    if (userFilter === "verified" && u.verification_status !== "verified") return false;
-    if (userFilter === "pending" && u.verification_status !== "pending" && u.tasker_application?.review_state !== "reverify") return false;
-    if (userFilter === "unverified" && (u.verification_status === "verified" || u.verification_status === "pending" || u.role === "admin")) return false;
-    if (!needle) return true;
-    return `${u.full_name || ""} ${u.email || ""} ${u.role || ""}`.toLowerCase().includes(needle);
-  });
+  const rows = users
+    .filter((u) => {
+      if (userFilter === "verified" && u.verification_status !== "verified") return false;
+      if (userFilter === "pending" && !userNeedsReview(u)) return false;
+      if (userFilter === "unverified" && (u.verification_status === "verified" || u.verification_status === "pending" || u.role === "admin")) return false;
+      if (!needle) return true;
+      return `${u.full_name || ""} ${u.email || ""} ${u.role || ""}`.toLowerCase().includes(needle);
+    })
+    .slice()
+    .sort((a, b) => {
+      if (sortBy === "name") return String(a.full_name || "").localeCompare(String(b.full_name || ""));
+      if (sortBy === "newest") return userStamp(b) - userStamp(a);
+      if (sortBy === "oldest") return userStamp(a) - userStamp(b);
+      const rank = userStatusRank(a) - userStatusRank(b);
+      if (rank !== 0) return rank;
+      return userStamp(b) - userStamp(a);
+    });
   const filters = [
     ["all", "All"],
-    ["verified", "Verified"],
     ["pending", "Pending"],
+    ["verified", "Verified"],
     ["unverified", "Unverified"],
+  ];
+  const stats = [
+    ["All", users.length],
+    ["Verified", verified],
+    ["Pending", pending.length],
+    ["Unverified", unverified.length],
   ];
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-2xl font-black text-[#163044]">Users</h2>
-        <p className="text-sm text-[#163044]/65">Invite someone to verify, or send a memo when a job or payment looks off.</p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MiniStat label="All accounts" value={users.length} />
-        <MiniStat label="Verified" value={users.filter((u) => u.verification_status === "verified").length} />
-        <MiniStat label="Pending review" value={pending.length} />
-        <MiniStat label="Unverified" value={unverified.length} />
-      </div>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search name, role, or email"
-          className="h-11 flex-1 rounded-xl border border-[#E6DDD0] bg-white px-3 text-sm font-semibold text-[#163044] outline-none"
-        />
-        <div className="flex flex-wrap gap-1.5">
+    <section className="flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[#163044]/10 bg-[#FFFCF7] shadow-[0_12px_36px_rgba(22,48,68,0.1)] dark:border-white/10 dark:bg-[#151922]">
+      <header className="shrink-0 border-b border-[#163044]/08 bg-gradient-to-br from-[#163044] to-[#2A4A5C] px-3 py-2 text-[#F7F4EC] sm:px-3.5">
+        <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-sm font-black leading-tight">Users</h2>
+            <p className="truncate text-[10px] font-semibold text-[#F7F4EC]/60">
+              {rows.length} shown · pending first by default
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-1 sm:flex sm:shrink-0">
+            {stats.map(([label, value]) => (
+              <div key={label} className="rounded-md bg-white/10 px-2 py-1 text-center">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-[#F7F4EC]/55">{label}</p>
+                <p className="text-sm font-black tabular-nums leading-none">{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-2 flex gap-1.5">
+          <label className="relative min-w-0 flex-1">
+            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] text-[#163044]/35">⌕</span>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search name, role, email…"
+              className="h-8 w-full rounded-md border-0 bg-[#F7F4EC] pl-7 pr-2 text-xs font-semibold text-[#163044] outline-none placeholder:text-[#163044]/40"
+            />
+          </label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Sort users"
+            className="h-8 shrink-0 rounded-md border-0 bg-[#F7F4EC] px-2 text-[11px] font-bold text-[#163044] outline-none"
+          >
+            <option value="priority">Pending first</option>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
+        <div className="mt-1.5 flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <span className="mr-0.5 self-center text-[9px] font-black uppercase tracking-wide text-[#F7F4EC]/45">Filter</span>
           {filters.map(([id, label]) => (
-            <button key={id} type="button" onClick={() => setUserFilter(id)} className={`h-11 rounded-xl px-3 text-xs font-black ${userFilter === id ? "bg-[#163044] text-white" : "bg-[#F3EFE3] text-[#163044]"}`}>
+            <button
+              key={id}
+              type="button"
+              onClick={() => setUserFilter(id)}
+              className={`h-6 shrink-0 rounded-md px-2 text-[10px] font-black ${
+                userFilter === id ? "bg-[#F6C56B] text-[#7A4A00]" : "bg-white/10 text-[#F7F4EC]/85"
+              }`}
+            >
               {label}
             </button>
           ))}
         </div>
-      </div>
-      <div className="overflow-x-auto rounded-[1.5rem] bg-white shadow-[0_8px_28px_rgba(22,48,68,0.08)]">
-        <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="border-b text-[11px] uppercase tracking-wide text-[#163044]/50">
-            <tr>
-              <th className="p-4">Name</th>
-              <th className="p-4">Role</th>
-              <th className="p-4">Verification</th>
-              <th className="p-4">Status</th>
-              <th className="p-4">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((u) => (
-              <tr key={u.id} className="border-b last:border-0">
-                <td className="p-4">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E8DCC4] text-xs font-black text-[#163044]">{initials(u.full_name)}</span>
-                    <div>
-                      <p className="font-black text-[#163044]">{u.full_name}</p>
-                      <p className="text-xs text-[#163044]/55">{u.email}</p>
+      </header>
+
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#F4F7FB]/80 p-2 sm:p-3 dark:bg-[#11141A]">
+        {!rows.length ? (
+          <p className="p-4 text-center text-sm font-semibold text-[#163044]/55 dark:text-[#F5F3EE]/55">No accounts match.</p>
+        ) : (
+          <>
+            <div className="space-y-2 lg:hidden">
+              {rows.map((u) => {
+                const verifyLabel = u.tasker_application?.review_state === "reverify" ? "Re-verifying" : u.verification_status || "unverified";
+                return (
+                  <article key={u.id} className="rounded-xl border border-[#163044]/08 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#1A1E27]">
+                    <div className="flex items-start gap-2.5">
+                      <ChatAvatar name={u.full_name} src={u.avatar_url} size="sm" className="h-9 w-9 text-[11px]" />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className="truncate text-sm font-black text-[#163044] dark:text-[#F5F3EE]">{u.full_name}</p>
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-black capitalize ${verifyTone(u.verification_status)}`}>
+                            {verifyLabel}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 truncate text-[11px] text-[#163044]/55 dark:text-[#F5F3EE]/55">{u.email}</p>
+                        <p className="mt-0.5 text-[11px] font-semibold text-[#163044]/70 dark:text-[#E8E4DC]/75">
+                          {ROLE_LABELS[u.role] || u.role}{u.poster_type ? ` · ${u.poster_type}` : ""} · {u.status || "active"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="p-4 font-semibold text-[#163044]">{ROLE_LABELS[u.role] || u.role}{u.poster_type ? ` · ${u.poster_type}` : ""}</td>
-                <td className="p-4">
-                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-black capitalize ${verifyTone(u.verification_status)}`}>
-                    {u.tasker_application?.review_state === "reverify" ? "Re-verifying" : u.verification_status || "unverified"}
-                  </span>
-                </td>
-                <td className="p-4 capitalize text-[#163044]">{u.status || "active"}</td>
-                <td className="p-4">
-                  <div className="flex flex-wrap gap-1.5">
-                    <Link href={`/u/${u.id}`} className="rounded-lg border border-[#163044]/15 px-2.5 py-1 text-[11px] font-black text-[#163044]">View badge</Link>
-                    {u.role !== "admin" && u.verification_status !== "verified" ? (
-                      <button type="button" className="rounded-lg bg-[#163044] px-2.5 py-1 text-[11px] font-black text-white" onClick={() => act(() => api.admin.inviteToVerify(u.id), "Invite sent")}>
-                        Invite to verify
-                      </button>
-                    ) : null}
-                    {u.role !== "admin" ? (
-                      <button type="button" className="rounded-lg bg-[#E8DCC4] px-2.5 py-1 text-[11px] font-black text-[#163044]" onClick={() => { setMemoFor(u); setMemoText(""); }}>
-                        Memo
-                      </button>
-                    ) : null}
-                    {u.role !== "admin" ? (
-                      <button
-                        type="button"
-                        className="rounded-lg border px-2.5 py-1 text-[11px] font-black"
-                        onClick={() => act(() => api.admin.setStatus(u.id, u.status === "suspended" ? "active" : "suspended"), u.status === "suspended" ? "User activated" : "User suspended")}
-                      >
-                        {u.status === "suspended" ? "Activate" : "Suspend"}
-                      </button>
-                    ) : null}
-                    {u.role !== "admin" ? (
-                      <button
-                        type="button"
-                        className="rounded-lg border border-[#B42318]/25 bg-[#FEE2E2] px-2.5 py-1 text-[11px] font-black text-[#991B1B]"
-                        onClick={() => onRequestDelete?.(u)}
-                      >
-                        Delete
-                      </button>
-                    ) : null}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {!rows.length ? <p className="p-4 text-sm text-[#163044]/60">No accounts match.</p> : null}
+                    <div className="mt-2.5 grid grid-cols-2 gap-1.5">
+                      <Link href={`/u/${u.id}`} className="inline-flex h-9 items-center justify-center rounded-lg border border-[#163044]/15 text-[11px] font-black text-[#163044] dark:border-white/15 dark:text-[#F5F3EE]">
+                        View badge
+                      </Link>
+                      {u.role !== "admin" && u.verification_status !== "verified" ? (
+                        <button type="button" className="inline-flex h-9 items-center justify-center rounded-lg bg-[#163044] text-[11px] font-black text-white" onClick={() => act(() => api.admin.inviteToVerify(u.id), "Invite sent")}>
+                          Invite to verify
+                        </button>
+                      ) : null}
+                      {u.role !== "admin" ? (
+                        <button type="button" className="inline-flex h-9 items-center justify-center rounded-lg bg-[#E8DCC4] text-[11px] font-black text-[#163044]" onClick={() => { setMemoFor(u); setMemoText(""); }}>
+                          Memo
+                        </button>
+                      ) : null}
+                      {u.role !== "admin" ? (
+                        <button
+                          type="button"
+                          className="inline-flex h-9 items-center justify-center rounded-lg border border-[#163044]/15 text-[11px] font-black text-[#163044] dark:border-white/15 dark:text-[#F5F3EE]"
+                          onClick={() => act(() => api.admin.setStatus(u.id, u.status === "suspended" ? "active" : "suspended"), u.status === "suspended" ? "User activated" : "User suspended")}
+                        >
+                          {u.status === "suspended" ? "Activate" : "Suspend"}
+                        </button>
+                      ) : null}
+                      {u.role !== "admin" ? (
+                        <button
+                          type="button"
+                          className="col-span-2 inline-flex h-9 items-center justify-center rounded-lg border border-[#B42318]/25 bg-[#FEE2E2] text-[11px] font-black text-[#991B1B]"
+                          onClick={() => onRequestDelete?.(u)}
+                        >
+                          Delete user
+                        </button>
+                      ) : null}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="w-full min-w-[720px] text-left text-sm">
+                <thead className="sticky top-0 z-[1] border-b border-[#163044]/08 bg-[#F4F7FB] text-[10px] uppercase tracking-wide text-[#163044]/50 dark:border-white/10 dark:bg-[#151922] dark:text-[#F5F3EE]/50">
+                  <tr>
+                    <th className="px-3 py-2 font-bold">Name</th>
+                    <th className="px-3 py-2 font-bold">Role</th>
+                    <th className="px-3 py-2 font-bold">Verify</th>
+                    <th className="px-3 py-2 font-bold">Status</th>
+                    <th className="px-3 py-2 font-bold">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((u) => (
+                    <tr key={u.id} className="border-b border-[#163044]/06 last:border-0 dark:border-white/5">
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <ChatAvatar name={u.full_name} src={u.avatar_url} size="sm" className="h-7 w-7 text-[10px]" />
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-black text-[#163044] dark:text-[#F5F3EE]">{u.full_name}</p>
+                            <p className="truncate text-[10px] text-[#163044]/55 dark:text-[#F5F3EE]/55">{u.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-xs font-semibold text-[#163044] dark:text-[#E8E4DC]">
+                        {ROLE_LABELS[u.role] || u.role}{u.poster_type ? ` · ${u.poster_type}` : ""}
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-black capitalize ${verifyTone(u.verification_status)}`}>
+                          {u.tasker_application?.review_state === "reverify" ? "Re-verifying" : u.verification_status || "unverified"}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-xs capitalize text-[#163044] dark:text-[#E8E4DC]">{u.status || "active"}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex flex-wrap gap-1">
+                          <Link href={`/u/${u.id}`} className="rounded-md border border-[#163044]/15 px-2 py-0.5 text-[10px] font-black text-[#163044] dark:border-white/15 dark:text-[#F5F3EE]">Badge</Link>
+                          {u.role !== "admin" && u.verification_status !== "verified" ? (
+                            <button type="button" className="rounded-md bg-[#163044] px-2 py-0.5 text-[10px] font-black text-white" onClick={() => act(() => api.admin.inviteToVerify(u.id), "Invite sent")}>
+                              Invite
+                            </button>
+                          ) : null}
+                          {u.role !== "admin" ? (
+                            <button type="button" className="rounded-md bg-[#E8DCC4] px-2 py-0.5 text-[10px] font-black text-[#163044]" onClick={() => { setMemoFor(u); setMemoText(""); }}>
+                              Memo
+                            </button>
+                          ) : null}
+                          {u.role !== "admin" ? (
+                            <button
+                              type="button"
+                              className="rounded-md border border-[#163044]/15 px-2 py-0.5 text-[10px] font-black text-[#163044] dark:border-white/15 dark:text-[#F5F3EE]"
+                              onClick={() => act(() => api.admin.setStatus(u.id, u.status === "suspended" ? "active" : "suspended"), u.status === "suspended" ? "User activated" : "User suspended")}
+                            >
+                              {u.status === "suspended" ? "Activate" : "Suspend"}
+                            </button>
+                          ) : null}
+                          {u.role !== "admin" ? (
+                            <button
+                              type="button"
+                              className="rounded-md border border-[#B42318]/25 bg-[#FEE2E2] px-2 py-0.5 text-[10px] font-black text-[#991B1B]"
+                              onClick={() => onRequestDelete?.(u)}
+                            >
+                              Delete
+                            </button>
+                          ) : null}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
+
       {memoFor ? (
         <form
-          className="rounded-[1.35rem] bg-[#163044] p-4 text-white"
+          className="shrink-0 border-t border-white/10 bg-[#163044] p-3 text-white"
           onSubmit={(e) => {
             e.preventDefault();
             act(async () => {
@@ -580,16 +688,18 @@ function UsersDirectory({ users, pending, query, setQuery, userFilter, setUserFi
             }, "Memo sent");
           }}
         >
-          <p className="text-sm font-black">Memo to {memoFor.full_name}</p>
-          <p className="mt-1 text-xs text-white/70">They get this in notifications. Use it for odd payments, changed job details, or a reminder.</p>
-          <textarea value={memoText} onChange={(e) => setMemoText(e.target.value)} className="mt-3 min-h-24 w-full rounded-xl bg-[#102636] p-3 text-sm outline-none" placeholder="What should they know?" />
-          <div className="mt-3 flex gap-2">
-            <button type="submit" className="h-10 rounded-xl bg-[#E8DCC4] px-4 text-sm font-black text-[#163044]">Send memo</button>
-            <button type="button" className="h-10 rounded-xl px-4 text-sm font-bold text-white/80" onClick={() => setMemoFor(null)}>Cancel</button>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs font-black">Memo to {memoFor.full_name}</p>
+              <p className="mt-0.5 text-[10px] text-white/65">Shown in their notifications.</p>
+            </div>
+            <button type="button" className="text-[11px] font-bold text-white/70" onClick={() => setMemoFor(null)}>Close</button>
           </div>
+          <textarea value={memoText} onChange={(e) => setMemoText(e.target.value)} className="mt-2 min-h-16 w-full rounded-lg bg-[#102636] p-2 text-xs outline-none" placeholder="What should they know?" />
+          <button type="submit" className="mt-2 h-8 rounded-lg bg-[#E8DCC4] px-3 text-xs font-black text-[#163044]">Send memo</button>
         </form>
       ) : null}
-    </div>
+    </section>
   );
 }
 

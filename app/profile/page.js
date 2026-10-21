@@ -81,7 +81,7 @@ export default function ProfilePage() {
                   </Link>
                 ) : null}
                 <Link href="/wallet" className="inline-flex h-10 items-center rounded-full bg-white px-5 text-xs font-bold shadow-card" style={{ color: LANDING.olive }}>
-                  Posting fees
+                  Wallet
                 </Link>
               </div>
             )}

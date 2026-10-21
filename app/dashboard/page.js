@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import ChatAvatar from "@/components/chat/Avatar";
 import CategoryCard from "@/components/landing/CategoryCard";
 import CategoryChips from "@/components/ui/CategoryChips";
 import SearchPill from "@/components/ui/SearchPill";
@@ -40,6 +41,7 @@ export default function DashboardPage() {
   const [openTasks, setOpenTasks] = useState([]);
   const [myTasks, setMyTasks] = useState([]);
   const [postingFees, setPostingFees] = useState(0);
+  const [releasedPayouts, setReleasedPayouts] = useState(0);
   const [people, setPeople] = useState({});
   const [reviews, setReviews] = useState({});
   const [myBids, setMyBids] = useState([]);
@@ -78,6 +80,13 @@ export default function DashboardPage() {
     api.fees.mine()
       .then((rows) => setPostingFees(rows.reduce((sum, row) => sum + Number(row.fee_php || 0), 0)))
       .catch(() => setPostingFees(0));
+    api.escrow.minePayouts()
+      .then((rows) => setReleasedPayouts(
+        (rows || [])
+          .filter((row) => row.status === "released")
+          .reduce((sum, row) => sum + Number(row.tasker_payout || 0), 0)
+      ))
+      .catch(() => setReleasedPayouts(0));
   }, [user?.active_mode]);
 
   const posted = myTasks.filter((t) => t.client_id === user?.id);
@@ -118,6 +127,23 @@ export default function DashboardPage() {
     if (!taskMatchesChip(task.category, category, task)) return false;
     return true;
   }).slice(0, 8);
+
+  const openPosterIdsKey = filtered.map((t) => t.client_id).filter(Boolean).sort().join(",");
+
+  useEffect(() => {
+    if (poster || !user || !openPosterIdsKey) return;
+    const ids = openPosterIdsKey.split(",");
+    let live = true;
+    Promise.all(ids.map((id) => api.profile.get(id).catch(() => null))).then((rows) => {
+      if (!live) return;
+      const map = {};
+      rows.forEach((p) => { if (p) map[p.id] = p; });
+      setPeople(map);
+    });
+    return () => {
+      live = false;
+    };
+  }, [poster, user, openPosterIdsKey]);
 
   const postHref = canOpenPost(user) ? "/post" : "/browse";
   const pendingBids = myBids.filter((o) => o.status === "pending");
@@ -202,7 +228,7 @@ export default function DashboardPage() {
           <InstallAppBanner />
           {poster ? (
             <>
-              <DashboardShortcuts user={user} postingFees={postingFees} myTasks={myTasks} />
+              <DashboardShortcuts user={user} postingFees={postingFees} releasedPayouts={releasedPayouts} myTasks={myTasks} />
               <div className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
                 <SectionIntro
                   pill="Poster"
@@ -284,6 +310,8 @@ export default function DashboardPage() {
                           ? { label: "Qualified", bg: "#D7F0EA", fg: "#0D666A" }
                           : { label: "Not qualified", bg: "#EFE8DC", fg: "#8A6A32" })
                         : null);
+                    const posterProfile = people[task.client_id];
+                    const posterName = posterProfile?.full_name || task.client_name || "Khaki user";
                     return (
                     <Link
                       key={task.id}
@@ -308,9 +336,17 @@ export default function DashboardPage() {
                         <p className="text-lg font-black text-foreground">{formatPHP(task.budget_php)}</p>
                         <p className="text-xs text-muted-foreground">{task.is_remote ? "Remote" : task.location_area}</p>
                       </div>
-                      <p className="mt-2 text-[11px] font-semibold text-muted-foreground">
-                        Poster: {task.client_name || "Khaki user"}
-                      </p>
+                      <div className="mt-3 flex items-center gap-2">
+                        <ChatAvatar
+                          name={posterName}
+                          src={posterProfile?.avatar_url || posterProfile?.profile_photo}
+                          size="sm"
+                          className="h-7 w-7 text-[10px]"
+                        />
+                        <p className="min-w-0 truncate text-[11px] font-semibold text-muted-foreground">
+                          {posterName}
+                        </p>
+                      </div>
                     </Link>
                     );
                   })}
@@ -343,7 +379,7 @@ export default function DashboardPage() {
               ) : null}
 
               <div className="pt-4">
-                <DashboardShortcuts user={user} postingFees={postingFees} myTasks={myTasks} />
+                <DashboardShortcuts user={user} postingFees={postingFees} releasedPayouts={releasedPayouts} myTasks={myTasks} />
               </div>
 
               <div className="pt-4">

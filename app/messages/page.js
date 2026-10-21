@@ -10,12 +10,18 @@ import { useAuth } from "@/lib/AuthContext";
 import { timeAgo } from "@/lib/khaki";
 import { api } from "@/lib/store";
 
+function threadOtherId(task, userId) {
+  if (!task || !userId) return null;
+  return userId === task.client_id ? task.accepted_tasker_id : task.client_id;
+}
+
 export default function MessagesPage() {
   const { user } = useAuth();
   const cached = api.messages.peekThreads();
   const [threads, setThreads] = useState(() => cached || []);
   const [ready, setReady] = useState(() => cached != null);
   const [query, setQuery] = useState("");
+  const [avatars, setAvatars] = useState({});
 
   useEffect(() => {
     const stop = api.messages.subscribeThreads((rows) => {
@@ -25,18 +31,42 @@ export default function MessagesPage() {
     return stop;
   }, []);
 
+  useEffect(() => {
+    if (!user?.id || !threads.length) {
+      setAvatars({});
+      return undefined;
+    }
+    const ids = threads.map(({ task }) => threadOtherId(task, user.id)).filter(Boolean);
+    if (!ids.length) {
+      setAvatars({});
+      return undefined;
+    }
+    let cancelled = false;
+    api.profile
+      .getMany(ids)
+      .then((map) => {
+        if (!cancelled) setAvatars(map || {});
+      })
+      .catch(() => {
+        if (!cancelled) setAvatars({});
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [threads, user?.id]);
+
   const firstName = (user?.full_name || "there").trim().split(/\s+/)[0];
   const unreadCount = threads.filter(({ last }) => last?.sender_id && last.sender_id !== user?.id).length;
   const contacts = useMemo(() => {
     const seen = new Set();
     const list = [];
     threads.forEach(({ task, last }) => {
+      const otherId = threadOtherId(task, user?.id);
+      const profile = otherId ? avatars[otherId] : null;
       const name =
         last?.sender_id && last.sender_id !== user?.id
           ? last.sender_name
-          : user?.id === task.client_id
-            ? "Tasker"
-            : task.client_name || "Poster";
+          : profile?.full_name || (user?.id === task.client_id ? "Tasker" : task.client_name || "Poster");
       const key = `${task.id}-${name}`;
       if (seen.has(key)) return;
       seen.add(key);
@@ -45,10 +75,11 @@ export default function MessagesPage() {
         name,
         href: `/task/${task.id}/chat`,
         unread: Boolean(last?.sender_id && last.sender_id !== user?.id),
+        avatar_url: profile?.avatar_url || null,
       });
     });
     return list.slice(0, 8);
-  }, [threads, user?.id]);
+  }, [threads, user?.id, avatars]);
 
   const filtered = threads.filter(({ task, last }) => {
     const q = query.trim().toLowerCase();
@@ -85,7 +116,7 @@ export default function MessagesPage() {
               {contacts.map((c) => (
                 <Link key={c.id} href={c.href} className="flex w-11 shrink-0 flex-col items-center gap-1">
                   <span className="relative">
-                    <ChatAvatar name={c.name} size="sm" />
+                    <ChatAvatar name={c.name} src={c.avatar_url} size="sm" />
                     {c.unread ? (
                       <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#F8D5E0] ring-2 ring-[#163044]" />
                     ) : null}
@@ -122,14 +153,17 @@ export default function MessagesPage() {
               </p>
             ) : (
               filtered.map(({ task, last }) => {
+                const otherId = threadOtherId(task, user?.id);
+                const profile = otherId ? avatars[otherId] : null;
                 const name =
                   last?.sender_id && last.sender_id !== user?.id
                     ? last.sender_name
-                    : user?.id === task.client_id
-                      ? task.client_name === user?.full_name
-                        ? "Tasker"
-                        : task.client_name || "Tasker"
-                      : task.client_name || "Poster";
+                    : profile?.full_name ||
+                      (user?.id === task.client_id
+                        ? task.client_name === user?.full_name
+                          ? "Tasker"
+                          : task.client_name || "Tasker"
+                        : task.client_name || "Poster");
                 const unread = last && last.sender_id && last.sender_id !== user?.id;
                 return (
                   <Link
@@ -137,7 +171,7 @@ export default function MessagesPage() {
                     href={`/task/${task.id}/chat`}
                     className="flex items-center gap-3 rounded-2xl px-2 py-3 hover:bg-[#F3EFE3]"
                   >
-                    <ChatAvatar name={name} size="md" />
+                    <ChatAvatar name={name} src={profile?.avatar_url} size="md" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate font-bold text-foreground">{task.title}</p>

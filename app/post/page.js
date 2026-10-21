@@ -12,8 +12,30 @@ import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
 import SectionIntro from "@/components/SectionIntro";
 import { useAuth } from "@/lib/AuthContext";
-import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, cn, formatPHP, postingFee, serviceByKey } from "@/lib/khaki";
-import { BUDGET_DISCLAIMER, cleanExtras, cleanPins, initialExtras, missingRequiredField, pinSlotsFor, templateForKey } from "@/lib/serviceTemplates";
+import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, cn, formatPHP, postingFee, scheduleLabel, serviceByKey } from "@/lib/khaki";
+import { BUDGET_DISCLAIMER, cleanExtras, cleanPins, describeFormExtras, initialExtras, missingRequiredField, pinSlotsFor, templateForKey } from "@/lib/serviceTemplates";
+
+const STAGE_BADGES = {
+  1: "Stage 1 · Registered",
+  2: "Stage 2 · ID verified",
+  3: "Stage 3 · Skill verified",
+  4: "Stage 4 · Licensed",
+  5: "Stage 5 · Pioneer",
+};
+
+function clampPostStep(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  return Math.min(3, Math.max(1, Math.round(n)));
+}
+
+function pinSummary(pins, slots) {
+  if (!pins || !slots?.length) return "";
+  return slots
+    .filter((slot) => pins[slot.key]?.lat != null && pins[slot.key]?.lng != null)
+    .map((slot) => slot.label)
+    .join(" · ");
+}
 import { getBarangays, municipalityCoords } from "@/lib/palawanLocations";
 import { canOpenPost, canPostTask } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -298,6 +320,7 @@ function PostPage() {
   const router = useRouter();
   const params = useSearchParams();
   const requested = categoryFromParam(params.get("category"));
+  const stepFromQuery = clampPostStep(params.get("step"));
   const { user } = useAuth();
   const [form, setForm] = useState(() => formForCategory(requested || SERVICE_CATEGORIES[0].key));
 
@@ -307,8 +330,13 @@ function PostPage() {
   }, [requested]);
   const [error, setError] = useState("");
   const [openSelect, setOpenSelect] = useState(null);
-  const [postStep, setPostStep] = useState(1);
+  const [postStep, setPostStep] = useState(stepFromQuery || 1);
   const [minStage, setMinStage] = useState(1);
+
+  useEffect(() => {
+    if (stepFromQuery == null) return;
+    setPostStep(stepFromQuery);
+  }, [stepFromQuery]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setExtra = (k, v) => setForm((f) => ({ ...f, extras: { ...f.extras, [k]: v } }));
   const toggleExtra = (k, v) => setForm((f) => {
@@ -330,7 +358,30 @@ function PostPage() {
   const scheduleOptions = template?.scheduleOptions
     || Object.entries(SCHEDULE_LABELS).map(([k, v]) => ({ value: k, label: v }));
   const needsDate = form.schedule_type === "on_date" || form.schedule_type === "before_date";
-  const fee = formatPHP(postingFee(Number(form.budget_php) || 0));
+  const budgetNum = Number(form.budget_php) || 0;
+  const feeNum = postingFee(budgetNum);
+  const totalNum = budgetNum + feeNum;
+  const fee = formatPHP(feeNum);
+  const reviewExtras = describeFormExtras(template, form.extras);
+  const serviceTypeLabel = reviewExtras.find((row) => row.key === "service_type" || row.key === "vehicle_type")?.value || "";
+  const reviewSubtitle = String(form.title || form.groupTitle || serviceTypeLabel || "").trim();
+  const reviewSchedule = scheduleLabel({
+    schedule_type: form.schedule_type,
+    schedule_date: needsDate ? form.schedule_date : "",
+  });
+  const reviewLocation = form.is_remote
+    ? "Remote"
+    : [form.location_area, form.barangay, form.location_detail].filter(Boolean).join(" · ") || "—";
+  const reviewPins = pinSummary(form.pins, pinSlots);
+  const budgetLabel = `${formatPHP(budgetNum)}${form.extras?.price_type === "per_hour" ? " / hr" : ""}`;
+  const reviewRows = [
+    ...reviewExtras.map((row) => [row.label, row.value]),
+    ["Schedule", reviewSchedule],
+    ["Location", reviewLocation],
+    reviewPins ? ["Map pins", reviewPins] : null,
+    form.details?.trim() ? ["Details", form.details.trim()] : null,
+    ["Budget", budgetLabel],
+  ].filter(Boolean);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -437,13 +488,13 @@ function PostPage() {
         <SectionIntro
           className="mb-2"
           pill="POST"
-          title="Gumawa ng task"
+          title={postStep === 3 ? "REVIEW POSTING" : "Gumawa ng task"}
         />
         <div className="mb-3 grid grid-cols-3 gap-2">
           {[
-            ["1", "Gumawa ng task"],
-            ["2", "Antas ng tasker"],
-            ["3", "I-post"],
+            ["1", "Create a task"],
+            ["2", "Tasker level"],
+            ["3", "Review"],
           ].map(([n, label], index) => (
             <button
               key={n}
@@ -768,59 +819,117 @@ function PostPage() {
 
           {postStep === 3 ? (
             <div className="rounded-[1.25rem] bg-[#FFFCF7] p-4 shadow-card sm:p-5">
-              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#0D666A]">Step 3 · I-post</p>
-              <h2 className="mt-1 text-xl font-black text-[#163044]">Handa na ang gawain</h2>
-              <p className="mt-2 text-sm text-[#163044]/75">{service?.title} · budget {formatPHP(form.budget_php)} · minimum stage {minStage}</p>
-              <p className="mt-2 text-sm text-[#163044]/70">Pag na-post, makikita ito ng mga tasker. Yung antas na pinili mo ang lalabas sa detalye.</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#0D666A]">Step 3 · Review</p>
+              <div className="mt-3 rounded-2xl border border-[#E6DDD0] bg-[#FBF8F1] p-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-black text-[#163044]">{service?.title || "Service"}</h2>
+                    {reviewSubtitle ? (
+                      <p className="mt-0.5 text-sm font-semibold text-[#163044]/70">{reviewSubtitle}</p>
+                    ) : null}
+                  </div>
+                  <span className="rounded-full bg-[#163044] px-2.5 py-1 text-[11px] font-black text-[#F7F4EC]">
+                    {STAGE_BADGES[minStage] || STAGE_BADGES[1]}
+                  </span>
+                </div>
+                <dl className="mt-4 space-y-2.5 border-t border-[#E6DDD0] pt-3">
+                  {reviewRows.map(([label, value], index) => (
+                    <div key={`${label}-${index}`} className="grid grid-cols-[88px_minmax(0,1fr)] gap-2 text-sm">
+                      <dt className="font-bold text-[#163044]/45">{label}</dt>
+                      <dd className="font-semibold whitespace-pre-wrap text-[#163044]">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
             </div>
           ) : null}
 
           <aside className={cn("rounded-[1.25rem] bg-[#163044] text-[#F7F4EC] shadow-soft sm:rounded-[1.5rem] lg:sticky lg:top-24", stacked ? "p-3 lg:p-4" : "p-4")}>
-            {stacked ? (
+            {stacked && postStep < 3 ? (
               <div className="flex items-center gap-3 lg:hidden">
                 <div className="min-w-0">
                   <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F7F4EC]/55">Fee 2%</p>
                   <p className="text-sm font-black">{fee}</p>
                 </div>
                 <button type="submit" className="h-10 min-w-0 flex-1 rounded-full bg-[#E8DCC4] text-[13px] font-black text-[#163044]">
-                  {postStep < 3 ? "Magpatuloy" : "I-post ang Gawain"}
+                  Magpatuloy
+                </button>
+              </div>
+            ) : null}
+            {stacked && postStep === 3 ? (
+              <div className="lg:hidden">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F7F4EC]/55">Total</p>
+                <p className="text-lg font-black">{formatPHP(totalNum)}</p>
+                <button type="submit" className="mt-2 h-10 w-full rounded-full bg-[#E8DCC4] text-[13px] font-black text-[#163044]">
+                  Confirm Posting · {formatPHP(totalNum)}
                 </button>
               </div>
             ) : null}
             <div className={stacked ? "hidden lg:block" : ""}>
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#F7F4EC]/55">Budget guide</p>
-              <span className="rounded-full bg-[#F7F4EC]/10 px-2 py-0.5 text-[10px] font-bold text-[#F7F4EC]/70">Min ₱50</span>
-            </div>
-            {template?.layout === "stacked" ? (
-              <p className="mt-2 text-2xl font-black">{formatPHP(form.budget_php)}{form.extras.price_type === "per_hour" ? " / hr" : ""}</p>
+            {postStep === 3 ? (
+              <>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#F7F4EC]/55">Transparent pricing</p>
+                <div className="mt-3 space-y-2 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-[#F7F4EC]/70">Posted budget</span>
+                    <span className="font-black">{formatPHP(budgetNum)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-[#F7F4EC]/70">Platform fee 2%</span>
+                    <span className="font-black">{fee}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 border-t border-[#F7F4EC]/15 pt-2">
+                    <span className="font-black">Total</span>
+                    <span className="text-lg font-black">{formatPHP(totalNum)}</span>
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px] font-bold leading-snug text-[#C8F0D8]">
+                  No hidden fees · what you see is what you pay
+                </p>
+                <p className="mt-1.5 text-[11px] leading-snug text-[#F7F4EC]/55">
+                  Tasker pay is settled directly between you and the tasker.
+                </p>
+                <button type="submit" className="mt-4 h-11 w-full rounded-full bg-[#E8DCC4] text-sm font-black text-[#163044]">
+                  Confirm Posting · {formatPHP(totalNum)}
+                </button>
+              </>
             ) : (
-            <label className="mt-2 flex items-center gap-2 rounded-xl bg-[#102636] px-4">
-              <Wallet className="h-4 w-4 shrink-0 text-[#C9D6E0]" />
-              <span className="text-sm font-black text-[#C9D6E0]">₱</span>
-              <input
-                className="h-11 w-full bg-transparent text-lg font-black text-[#F7F4EC] outline-none"
-                type="number"
-                min={50}
-                value={form.budget_php}
-                onChange={(e) => set("budget_php", e.target.value)}
-                required
-              />
-            </label>
+              <>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#F7F4EC]/55">Budget guide</p>
+                  <span className="rounded-full bg-[#F7F4EC]/10 px-2 py-0.5 text-[10px] font-bold text-[#F7F4EC]/70">Min ₱50</span>
+                </div>
+                {template?.layout === "stacked" ? (
+                  <p className="mt-2 text-2xl font-black">{formatPHP(form.budget_php)}{form.extras.price_type === "per_hour" ? " / hr" : ""}</p>
+                ) : (
+                <label className="mt-2 flex items-center gap-2 rounded-xl bg-[#102636] px-4">
+                  <Wallet className="h-4 w-4 shrink-0 text-[#C9D6E0]" />
+                  <span className="text-sm font-black text-[#C9D6E0]">₱</span>
+                  <input
+                    className="h-11 w-full bg-transparent text-lg font-black text-[#F7F4EC] outline-none"
+                    type="number"
+                    min={50}
+                    value={form.budget_php}
+                    onChange={(e) => set("budget_php", e.target.value)}
+                    required
+                  />
+                </label>
+                )}
+                <div className="mt-3 flex items-center justify-between rounded-2xl bg-[#F7F4EC]/10 px-3 py-2">
+                  <span className="text-[11px] font-semibold text-[#F7F4EC]/70">Posting fee 2%</span>
+                  <span className="rounded-full bg-[#C8F0D8] px-2.5 py-0.5 text-[11px] font-black text-[#163044]">{fee}</span>
+                </div>
+                <p className="mt-2 text-[11px] leading-snug text-[#F7F4EC]/55">
+                  Guide lang — kayo ng tasker ang mag-aayos ng bayad sa work.
+                </p>
+                <p className="mt-2 rounded-2xl bg-[#F0A8A8]/15 px-3 py-2 text-[11px] font-semibold leading-snug text-[#F3C3C3]">
+                  {BUDGET_DISCLAIMER}
+                </p>
+                <button type="submit" className="mt-4 h-11 w-full rounded-full bg-[#E8DCC4] text-sm font-black text-[#163044]">
+                  Magpatuloy
+                </button>
+              </>
             )}
-            <div className="mt-3 flex items-center justify-between rounded-2xl bg-[#F7F4EC]/10 px-3 py-2">
-              <span className="text-[11px] font-semibold text-[#F7F4EC]/70">Posting fee 2%</span>
-              <span className="rounded-full bg-[#C8F0D8] px-2.5 py-0.5 text-[11px] font-black text-[#163044]">{fee}</span>
-            </div>
-            <p className="mt-2 text-[11px] leading-snug text-[#F7F4EC]/55">
-              Guide lang — kayo ng tasker ang mag-aayos ng bayad sa work.
-            </p>
-            <p className="mt-2 rounded-2xl bg-[#F0A8A8]/15 px-3 py-2 text-[11px] font-semibold leading-snug text-[#F3C3C3]">
-              {BUDGET_DISCLAIMER}
-            </p>
-            <button type="submit" className="mt-4 h-11 w-full rounded-full bg-[#E8DCC4] text-sm font-black text-[#163044]">
-              {postStep < 3 ? "Magpatuloy" : "I-post ang gawain"}
-            </button>
             </div>
           </aside>
         </form>

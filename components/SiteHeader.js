@@ -80,8 +80,8 @@ export default function SiteHeader({ landing: _landing = false }) {
         </div>
         <div className="flex shrink-0 items-center gap-2 md:hidden">
           {!isAuthenticated && (
-            <Link href="/register" className="btn-olive hidden h-9 items-center px-3 text-[11px] min-[380px]:inline-flex">
-              Post a task
+            <Link href="/browse" className="btn-olive hidden h-9 items-center px-3 text-[11px] min-[380px]:inline-flex">
+              Browse tasks
             </Link>
           )}
           <button

@@ -167,7 +167,7 @@ export default function TaskTaskersPage() {
             {visible.map((t) => (
               <div key={t.id} className="rounded-[1.25rem] bg-[#FFFCF7] p-4 shadow-card">
                 <div className="flex items-start gap-3">
-                  <ChatAvatar name={t.full_name} size="lg" />
+                  <ChatAvatar name={t.full_name} src={t.avatar_url || t.profile_photo} size="lg" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <Link href={`/u/${t.id}`} className="truncate font-black text-[#163044] underline-offset-2 hover:underline">
