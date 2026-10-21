@@ -68,11 +68,16 @@ export default function AppFrame({ children }) {
         <AppHeader />
       </div>
       <PullToRefresh
-        className={cn("relative min-h-0 flex-1", lockScroll ? "overflow-hidden" : "overflow-y-auto")}
+        className={cn(
+          "relative min-h-0 min-w-0 flex-1",
+          lockScroll ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto"
+        )}
         onRefresh={handleRefresh}
         disabled={lockScroll}
       >
-        <div key={refreshKey}>{children}</div>
+        <div key={refreshKey} className="min-w-0 max-w-full">
+          {children}
+        </div>
       </PullToRefresh>
       {showUserChrome ? <BottomNav hidden={hideNav} /> : null}
       {showUserChrome ? <ModeSwitchOverlay /> : null}

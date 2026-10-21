@@ -5,7 +5,7 @@ export default function StarRating({ value = 0, onChange, size = "md", readOnly 
   const text = size === "sm" ? "text-base" : "text-2xl";
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="inline-flex shrink-0 items-center gap-0.5">
       {stars.map((star) => {
         const on = star <= Number(value || 0);
         if (readOnly) {

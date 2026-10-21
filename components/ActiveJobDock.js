@@ -45,6 +45,10 @@ export default function ActiveJobDock() {
   const [tasks, setTasks] = useState([]);
   const [myOffers, setMyOffers] = useState([]);
   const [open, setOpen] = useState(false);
+  /** In DOM while opening/open/closing */
+  const [panelShown, setPanelShown] = useState(false);
+  /** True only after mount paint so CSS transition always runs */
+  const [panelActive, setPanelActive] = useState(false);
   const [bids, setBids] = useState([]);
   const [updates, setUpdates] = useState([]);
   const [tablet, setTablet] = useState(false);
@@ -52,6 +56,7 @@ export default function ActiveJobDock() {
   const dockRef = useRef(null);
   const dragRef = useRef(null);
   const offsetRef = useRef({ x: 0, y: 0 });
+  const animTimers = useRef({ leave: null, raf1: 0, raf2: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -68,6 +73,38 @@ export default function ActiveJobDock() {
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
+
+  useEffect(() => {
+    const timers = animTimers.current;
+    if (timers.leave) {
+      clearTimeout(timers.leave);
+      timers.leave = null;
+    }
+    cancelAnimationFrame(timers.raf1);
+    cancelAnimationFrame(timers.raf2);
+
+    if (open) {
+      setPanelShown(true);
+      setPanelActive(false);
+      // Double rAF: first paint closed, second frame apply open styles → transition fires.
+      timers.raf1 = requestAnimationFrame(() => {
+        timers.raf2 = requestAnimationFrame(() => setPanelActive(true));
+      });
+      return () => {
+        cancelAnimationFrame(timers.raf1);
+        cancelAnimationFrame(timers.raf2);
+      };
+    }
+
+    setPanelActive(false);
+    timers.leave = setTimeout(() => {
+      setPanelShown(false);
+      timers.leave = null;
+    }, 340);
+    return () => {
+      if (timers.leave) clearTimeout(timers.leave);
+    };
+  }, [open]);
 
   const place = (next) => {
     offsetRef.current = next;
@@ -153,6 +190,7 @@ export default function ActiveJobDock() {
   if (!user || hidden || !task) return null;
 
   const status = STATUS_CONFIG[task.status]?.label || task.status;
+  const ease = "duration-[340ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
 
   const dock = (
     <div
@@ -167,12 +205,21 @@ export default function ActiveJobDock() {
     >
       <div
         className={cn(
-          "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-          open ? "w-[min(78vw,320px)] grid-rows-[1fr]" : "grid-rows-[0fr]"
+          "grid w-[min(78vw,320px)] origin-bottom-right transition-[grid-template-rows,opacity] ",
+          ease,
+          panelShown ? "mb-2" : "mb-0",
+          panelActive ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         )}
+        aria-hidden={!panelActive}
       >
-        <div className="overflow-hidden">
-          <div className="mb-2 max-h-[min(46vh,300px)] overflow-y-auto rounded-[1.35rem] bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)]">
+        <div className="min-h-0 overflow-hidden">
+          <div
+            className={cn(
+              "max-h-[min(46vh,300px)] origin-bottom-right overflow-y-auto rounded-[1.35rem] bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)] transition-transform ",
+              ease,
+              panelActive ? "translate-y-0 scale-100" : "translate-y-3 scale-[0.94]"
+            )}
+          >
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#3D5C6E]">
               {displayTaskCategory(task)}
             </p>
@@ -218,7 +265,7 @@ export default function ActiveJobDock() {
 
             <Link
               href={`/task/${task.id}`}
-              className="mt-4 flex h-10 items-center justify-center rounded-full bg-[#3D5C6E] text-xs font-bold text-[#F7F4EC]"
+              className="mt-4 flex h-10 items-center justify-center rounded-full bg-[#3D5C6E] text-xs font-bold text-[#F7F4EC] transition-transform duration-200 active:scale-[0.98]"
             >
               Tingnan ang buong detalye
             </Link>
@@ -233,7 +280,10 @@ export default function ActiveJobDock() {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         aria-expanded={open}
-        className="relative flex h-10 max-w-[240px] cursor-grab touch-none items-center gap-2 rounded-full bg-[#2A3F4D] px-3 text-left text-[#F7F4EC] shadow-[0_10px_24px_rgba(42,63,77,0.28)] active:cursor-grabbing"
+        className={cn(
+          "relative flex h-10 max-w-[240px] cursor-grab touch-none items-center gap-2 rounded-full bg-[#2A3F4D] px-3 text-left text-[#F7F4EC] shadow-[0_10px_24px_rgba(42,63,77,0.28)] transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:cursor-grabbing active:scale-[0.97]",
+          panelActive && "scale-[0.98]"
+        )}
       >
         <span className="relative flex h-2.5 w-2.5 shrink-0">
           <span className="active-job-pulse absolute inset-0 rounded-full bg-[#3DDC97]" />
@@ -249,12 +299,16 @@ export default function ActiveJobDock() {
 
   return (
     <>
-      {open && typeof document !== "undefined"
+      {panelShown && typeof document !== "undefined"
         ? createPortal(
             <button
               type="button"
               aria-label="Close job details"
-              className="fixed inset-0 z-30 border-0 bg-[#163044]/30"
+              className={cn(
+                "fixed inset-0 z-30 border-0 bg-[#163044]/30 transition-opacity",
+                ease,
+                panelActive ? "opacity-100" : "opacity-0 pointer-events-none"
+              )}
               onClick={() => setOpen(false)}
             />,
             document.body

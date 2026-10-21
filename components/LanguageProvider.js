@@ -3,12 +3,19 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { DEFAULT_LANG, LANGS, LANG_STORAGE_KEY, isLang, translateText } from "@/lib/i18n";
 
-const LanguageContext = createContext({ lang: DEFAULT_LANG, setLanguage: () => {}, translating: false });
+const LanguageContext = createContext({
+  lang: DEFAULT_LANG,
+  setLanguage: () => {},
+  finishLanguage: () => {},
+  translating: false,
+});
 
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "CODE", "PRE"]);
 const ATTRS = ["placeholder", "aria-label", "title"];
-const SWAP_AT = 420;
-const HIDE_AT = 1150;
+const SWAP_DESKTOP = 360;
+const HIDE_DESKTOP = 900;
+const SWAP_TOUCH = 180;
+const HIDE_TOUCH = 520;
 
 function skipped(el) {
   return !el || SKIP_TAGS.has(el.tagName) || Boolean(el.closest("[data-no-translate]"));
@@ -23,6 +30,10 @@ function readLang() {
   }
 }
 
+function isTouchUi() {
+  return Boolean(window.matchMedia?.("(hover: none) and (pointer: coarse)").matches);
+}
+
 export default function LanguageProvider({ children }) {
   const [lang, setLang] = useState(DEFAULT_LANG);
   const [overlay, setOverlay] = useState(null);
@@ -30,6 +41,8 @@ export default function LanguageProvider({ children }) {
   const textRef = useRef(new WeakMap());
   const attrRef = useRef(new WeakMap());
   const timers = useRef([]);
+  const walkToken = useRef(0);
+  const pendingLang = useRef(null);
 
   const translateNode = useCallback((node) => {
     if (skipped(node.parentElement)) return;
@@ -53,7 +66,7 @@ export default function LanguageProvider({ children }) {
     attrRef.current.set(el, recs);
   }, []);
 
-  const walk = useCallback((root) => {
+  const walkSync = useCallback((root) => {
     if (!root) return;
     if (root.nodeType === Node.TEXT_NODE) {
       translateNode(root);
@@ -72,20 +85,54 @@ export default function LanguageProvider({ children }) {
     }
   }, [translateAttr, translateNode]);
 
-  const apply = useCallback((next) => {
+  /** Chunked walk so phones don't freeze the main thread. */
+  const walkChunked = useCallback((root) => {
+    if (!root || root.nodeType !== Node.ELEMENT_NODE) {
+      walkSync(root);
+      return;
+    }
+    ATTRS.forEach((name) => translateAttr(root, name));
+    root.querySelectorAll("[placeholder],[aria-label],[title]").forEach((el) => {
+      ATTRS.forEach((name) => translateAttr(el, name));
+    });
+
+    const token = ++walkToken.current;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const batch = () => {
+      if (token !== walkToken.current) return;
+      let n = 0;
+      let node = walker.nextNode();
+      while (node && n < 80) {
+        translateNode(node);
+        node = walker.nextNode();
+        n += 1;
+      }
+      if (node) {
+        if (typeof window.requestIdleCallback === "function") {
+          window.requestIdleCallback(batch, { timeout: 48 });
+        } else {
+          window.setTimeout(batch, 0);
+        }
+      }
+    };
+    batch();
+  }, [translateAttr, translateNode, walkSync]);
+
+  const apply = useCallback((next, { chunked = true } = {}) => {
     langRef.current = next;
     setLang(next);
     document.documentElement.lang = next === "tl" ? "fil" : "en";
-    walk(document.body);
-  }, [walk]);
+    if (chunked && isTouchUi()) walkChunked(document.body);
+    else walkSync(document.body);
+  }, [walkChunked, walkSync]);
 
   useEffect(() => {
-    apply(readLang());
+    apply(readLang(), { chunked: false });
     const observer = new MutationObserver((records) => {
       for (const record of records) {
         if (record.type === "characterData") translateNode(record.target);
         else if (record.type === "attributes") translateAttr(record.target, record.attributeName);
-        else record.addedNodes.forEach(walk);
+        else record.addedNodes.forEach(walkSync);
       }
     });
     observer.observe(document.body, {
@@ -99,8 +146,9 @@ export default function LanguageProvider({ children }) {
     return () => {
       observer.disconnect();
       pending.forEach(clearTimeout);
+      walkToken.current += 1;
     };
-  }, [apply, translateAttr, translateNode, walk]);
+  }, [apply, translateAttr, translateNode, walkSync]);
 
   useEffect(() => {
     const { alert, confirm } = window;
@@ -113,6 +161,16 @@ export default function LanguageProvider({ children }) {
     };
   }, []);
 
+  const finishLanguage = useCallback(() => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    const pending = pendingLang.current;
+    if (pending && pending !== langRef.current) apply(pending);
+    pendingLang.current = null;
+    setOverlay((o) => (o ? { ...o, leaving: true } : o));
+    timers.current = [setTimeout(() => setOverlay(null), 200)];
+  }, [apply]);
+
   const setLanguage = useCallback((next) => {
     if (!isLang(next) || next === langRef.current) return;
     try {
@@ -123,31 +181,49 @@ export default function LanguageProvider({ children }) {
     timers.current.forEach(clearTimeout);
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      apply(next);
+      pendingLang.current = null;
+      apply(next, { chunked: false });
       return;
     }
+    const touch = isTouchUi();
+    const swapAt = touch ? SWAP_TOUCH : SWAP_DESKTOP;
+    const hideAt = touch ? HIDE_TOUCH : HIDE_DESKTOP;
+    pendingLang.current = next;
     setOverlay({ to: next, leaving: false });
     timers.current = [
-      setTimeout(() => apply(next), SWAP_AT),
-      setTimeout(() => setOverlay((o) => (o ? { ...o, leaving: true } : o)), HIDE_AT),
-      setTimeout(() => setOverlay(null), HIDE_AT + 260),
+      setTimeout(() => {
+        apply(next);
+        pendingLang.current = null;
+      }, swapAt),
+      setTimeout(() => setOverlay((o) => (o ? { ...o, leaving: true } : o)), hideAt),
+      setTimeout(() => setOverlay(null), hideAt + 220),
     ];
   }, [apply]);
 
   return (
-    <LanguageContext.Provider value={{ lang, setLanguage, translating: Boolean(overlay) }}>
+    <LanguageContext.Provider value={{ lang, setLanguage, finishLanguage, translating: Boolean(overlay) }}>
       {children}
-      {overlay ? <TranslatingOverlay to={overlay.to} leaving={overlay.leaving} /> : null}
+      {overlay ? (
+        <TranslatingOverlay to={overlay.to} leaving={overlay.leaving} onDismiss={finishLanguage} />
+      ) : null}
     </LanguageContext.Provider>
   );
 }
 
-function TranslatingOverlay({ to, leaving }) {
+function TranslatingOverlay({ to, leaving, onDismiss }) {
   const target = LANGS.find((l) => l.id === to) || LANGS[0];
   const from = LANGS.find((l) => l.id !== to) || LANGS[1];
   return (
-    <div data-no-translate className={`lang-overlay ${leaving ? "is-leaving" : ""}`} role="status" aria-live="polite">
-      <div className="lang-card">
+    <button
+      type="button"
+      data-no-translate
+      className={`lang-overlay ${leaving ? "is-leaving" : ""}`}
+      role="status"
+      aria-live="polite"
+      aria-label="Dismiss translation"
+      onClick={onDismiss}
+    >
+      <div className="lang-card" onClick={(e) => e.stopPropagation()}>
         <div className="lang-swap" aria-hidden>
           <span className="lang-chip lang-chip-from">{from.short}</span>
           <span className="lang-arrow">⇄</span>
@@ -155,7 +231,7 @@ function TranslatingOverlay({ to, leaving }) {
         </div>
         <p className="lang-title">{to === "tl" ? "Nagta-translate sa Tagalog" : "Translating to English"}</p>
         <p className="lang-sub">
-          {to === "tl" ? "Sandali lang" : "One moment"}
+          {to === "tl" ? "Sandali lang · tap to skip" : "One moment · tap to skip"}
           <span className="lang-dots"><i /><i /><i /></span>
         </p>
         <div className="lang-lines" aria-hidden>
@@ -164,7 +240,7 @@ function TranslatingOverlay({ to, leaving }) {
           <span style={{ width: "76%" }} />
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 

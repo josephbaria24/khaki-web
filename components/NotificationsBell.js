@@ -45,7 +45,8 @@ export default function NotificationsBell() {
 export function NotificationsSheet({ open, onClose }) {
   const { user } = useAuth();
   const router = useRouter();
-  const [shown, setShown] = useState(open);
+  const [shown, setShown] = useState(false);
+  const [visible, setVisible] = useState(false);
   const cached = api.notifications.peek();
   const [notes, setNotes] = useState(() => cached || []);
   const [ready, setReady] = useState(() => cached != null);
@@ -58,20 +59,32 @@ export function NotificationsSheet({ open, onClose }) {
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open) {
+      setVisible(false);
+      return undefined;
+    }
+    setShown(true);
     setDragY(null);
     setDragging(false);
-    return undefined;
+    const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setVisible(true);
+      return undefined;
+    }
+    let raf2 = 0;
+    const raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => setVisible(true));
+    });
+    return () => {
+      window.cancelAnimationFrame(raf1);
+      if (raf2) window.cancelAnimationFrame(raf2);
+    };
   }, [open]);
 
   useEffect(() => {
-    if (open) {
-      setShown(true);
-      return undefined;
-    }
-    if (!shown) return undefined;
+    if (open || !shown) return undefined;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const id = window.setTimeout(() => setShown(false), reduced ? 0 : 240);
+    const id = window.setTimeout(() => setShown(false), reduced ? 0 : 420);
     return () => window.clearTimeout(id);
   }, [open, shown]);
 
@@ -164,7 +177,7 @@ export function NotificationsSheet({ open, onClose }) {
     if (y > 96 || (y > 36 && y / dt > 0.55)) {
       const height = sheetRef.current?.offsetHeight || 640;
       setDragY(height);
-      window.setTimeout(() => onClose(), 200);
+      window.setTimeout(() => onClose(), 280);
       return;
     }
     setDragY(0);
@@ -179,11 +192,11 @@ export function NotificationsSheet({ open, onClose }) {
 
   return createPortal(
     <div
-      className={cn("notif-backdrop", !open && "is-leaving")}
+      className={cn("notif-backdrop", visible && "is-open")}
       onClick={onClose}
-      onAnimationEnd={(e) => {
-        if (e.target !== e.currentTarget) return;
-        if (!open) setShown(false);
+      onTransitionEnd={(e) => {
+        if (e.target !== e.currentTarget || e.propertyName !== "opacity") return;
+        if (!open && !visible) setShown(false);
       }}
     >
       <div
@@ -191,19 +204,19 @@ export function NotificationsSheet({ open, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-label="Notifications"
-        className={cn("notif-sheet", !open && "is-leaving", dragY != null && "is-dragging")}
+        className={cn("notif-sheet", visible && "is-open", dragging && "is-dragging")}
         style={
           dragY == null
             ? undefined
             : {
                 transform: `translateY(${dragY}px)`,
-                animation: "none",
-                transition: dragging ? "none" : "transform 0.22s ease-out",
+                transition: dragging ? "none" : "transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)",
               }
         }
         onTransitionEnd={(event) => {
           if (event.target !== event.currentTarget || event.propertyName !== "transform") return;
           if (!dragging && dragY === 0) setDragY(null);
+          if (!open && !visible && dragY == null) setShown(false);
         }}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={pointerDown}

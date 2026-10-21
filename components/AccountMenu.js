@@ -19,10 +19,38 @@ export default function AccountMenu() {
   const [shown, setShown] = useState(false);
   const [walletAmount, setWalletAmount] = useState(null);
   const wrapRef = useRef(null);
+  const leaveTimer = useRef(null);
+
+  const closeMenu = (immediate = false) => {
+    if (leaveTimer.current) {
+      clearTimeout(leaveTimer.current);
+      leaveTimer.current = null;
+    }
+    setOpen(false);
+    if (immediate) {
+      setShown(false);
+      return;
+    }
+    // Fallback if leave animation is interrupted (common after language swap).
+    leaveTimer.current = setTimeout(() => {
+      setShown(false);
+      leaveTimer.current = null;
+    }, 200);
+  };
 
   useEffect(() => {
-    if (open) setShown(true);
+    if (open) {
+      if (leaveTimer.current) {
+        clearTimeout(leaveTimer.current);
+        leaveTimer.current = null;
+      }
+      setShown(true);
+    }
   }, [open]);
+
+  useEffect(() => () => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+  }, []);
 
   useEffect(() => {
     if (!open || !user?.id) return undefined;
@@ -49,18 +77,27 @@ export default function AccountMenu() {
   useEffect(() => {
     if (!open) return undefined;
     const onPointer = (e) => {
-      if (!wrapRef.current?.contains(e.target)) setOpen(false);
+      if (!wrapRef.current?.contains(e.target)) closeMenu();
     };
     const onKey = (e) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeMenu();
     };
-    document.addEventListener("mousedown", onPointer);
+    // pointerdown covers mouse + touch; touchstart as backup for older iOS.
+    document.addEventListener("pointerdown", onPointer, true);
+    document.addEventListener("touchstart", onPointer, true);
     document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("pointerdown", onPointer, true);
+      document.removeEventListener("touchstart", onPointer, true);
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  const pickLanguage = (id) => {
+    // Unmount menu before the translate overlay / DOM walk, or leave anim never ends.
+    closeMenu(true);
+    window.setTimeout(() => setLanguage(id), 30);
+  };
 
   return (
     <div className="relative" ref={wrapRef}>
@@ -86,14 +123,20 @@ export default function AccountMenu() {
           )}
           onAnimationEnd={(e) => {
             if (e.target !== e.currentTarget) return;
-            if (!open) setShown(false);
+            if (!open) {
+              if (leaveTimer.current) {
+                clearTimeout(leaveTimer.current);
+                leaveTimer.current = null;
+              }
+              setShown(false);
+            }
           }}
         >
           <Link
             href="/profile"
             role="menuitem"
             className="block px-3.5 py-2.5 text-sm font-bold text-[#163044] hover:bg-[#F3EFE3] dark:text-[#F5F3EE] dark:hover:bg-white/5"
-            onClick={() => setOpen(false)}
+            onClick={() => closeMenu(true)}
           >
             Profile
           </Link>
@@ -102,7 +145,7 @@ export default function AccountMenu() {
               href="/team"
               role="menuitem"
               className="block px-3.5 py-2.5 text-sm font-bold text-[#163044] hover:bg-[#F3EFE3] dark:text-[#F5F3EE] dark:hover:bg-white/5"
-              onClick={() => setOpen(false)}
+              onClick={() => closeMenu(true)}
             >
               Team
             </Link>
@@ -111,7 +154,7 @@ export default function AccountMenu() {
             href="/wallet"
             role="menuitem"
             className="flex items-center justify-between gap-3 px-3.5 py-2.5 text-sm font-bold text-[#163044] hover:bg-[#F3EFE3] dark:text-[#F5F3EE] dark:hover:bg-white/5"
-            onClick={() => setOpen(false)}
+            onClick={() => closeMenu(true)}
           >
             <span>Wallet</span>
             <span className="shrink-0 text-xs font-black text-[#0D666A] dark:text-[#7FD3CF]">
@@ -122,11 +165,11 @@ export default function AccountMenu() {
             href="/settings"
             role="menuitem"
             className="block px-3.5 py-2.5 text-sm font-bold text-[#163044] hover:bg-[#F3EFE3] dark:text-[#F5F3EE] dark:hover:bg-white/5"
-            onClick={() => setOpen(false)}
+            onClick={() => closeMenu(true)}
           >
             Settings
           </Link>
-          <div className="mx-2 my-1 rounded-xl bg-[#F3EFE3] p-1.5 dark:bg-[#252A35]">
+          <div className="mx-2 my-1 rounded-xl bg-[#F3EFE3] p-1.5 dark:bg-[#252A35]" data-no-translate>
             <p className="px-1.5 pb-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/55 dark:text-[#F5F3EE]/55">
               Language
             </p>
@@ -140,10 +183,7 @@ export default function AccountMenu() {
                     role="radio"
                     aria-checked={on}
                     data-no-translate
-                    onClick={() => {
-                      setOpen(false);
-                      setLanguage(option.id);
-                    }}
+                    onClick={() => pickLanguage(option.id)}
                     className={cn(
                       "h-8 rounded-lg text-xs font-black transition-colors",
                       on
@@ -162,7 +202,7 @@ export default function AccountMenu() {
             role="menuitem"
             className="block w-full px-3.5 py-2.5 text-left text-sm font-bold text-[#C94B78] hover:bg-[#F8D5E0]/70 dark:text-[#F0A3BC] dark:hover:bg-[#C94B78]/15"
             onClick={async () => {
-              setOpen(false);
+              closeMenu(true);
               await logout();
               toast.success("Logged out");
               router.push("/");

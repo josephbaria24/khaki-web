@@ -222,6 +222,21 @@ export default function TaskDetailPage() {
     }
   };
 
+  const cancelAssignment = async () => {
+    const name = tasker?.full_name || "this tasker";
+    const ok = window.confirm(`Cancel assignment for ${name}? You can assign someone else after.`);
+    if (!ok) return;
+    try {
+      await api.offers.cancelAssignment(task.id);
+      refresh();
+      toast.success("Assignment cancelled. You can assign again.");
+    } catch (err) {
+      const msg = err.message || "Could not cancel assignment";
+      setError(msg);
+      toast.error(msg);
+    }
+  };
+
   const complete = async () => {
     try {
       await api.tasks.complete(task.id);
@@ -896,6 +911,21 @@ export default function TaskDetailPage() {
                     ) : null}
                   </div>
                 ) : null}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    href={`/task/${task.id}/taskers`}
+                    className="inline-flex h-11 items-center rounded-full bg-[#163044] px-5 text-sm font-black text-[#F7F4EC]"
+                  >
+                    Find another tasker
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={cancelAssignment}
+                    className="h-11 rounded-full border-2 border-destructive px-5 text-sm font-bold text-destructive"
+                  >
+                    Cancel assign
+                  </button>
+                </div>
               </div>
             ) : null}
 

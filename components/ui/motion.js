@@ -1,7 +1,7 @@
 "use client";
 
 export function PageEnter({ children, className = "" }) {
-  return <div className={`animate-page-enter ${className}`.trim()}>{children}</div>;
+  return <div className={`animate-page-enter min-w-0 max-w-full ${className}`.trim()}>{children}</div>;
 }
 
 export function FadeIn({ children, className = "", delay = 0 }) {
