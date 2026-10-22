@@ -20,8 +20,7 @@ function useShown(open) {
       return undefined;
     }
     if (!shown) return undefined;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(() => setShown(false), reduced ? 0 : 170);
+    const timer = window.setTimeout(() => setShown(false), 170);
     return () => window.clearTimeout(timer);
   }, [open, shown]);
   return [shown, setShown];

@@ -172,8 +172,7 @@ function PostSelect({ id, openId, setOpenId, value, options, onChange, placehold
       return () => window.cancelAnimationFrame(frame);
     }
     if (!shown) return undefined;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(() => setShown(false), reduced ? 0 : 180);
+    const timer = window.setTimeout(() => setShown(false), 180);
     return () => window.clearTimeout(timer);
   }, [open, shown]);
 

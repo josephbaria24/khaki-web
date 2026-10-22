@@ -179,12 +179,6 @@ export default function LanguageProvider({ children }) {
       /* private mode */
     }
     timers.current.forEach(clearTimeout);
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      pendingLang.current = null;
-      apply(next, { chunked: false });
-      return;
-    }
     const touch = isTouchUi();
     const swapAt = touch ? SWAP_TOUCH : SWAP_DESKTOP;
     const hideAt = touch ? HIDE_TOUCH : HIDE_DESKTOP;

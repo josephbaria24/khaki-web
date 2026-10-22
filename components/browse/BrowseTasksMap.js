@@ -36,11 +36,6 @@ function refreshSize(map) {
   setTimeout(() => map.invalidateSize({ animate: false, pan: false }), 400);
 }
 
-function prefersReducedMotion() {
-  return typeof window !== "undefined"
-    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
 function mapCanMove(map) {
   if (!map) return false;
   const size = map.getSize?.();
@@ -185,16 +180,11 @@ export default function BrowseTasksMap({ tasks, selectedId, onSelect, onExit }) 
       if (pendingFlyIdRef.current === point.id) pendingFlyIdRef.current = null;
     };
     try {
-      if (prefersReducedMotion()) {
-        map.setView(latlng, zoom, { animate: false });
-        clearPending();
-      } else {
-        map.flyTo(latlng, zoom, {
-          duration: FLY_MS / 1000,
-          easeLinearity: 0.2,
-        });
-        map.once("moveend", clearPending);
-      }
+      map.flyTo(latlng, zoom, {
+        duration: FLY_MS / 1000,
+        easeLinearity: 0.2,
+      });
+      map.once("moveend", clearPending);
     } catch {
       clearPending();
     }
@@ -264,12 +254,11 @@ export default function BrowseTasksMap({ tasks, selectedId, onSelect, onExit }) 
           map.fitBounds(latlngs, {
             padding: [48, 48],
             maxZoom: 12,
-            animate: !prefersReducedMotion(),
+            animate: true,
             duration: 0.55,
           });
         } else if (latlngs.length === 1) {
-          if (prefersReducedMotion()) map.setView(latlngs[0], 11, { animate: false });
-          else map.flyTo(latlngs[0], 11, { duration: 0.5 });
+          map.flyTo(latlngs[0], 11, { duration: 0.5 });
         }
       } catch {
         /* map pane not ready */
@@ -302,7 +291,7 @@ export default function BrowseTasksMap({ tasks, selectedId, onSelect, onExit }) 
     if (!map || !ready) return;
     const pane = map.getPane("tilePane");
     if (pane) {
-      pane.style.transition = prefersReducedMotion() ? "none" : "filter 0.35s ease";
+      pane.style.transition = "filter 0.35s ease";
       pane.style.filter = dark
         ? "invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9)"
         : "";

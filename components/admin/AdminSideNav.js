@@ -15,10 +15,6 @@ export function AdminSectionChip({ label, className = "" }) {
   );
 }
 
-function prefersReducedMotion() {
-  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
 export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hideChip = false }) {
   const { open, setOpen, register, unregister } = useAdminNav();
   const [shown, setShown] = useState(false);
@@ -44,10 +40,6 @@ export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hi
 
   useEffect(() => {
     if (!shown || !open) return undefined;
-    if (prefersReducedMotion()) {
-      setEntered(true);
-      return undefined;
-    }
     setEntered(false);
     let frame2 = 0;
     const frame1 = window.requestAnimationFrame(() => {
@@ -61,7 +53,7 @@ export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hi
 
   useEffect(() => {
     if (open || !shown) return undefined;
-    const timer = window.setTimeout(() => setShown(false), prefersReducedMotion() ? 0 : 340);
+    const timer = window.setTimeout(() => setShown(false), 340);
     return () => window.clearTimeout(timer);
   }, [open, shown]);
 
@@ -84,7 +76,6 @@ export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hi
     setOpen(false);
   };
 
-  const motion = "motion-reduce:transition-none motion-reduce:transform-none";
   const ease = "duration-[340ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
 
   const drawer = shown && mounted ? createPortal(
@@ -92,7 +83,7 @@ export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hi
       <button
         type="button"
         aria-label="Close menu"
-        className={`absolute inset-0 bg-[#163044]/40 backdrop-blur-[3px] transition-opacity ${ease} ${motion} ${
+        className={`absolute inset-0 bg-[#163044]/40 backdrop-blur-[3px] transition-opacity ${ease} ${
           entered ? "opacity-100" : "opacity-0"
         }`}
         onClick={() => setOpen(false)}
@@ -102,14 +93,14 @@ export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hi
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`admin-side-nav absolute left-3 top-[4.5rem] flex w-[min(18.5rem,calc(100vw-1.5rem))] max-h-[calc(100dvh-5.25rem)] origin-top-left flex-col overflow-hidden rounded-[1.75rem] border border-[#163044]/12 bg-[#FBF8F1] text-[#163044] shadow-[0_24px_60px_rgba(22,48,68,0.28)] backdrop-blur-xl transition-[transform,opacity] ${ease} ${motion} sm:left-4 sm:top-[4.75rem] sm:max-h-[calc(100dvh-5.5rem)] lg:top-[5rem] dark:border-white/12 dark:bg-[#151922] dark:text-[#F5F3EE] dark:shadow-[0_24px_60px_rgba(0,0,0,0.55)] ${
-          entered
+        className={`admin-side-nav absolute left-3 top-[4.5rem] flex w-[min(18.5rem,calc(100vw-1.5rem))] max-h-[calc(100dvh-5.25rem)] origin-top-left flex-col overflow-hidden rounded-[1.75rem] border border-[#163044]/12 bg-[#FBF8F1] text-[#163044] shadow-[0_24px_60px_rgba(22,48,68,0.28)] backdrop-blur-xl transition-[transform,opacity] ${ease} sm:left-4 sm:top-[4.75rem] sm:max-h-[calc(100dvh-5.5rem)] lg:top-[5rem] dark:border-white/12 dark:bg-[#151922] dark:text-[#F5F3EE] dark:shadow-[0_24px_60px_rgba(0,0,0,0.55)] ${
+            entered
             ? "translate-x-0 scale-100 opacity-100"
             : "-translate-x-5 scale-[0.96] opacity-0"
         }`}
       >
         <div
-          className={`flex shrink-0 items-center justify-between gap-2 border-b border-[#163044]/08 px-3 py-3 transition-[transform,opacity] delay-75 duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-white/10 ${motion} ${
+          className={`flex shrink-0 items-center justify-between gap-2 border-b border-[#163044]/08 px-3 py-3 transition-[transform,opacity] delay-75 duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-white/10 ${
             entered ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"
           }`}
         >
@@ -135,7 +126,7 @@ export default function AdminSideNav({ tabs, activeId, onSelect, badges = {}, hi
                 type="button"
                 onClick={() => choose(tab.id)}
                 style={{ transitionDelay: entered ? `${90 + index * 28}ms` : "0ms" }}
-                className={`flex w-full items-center justify-between gap-3 rounded-2xl px-3.5 py-2.5 text-left text-sm font-bold transition-[transform,opacity,background-color,color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${motion} ${
+                className={`flex w-full items-center justify-between gap-3 rounded-2xl px-3.5 py-2.5 text-left text-sm font-bold transition-[transform,opacity,background-color,color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                   entered ? "translate-x-0 opacity-100" : "-translate-x-3 opacity-0"
                 } ${
                   on

@@ -693,13 +693,6 @@
     background-color: #2A303C;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .skeleton-shine {
-      animation: none;
-      opacity: 0.7;
-    }
-  }
-
   .animate-pulse {
     animation: khaki-pulse 1.4s ease-in-out infinite;
   }
@@ -962,15 +955,6 @@
     to {
       opacity: 1;
       transform: translateY(0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .overview-tab-pill {
-      transition: none;
-    }
-    .overview-panel {
-      animation: none;
     }
   }
 
@@ -1680,122 +1664,6 @@
   .profile-bio.is-open {
     max-height: 48rem;
   }
-
-  @media (prefers-reduced-motion: reduce) {
-    .animate-page-enter,
-    .animate-fade-in-up,
-    .animate-toast-in,
-    .animate-fade-in,
-    .animate-post-pop,
-    .hero-mobile-card,
-    .hero-art-float,
-    .hero-desktop-bg,
-    .mode-switch-overlay,
-    .mode-switch-card,
-    .account-menu,
-    .account-menu [role="menuitem"],
-    .post-select-backdrop,
-    .post-select-menu,
-    .post-select-menu [role="option"],
-    .tasker-setup-panel,
-    .tasker-setup-panel > .tasker-setup-row,
-    .notif-backdrop,
-    .notif-sheet,
-    .stagger-children > *,
-    .float-nav,
-    .active-job-pulse,
-    .chat-bubble-enter-mine,
-    .chat-bubble-enter-theirs,
-    .site-nav-panel.is-open .site-nav-panel-inner > * > a,
-    .site-nav-panel.is-open .site-nav-panel-inner > * > div {
-      animation: none !important;
-    }
-
-    .profile-collapse,
-    .profile-collapse-inner > *,
-    .profile-bio,
-    .site-nav-panel,
-    .site-menu-btn,
-    .site-menu-icon,
-    .khaki-landing button,
-    .khaki-landing a:not(.float-nav-post),
-    .account-menu [role="menuitem"],
-    .notif-backdrop,
-    .notif-sheet {
-      transition: none !important;
-    }
-
-    .profile-collapse,
-    .profile-collapse-inner > *,
-    .profile-bio,
-    .site-nav-panel,
-    .site-menu-btn,
-    .site-menu-icon,
-    .khaki-landing button,
-    .khaki-landing a:not(.float-nav-post),
-    .account-menu [role="menuitem"] {
-      transform: none !important;
-    }
-
-    .post-select-chevron {
-      transition: none !important;
-    }
-
-    .khaki-landing a.float-nav-post,
-    .khaki-landing a.float-nav-post:active {
-      transition: none !important;
-      transform: translate(-50%, -50%) !important;
-    }
-
-    .khaki-landing {
-      transition: none !important;
-    }
-
-    .profile-collapse-inner > * {
-      opacity: 1;
-    }
-
-    .interactive-card,
-    .interactive-card:hover,
-    .interactive-card:active,
-    .category-tile,
-    .category-tile:hover,
-    .category-tile:active,
-    .category-tile:hover .category-tile-photo img,
-    .category-tile:hover .category-tile-go,
-    .shortcut-tile,
-    .shortcut-tile:hover,
-    .shortcut-tile:active,
-    .bento-widget,
-    .bento-widget:hover,
-    .bento-widget:active,
-    .btn-dark:active,
-    .glass-cta:active,
-    .chip-inactive:active,
-    .chip-active:active,
-    .khaki-landing button:not(:disabled):active,
-    .khaki-landing [type="button"]:not(:disabled):active,
-    .khaki-landing [type="submit"]:not(:disabled):active,
-    .khaki-landing [role="button"]:active,
-    .khaki-landing a.inline-flex:active:not(.float-nav-post),
-    .khaki-landing a.flex:active:not(.float-nav-post),
-    .khaki-landing a.grid:active,
-    .khaki-landing a.block:active,
-    .khaki-landing a.float-nav-tab,
-    .khaki-landing a.float-nav-tab:active,
-    .khaki-landing a.float-nav-tab.is-active,
-    .account-menu [role="menuitem"]:hover,
-    .account-menu [role="menuitem"]:active,
-    .btn-olive:active,
-    .btn-sand:active,
-    .btn-olive-outline:active {
-      transform: none !important;
-    }
-
-    .landing-marquee-track {
-      animation: none !important;
-    }
-  }
 }
 
 /* Logged-in shell: paper surfaces go dark, ink text goes light. */
@@ -2052,16 +1920,6 @@ html.dark .khaki-landing .browse-page :is([class*="text-[#2A3F4D]/"], [class*="t
   100% { transform: translateZ(0) scale(1.12); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .browse-map-pin,
-  .browse-map-pin__body,
-  .browse-map-pin__tip,
-  .browse-map-pin.is-selected {
-    transition: none;
-    animation: none;
-  }
-}
-
 .browse-detail-panel {
   animation: browse-detail-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -2089,13 +1947,6 @@ html.dark .khaki-landing .browse-page :is([class*="text-[#2A3F4D]/"], [class*="t
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .browse-detail-panel,
-  .browse-mobile-detail {
-    animation: none;
   }
 }
 
@@ -2276,15 +2127,6 @@ html.dark .team-lead-welcome-secondary {
 
 html.dark .team-lead-welcome-body {
   color: rgba(245, 243, 238, 0.65);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .team-lead-welcome-card,
-  .team-lead-welcome-badge,
-  .team-lead-spark,
-  .rider-team-highlight {
-    animation: none;
-  }
 }
 
 .map-pin-canvas.leaflet-container {

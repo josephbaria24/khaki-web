@@ -1164,7 +1164,7 @@ function JobDock({ children }) {
       <div
         className={cn(
           "pointer-events-auto w-full max-w-lg",
-          tuck == null && "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+          tuck == null && "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         )}
         style={{ transform: full ? `translateY(${shift}px)` : undefined }}
       >

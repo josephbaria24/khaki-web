@@ -190,7 +190,9 @@ export default function ActiveJobDock() {
   if (!user || hidden || !task) return null;
 
   const status = STATUS_CONFIG[task.status]?.label || task.status;
-  const ease = "duration-[340ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
+  // Prefer transform/opacity only — grid-template-rows often skips in iOS standalone PWAs.
+  const ease = "duration-[340ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
+  const dragged = offset.x !== 0 || offset.y !== 0;
 
   const dock = (
     <div
@@ -201,25 +203,21 @@ export default function ActiveJobDock() {
           ? "fixed bottom-5 right-5 z-50 md:bottom-6 md:right-6"
           : "absolute bottom-[calc(100%+10px)] right-1"
       )}
-      style={{ transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` }}
+      // Only apply a transform while dragging. A permanent translate3d(0,0,0) makes
+      // child transitions skip in installed Safari/Chrome shortcuts (standalone WebKit).
+      style={dragged ? { transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` } : undefined}
     >
       <div
         className={cn(
-          "grid w-[min(78vw,320px)] origin-bottom-right transition-[grid-template-rows,opacity] ",
+          "w-[min(78vw,320px)] origin-bottom-right overflow-hidden transition-[max-height,opacity,transform,margin] ",
           ease,
-          panelShown ? "mb-2" : "mb-0",
-          panelActive ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+          panelActive
+            ? "mb-2 max-h-[min(46vh,320px)] translate-y-0 scale-100 opacity-100"
+            : "mb-0 max-h-0 translate-y-2 scale-[0.96] opacity-0 pointer-events-none"
         )}
         aria-hidden={!panelActive}
       >
-        <div className="min-h-0 overflow-hidden">
-          <div
-            className={cn(
-              "max-h-[min(46vh,300px)] origin-bottom-right overflow-y-auto rounded-[1.35rem] bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)] transition-transform ",
-              ease,
-              panelActive ? "translate-y-0 scale-100" : "translate-y-3 scale-[0.94]"
-            )}
-          >
+          <div className="max-h-[min(46vh,300px)] overflow-y-auto rounded-[1.35rem] bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)]">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#3D5C6E]">
               {displayTaskCategory(task)}
             </p>
@@ -270,7 +268,6 @@ export default function ActiveJobDock() {
               Tingnan ang buong detalye
             </Link>
           </div>
-        </div>
       </div>
 
       <button

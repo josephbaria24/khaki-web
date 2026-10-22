@@ -403,7 +403,7 @@ function TrackSheet({ open, onOpenChange, collapsible, title, hint, children }) 
           </button>
           {collapsible ? (
             <div
-              className={cn("overflow-hidden", dragHeight == null && "transition-[height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none")}
+              className={cn("overflow-hidden", dragHeight == null && "transition-[height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]")}
               style={{ height: full ? shown : open ? "auto" : 0 }}
             >
               <div ref={bodyRef} className="px-3 pb-2">{controls}</div>

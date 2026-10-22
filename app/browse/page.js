@@ -285,7 +285,7 @@ function BrowseBody() {
         >
           <div
             className={cn(
-              "absolute inset-0 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              "absolute inset-0 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
               detailOpen ? "opacity-40 md:opacity-30" : "opacity-100"
             )}
           >

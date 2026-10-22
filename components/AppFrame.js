@@ -59,7 +59,7 @@ export default function AppFrame({ children }) {
   return (
     <div
       className={cn(
-        "khaki-landing flex h-dvh max-h-dvh flex-col overflow-hidden transition-[padding-bottom] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:pb-0",
+        "khaki-landing flex h-dvh max-h-dvh flex-col overflow-hidden transition-[padding-bottom] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:pb-0",
         hideNav ? "pb-0" : "pb-[4.5rem]"
       )}
     >

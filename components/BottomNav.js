@@ -38,7 +38,7 @@ export default function BottomNav({ hidden = false }) {
     <nav
       className={cn(
         "fixed bottom-4 left-4 right-4 z-40 lg:hidden",
-        "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+        "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
         hidden
           ? "pointer-events-none translate-y-[calc(100%+1.5rem)] opacity-0"
           : "translate-y-0 opacity-100"

@@ -66,11 +66,6 @@ export function NotificationsSheet({ open, onClose }) {
     setShown(true);
     setDragY(null);
     setDragging(false);
-    const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      setVisible(true);
-      return undefined;
-    }
     let raf2 = 0;
     const raf1 = window.requestAnimationFrame(() => {
       raf2 = window.requestAnimationFrame(() => setVisible(true));
@@ -83,8 +78,7 @@ export function NotificationsSheet({ open, onClose }) {
 
   useEffect(() => {
     if (open || !shown) return undefined;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const id = window.setTimeout(() => setShown(false), reduced ? 0 : 420);
+    const id = window.setTimeout(() => setShown(false), 420);
     return () => window.clearTimeout(id);
   }, [open, shown]);
 
