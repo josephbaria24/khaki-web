@@ -12,7 +12,8 @@ import PostedJobsList from "@/components/PostedJobsList";
 import SectionIntro from "@/components/SectionIntro";
 import { FadeIn } from "@/components/ui/motion";
 import { CHIP_CATEGORIES, taskMatchesChip } from "@/lib/catalog";
-import { LANDING, LANDING_CATEGORIES } from "@/lib/landingContent";
+import { LANDING } from "@/lib/landingContent";
+import { useMarketingLanding } from "@/lib/useMarketingLanding";
 import { displayTaskCategory, formatPHP, skillFitsTask } from "@/lib/khaki";
 import { useAuth } from "@/lib/AuthContext";
 import { canOpenPost, isPosterMode, needsTaskerVerification } from "@/lib/roles";
@@ -35,6 +36,7 @@ function interactionBadge(task, userId, bid) {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { categories: landingCategories } = useMarketingLanding();
   const poster = isPosterMode(user);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -269,13 +271,13 @@ export default function DashboardPage() {
               </div>
               <div className="landing-marquee mt-4 hidden overflow-hidden sm:block">
                 <div className="landing-marquee-track">
-                  {[...LANDING_CATEGORIES, ...LANDING_CATEGORIES].map((cat, i) => (
+                  {[...landingCategories, ...landingCategories].map((cat, i) => (
                     <CategoryCard key={`${cat.key}-${i}`} cat={{ ...cat, href: `/post?category=${cat.key}` }} />
                   ))}
                 </div>
               </div>
               <div className="no-scrollbar mt-4 grid auto-cols-max grid-flow-col grid-rows-2 gap-3 overflow-x-auto px-4 pb-2 sm:hidden">
-                {LANDING_CATEGORIES.map((cat) => (
+                {landingCategories.map((cat) => (
                   <CategoryCard key={cat.key} cat={{ ...cat, href: `/post?category=${cat.key}` }} compact />
                 ))}
               </div>
@@ -391,13 +393,13 @@ export default function DashboardPage() {
               </div>
               <div className="landing-marquee mt-4 hidden overflow-hidden sm:block">
                 <div className="landing-marquee-track">
-                  {[...LANDING_CATEGORIES, ...LANDING_CATEGORIES].map((cat, i) => (
+                  {[...landingCategories, ...landingCategories].map((cat, i) => (
                     <CategoryCard key={`${cat.key}-${i}`} cat={cat} />
                   ))}
                 </div>
               </div>
               <div className="no-scrollbar mt-4 grid auto-cols-max grid-flow-col grid-rows-2 gap-3 overflow-x-auto pb-2 sm:hidden">
-                {LANDING_CATEGORIES.map((cat) => (
+                {landingCategories.map((cat) => (
                   <CategoryCard key={cat.key} cat={cat} compact />
                 ))}
               </div>

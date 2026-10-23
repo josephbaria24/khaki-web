@@ -70,12 +70,18 @@ export default function AppFrame({ children }) {
       <PullToRefresh
         className={cn(
           "relative min-h-0 min-w-0 flex-1",
-          lockScroll ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto"
+          lockScroll ? "flex flex-col overflow-hidden" : "overflow-x-hidden overflow-y-auto"
         )}
         onRefresh={handleRefresh}
         disabled={lockScroll}
       >
-        <div key={refreshKey} className="min-w-0 max-w-full">
+        <div
+          key={refreshKey}
+          className={cn(
+            "min-w-0 max-w-full",
+            lockScroll ? "flex min-h-0 flex-1 flex-col overflow-hidden" : "min-h-full"
+          )}
+        >
           {children}
         </div>
       </PullToRefresh>

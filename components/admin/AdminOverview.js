@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { formatPHP } from "@/lib/khaki";
 import { buildAdminDashboard, CHART_COLORS } from "@/lib/adminDashboard";
 import { ShieldCheck, Wallet, Briefcase, User, Bell, Flash, Calendar } from "@/components/icons";
+import RolePortals from "@/components/admin/RolePortals";
 
 const PANELS = [
   { id: "snapshot", label: "Snapshot", icon: Flash },
@@ -12,8 +13,9 @@ const PANELS = [
   { id: "recent", label: "Recent", icon: Bell },
 ];
 
-export default function AdminOverview({ overview, users, logs, transactions, onOpenTab }) {
+export default function AdminOverview({ overview, users, logs, transactions, onOpenTab, lockedPortal = null, onCreateUser }) {
   const [panel, setPanel] = useState("snapshot");
+  const [pulse, setPulse] = useState(false);
   const data = useMemo(
     () => buildAdminDashboard({ overview, users, logs, transactions }),
     [overview, users, logs, transactions]
@@ -24,6 +26,26 @@ export default function AdminOverview({ overview, users, logs, transactions, onO
 
   return (
     <div className="space-y-4">
+      <RolePortals
+        overview={overview}
+        users={users}
+        logs={logs}
+        transactions={transactions}
+        onOpenTab={onOpenTab}
+        lockedPortal={lockedPortal}
+        onCreateUser={onCreateUser}
+      />
+      {lockedPortal ? null : (
+      <>
+      <button
+        type="button"
+        onClick={() => setPulse((value) => !value)}
+        className="text-sm font-bold text-[#163044] underline-offset-4 hover:underline dark:text-[#E8E4DC]"
+      >
+        {pulse ? "Hide marketplace pulse" : "Marketplace pulse"}
+      </button>
+      {pulse ? (
+      <div className="space-y-4">
       <nav
         className="overview-tablist sticky top-0 z-10 -mx-1 grid grid-cols-4 rounded-2xl border border-[#163044]/08 bg-card/95 p-1 shadow-card backdrop-blur-md dark:border-white/10"
         aria-label="Overview sections"
@@ -211,6 +233,10 @@ export default function AdminOverview({ overview, users, logs, transactions, onO
           </Card>
         </section>
       ) : null}
+      </div>
+      ) : null}
+      </>
+      )}
     </div>
   );
 }

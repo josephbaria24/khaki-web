@@ -8,8 +8,10 @@ import Container from "@/components/Container";
 import Refreshable from "@/components/Refreshable";
 import { useAuth } from "@/lib/AuthContext";
 import { formatPHP, DISPUTE_STATUS_LABEL, reportReasonLabel } from "@/lib/khaki";
-import { ROLE_LABELS } from "@/lib/roles";
+import { ROLE_LABELS, canOpenAdmin, staffPortal } from "@/lib/roles";
 import { api } from "@/lib/store";
+import { supabase } from "@/lib/supabase";
+import CreateStaffAccount from "@/components/admin/CreateStaffAccount";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminSideNav, { AdminSectionChip } from "@/components/admin/AdminSideNav";
@@ -107,6 +109,8 @@ function AdminScreen() {
   const [queueTeam, setQueueTeam] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const portal = staffPortal(user);
   const refresh = () => setTick((n) => n + 1);
 
   const requestDelete = (target) => {
@@ -142,8 +146,28 @@ function AdminScreen() {
   };
 
   useEffect(() => {
-    if (user?.role !== "admin") return;
+    if (!canOpenAdmin(user)) return;
     let live = true;
+    if (portal) {
+      supabase.rpc("staff_portal_bundle").then(({ data, error: rpcError }) => {
+        if (!live) return;
+        if (rpcError) {
+          setError(/staff_portal_bundle|function/i.test(rpcError.message || "")
+            ? "Run supabase/staff_accounts.sql in the SQL editor, then sign in again."
+            : rpcError.message);
+          setReady(true);
+          return;
+        }
+        const bundle = data || {};
+        setOverview(bundle.overview || {});
+        setUsers(bundle.users || []);
+        setLogs(bundle.logs || []);
+        setTransactions(bundle.transactions || []);
+        setDisputes([]);
+        setReady(true);
+      });
+      return () => { live = false; };
+    }
     const force = tick > 0;
     if (!force) {
       const stored = (adminCache.data && Date.now() - adminCache.at < CACHE_MS) ? adminCache.data : storedAdmin();
@@ -172,9 +196,9 @@ function AdminScreen() {
       }
     });
     return () => { live = false; };
-  }, [tick, user?.role]);
+  }, [tick, user?.role, user?.staff_portal, portal]);
 
-  if (user?.role !== "admin") {
+  if (!canOpenAdmin(user)) {
     return (
       <AppShell>
         <p className="p-8 text-center">Admin only.</p>
@@ -182,10 +206,33 @@ function AdminScreen() {
     );
   }
 
+  if (portal) {
+    return (
+      <AppShell>
+        <Container className="h-full min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain py-6 lg:py-10">
+          <div>
+            <h1 className="page-title mb-0 capitalize">{portal} portal</h1>
+            <p className="page-sub">This login opens only the {portal} tools.</p>
+          </div>
+          {error ? <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
+          {!ready || !overview ? <PageSkeleton rows={5} /> : (
+            <AdminOverview
+              overview={overview}
+              users={users}
+              logs={logs}
+              transactions={transactions}
+              lockedPortal={portal}
+            />
+          )}
+        </Container>
+      </AppShell>
+    );
+  }
+
   const needsReview = (u) => u.verification_status === "pending" || u.tasker_application?.review_state === "reverify";
   const pending = users.filter(needsReview);
   const applications = users
-    .filter((u) => u.role !== "admin" && (
+    .filter((u) => !u.staff_portal && u.role !== "admin" && (
       u.verification_status === "pending"
       || u.verification_status === "verified"
       || u.tasker_application
@@ -221,8 +268,8 @@ function AdminScreen() {
         as={tab === "verification" || tab === "users" ? "div" : Refreshable}
         className={
           tab === "verification" || tab === "users"
-            ? "flex h-full min-h-0 flex-col gap-6 overflow-hidden py-6 lg:py-8"
-            : "h-full min-h-0 space-y-6 overflow-y-auto py-6 lg:py-10"
+            ? "flex h-full min-h-0 flex-1 flex-col gap-6 overflow-hidden py-6 lg:py-8"
+            : "h-full min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain py-6 lg:py-10"
         }
       >
         <div className="shrink-0">
@@ -232,6 +279,16 @@ function AdminScreen() {
           </div>
           <p className="page-sub">Review applications, reports, users, and marketplace activity.</p>
         </div>
+        {createOpen ? (
+          <CreateStaffAccount
+            onClose={() => setCreateOpen(false)}
+            onCreated={() => {
+              setCreateOpen(false);
+              refresh();
+              toast.success("Staff account created. They can sign in now.");
+            }}
+          />
+        ) : null}
         {error && <p className="shrink-0 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <div className="shrink-0">
           <AdminSideNav
@@ -255,6 +312,7 @@ function AdminScreen() {
             logs={logs}
             transactions={transactions}
             onOpenTab={selectTab}
+            onCreateUser={() => setCreateOpen(true)}
           />
         )}
 

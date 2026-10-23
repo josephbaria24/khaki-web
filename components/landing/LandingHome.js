@@ -9,7 +9,6 @@ import CategoryBreakdown from "@/components/landing/CategoryBreakdown";
 import { formatPHP } from "@/lib/khaki";
 import {
   LANDING,
-  LANDING_CATEGORIES,
   LANDING_DISCLAIMER,
   LANDING_EARN_POINTS,
   LANDING_FAQS,
@@ -20,6 +19,7 @@ import {
   LANDING_TRUST,
 } from "@/lib/landingContent";
 import { useAuth } from "@/lib/AuthContext";
+import { useMarketingLanding } from "@/lib/useMarketingLanding";
 import { canOpenPost, needsTaskerVerification } from "@/lib/roles";
 import { Collapse } from "@/components/ui/motion";
 import InstallAppBanner from "@/components/InstallAppBanner";
@@ -130,6 +130,7 @@ function TaskPreviewCard({ task }) {
 
 export default function LandingHome() {
   const { isAuthenticated, user } = useAuth();
+  const { categories: landingCategories, promo } = useMarketingLanding();
   const [tab, setTab] = useState(LANDING_TASK_TABS[0]);
   const postHref = isAuthenticated
     ? (needsTaskerVerification(user) ? "/verify" : canOpenPost(user) ? "/post" : "/browse")
@@ -241,23 +242,23 @@ export default function LandingHome() {
 
       <section className="bg-[#FBF8F1] py-12 lg:py-16">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-black text-foreground sm:text-3xl">What can you get done?</h2>
-          <p className="mt-2 text-muted-foreground">Popular Palawan categories, ready when you are.</p>
+          <h2 className="text-2xl font-black text-foreground sm:text-3xl">{promo.headline}</h2>
+          <p className="mt-2 text-muted-foreground">{promo.sub}</p>
         </div>
         <div className="landing-marquee mt-8 hidden overflow-hidden sm:block">
           <div className="landing-marquee-track">
-            {[...LANDING_CATEGORIES, ...LANDING_CATEGORIES].map((cat, i) => (
+            {[...landingCategories, ...landingCategories].map((cat, i) => (
               <CategoryCard key={`${cat.key}-${i}`} cat={cat} />
             ))}
           </div>
         </div>
         <div className="no-scrollbar mt-8 grid auto-cols-max grid-flow-col grid-rows-2 gap-3 overflow-x-auto px-4 pb-2 sm:hidden">
-          {LANDING_CATEGORIES.map((cat) => (
+          {landingCategories.map((cat) => (
             <CategoryCard key={cat.key} cat={cat} compact />
           ))}
         </div>
         <div className="mx-auto mt-4 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-          <CategoryBreakdown />
+          <CategoryBreakdown categories={landingCategories} />
           <Link href="/#how-it-works" className="mt-8 inline-block text-sm font-bold underline-offset-4 hover:underline" style={{ color: LANDING.olive }}>
             Learn how Khaki works
           </Link>

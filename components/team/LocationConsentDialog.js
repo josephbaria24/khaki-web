@@ -4,12 +4,16 @@ import { useState } from "react";
 
 export default function LocationConsentDialog({ open, onAccept, onDecline }) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   if (!open) return null;
 
   const accept = async () => {
     setBusy(true);
+    setError("");
     try {
       await onAccept?.();
+    } catch (err) {
+      setError(err?.message || "Could not save location consent.");
     } finally {
       setBusy(false);
     }
@@ -33,6 +37,7 @@ export default function LocationConsentDialog({ open, onAccept, onDecline }) {
           <li>· Your current customer sees you on job tracking.</li>
           <li>· You can turn this off anytime from Profile / Team.</li>
         </ul>
+        {error ? <p className="mt-3 text-sm font-semibold text-[#B42318]">{error}</p> : null}
         <div className="mt-5 flex flex-col gap-2 sm:flex-row">
           <button
             type="button"

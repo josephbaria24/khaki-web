@@ -20,9 +20,13 @@ export default function Refreshable({ children, className, onRefresh, disabled =
     await new Promise((r) => setTimeout(r, 350));
   }, [onRefresh, refreshAuth]);
 
+  const parts = String(className || "").split(/\s+/).filter(Boolean);
+  const contentSpace = parts.filter((token) => token.startsWith("space-y-") || token.startsWith("space-x-")).join(" ");
+  const scrollerClass = parts.filter((token) => !token.startsWith("space-y-") && !token.startsWith("space-x-")).join(" ");
+
   return (
-    <PullToRefresh className={cn(className)} onRefresh={handleRefresh} disabled={disabled}>
-      <div key={refreshKey} className="min-h-0">
+    <PullToRefresh className={scrollerClass} onRefresh={handleRefresh} disabled={disabled}>
+      <div key={refreshKey} className={cn("min-h-0", contentSpace)}>
         {children}
       </div>
     </PullToRefresh>

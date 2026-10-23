@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { PageEnter } from "@/components/ui/motion";
 import { isFillPage } from "@/lib/khaki";
-import { mustCompleteVerification } from "@/lib/roles";
+import { mustCompleteVerification, staffPortal } from "@/lib/roles";
 
 export default function AppShell({ children }) {
   const { ready, isAuthenticated, user } = useAuth();
@@ -20,6 +20,10 @@ export default function AppShell({ children }) {
 
   useEffect(() => {
     if (!ready || !isAuthenticated || !user) return;
+    if (staffPortal(user)) {
+      if (pathname !== "/admin") router.replace("/admin");
+      return;
+    }
     if (!mustCompleteVerification(user)) return;
     if (pathname === "/verify" || pathname?.startsWith("/verify/")) return;
     router.replace("/verify");
@@ -36,7 +40,7 @@ export default function AppShell({ children }) {
   return (
     <PageEnter
       className={
-        isFillPage(pathname) ? "flex h-full min-h-0 flex-col overflow-hidden" : "min-h-full"
+        isFillPage(pathname) ? "flex h-full min-h-0 flex-1 flex-col overflow-hidden" : "min-h-full"
       }
     >
       {children}

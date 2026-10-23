@@ -5,12 +5,12 @@ import Link from "next/link";
 import { LANDING_CATEGORIES } from "@/lib/landingContent";
 import { Collapse } from "@/components/ui/motion";
 
-export default function CategoryBreakdown() {
+export default function CategoryBreakdown({ categories = LANDING_CATEGORIES }) {
   const [openKey, setOpenKey] = useState(null);
 
   return (
     <div className="mt-10 grid items-start gap-2 sm:grid-cols-2 sm:gap-3">
-      {LANDING_CATEGORIES.map((cat, i) => {
+      {categories.map((cat, i) => {
         const open = openKey === cat.key;
         return (
           <article
