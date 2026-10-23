@@ -21,7 +21,8 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     title: "Khaki",
-    statusBarStyle: "default",
+    /* Translucent bar + safe-area padding on headers keeps chrome visible in installed Safari */
+    statusBarStyle: "black-translucent",
   },
   formatDetection: {
     telephone: false,

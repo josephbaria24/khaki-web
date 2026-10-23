@@ -40,7 +40,7 @@ export default function SiteHeader({ landing: _landing = false }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1]/95 backdrop-blur-md dark:border-white/10 dark:bg-[#11141A]/95">
+    <header className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1]/95 pt-[env(safe-area-inset-top,0px)] backdrop-blur-md dark:border-white/10 dark:bg-[#11141A]/95">
       <Container className="flex h-16 min-w-0 items-center justify-between gap-2 lg:h-[72px] lg:gap-4">
         <Logo />
         <nav className="hidden items-center gap-1 md:flex">

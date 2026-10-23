@@ -38,16 +38,19 @@ export default function AppHeader() {
     const node = headerRef.current;
     if (!node || typeof window === "undefined") return undefined;
     const sync = () => {
-      const height = Math.ceil(node.getBoundingClientRect().height);
-      document.documentElement.style.setProperty("--khaki-header-offset", `${height + 12}px`);
+      /* bottom of header vs viewport top — includes safe-area chrome above the header */
+      const bottom = Math.ceil(node.getBoundingClientRect().bottom);
+      document.documentElement.style.setProperty("--khaki-header-offset", `${bottom + 12}px`);
     };
     sync();
     const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(sync) : null;
     observer?.observe(node);
     window.addEventListener("resize", sync);
+    window.visualViewport?.addEventListener("resize", sync);
     return () => {
       observer?.disconnect();
       window.removeEventListener("resize", sync);
+      window.visualViewport?.removeEventListener("resize", sync);
     };
   }, [showAdminToggle, showModeToggle, previewing]);
 

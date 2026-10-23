@@ -7,7 +7,7 @@ import { ROLE_LABELS } from "@/lib/roles";
 import { SignaturePreview } from "@/components/verify/SignaturePad";
 import { Collapse } from "@/components/ui/motion";
 import ChatAvatar from "@/components/chat/Avatar";
-import { Briefcase, Calendar, Mail, MapPin, User, Wallet } from "@/components/icons";
+import { Briefcase, Calendar, Mail, MapPin, ShieldCheck, User, Wallet } from "@/components/icons";
 
 function shown(value) {
   if (value === 0) return "0";

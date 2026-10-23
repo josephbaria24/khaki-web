@@ -59,17 +59,18 @@ export default function AppFrame({ children }) {
   return (
     <div
       className={cn(
-        "khaki-landing flex h-dvh max-h-dvh flex-col overflow-hidden transition-[padding-bottom] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:pb-0",
+        /* fixed inset-0: stop iOS/Android PWA body rubber-band from scrolling the header off-screen */
+        "khaki-landing fixed inset-0 z-0 flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden overscroll-none transition-[padding-bottom] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:pb-0",
         hideNav ? "pb-0" : "pb-[4.5rem]"
       )}
     >
-      <div className="shrink-0">
+      <div className="relative z-40 shrink-0 bg-[#FBF8F1] pt-[env(safe-area-inset-top,0px)] dark:bg-[#11141A]">
         {isAdmin(user) && previewing ? <AdminPreviewBanner /> : null}
         <AppHeader />
       </div>
       <PullToRefresh
         className={cn(
-          "relative min-h-0 min-w-0 flex-1",
+          "relative z-0 min-h-0 min-w-0 flex-1 overscroll-y-contain",
           lockScroll ? "flex flex-col overflow-hidden" : "overflow-x-hidden overflow-y-auto"
         )}
         onRefresh={handleRefresh}

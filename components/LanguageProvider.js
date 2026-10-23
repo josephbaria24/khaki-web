@@ -127,24 +127,41 @@ export default function LanguageProvider({ children }) {
   }, [walkChunked, walkSync]);
 
   useEffect(() => {
-    apply(readLang(), { chunked: false });
-    const observer = new MutationObserver((records) => {
-      for (const record of records) {
-        if (record.type === "characterData") translateNode(record.target);
-        else if (record.type === "attributes") translateAttr(record.target, record.attributeName);
-        else record.addedNodes.forEach(walkSync);
-      }
-    });
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: ATTRS,
-    });
+    let cancelled = false;
+    let observer = null;
+    // Wait until streamed segments finish hydrating before rewriting text nodes.
+    // Translating earlier makes React see English vs Tagalog (or alt spellings) as a mismatch.
+    const start = () => {
+      if (cancelled) return;
+      apply(readLang(), { chunked: false });
+      observer = new MutationObserver((records) => {
+        for (const record of records) {
+          if (record.type === "characterData") translateNode(record.target);
+          else if (record.type === "attributes") translateAttr(record.target, record.attributeName);
+          else record.addedNodes.forEach(walkSync);
+        }
+      });
+      observer.observe(document.body, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ATTRS,
+      });
+    };
+    const idle =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(start, { timeout: 400 })
+        : window.setTimeout(start, 0);
     const pending = timers.current;
     return () => {
-      observer.disconnect();
+      cancelled = true;
+      if (typeof window.cancelIdleCallback === "function" && typeof idle === "number") {
+        window.cancelIdleCallback(idle);
+      } else {
+        window.clearTimeout(idle);
+      }
+      observer?.disconnect();
       pending.forEach(clearTimeout);
       walkToken.current += 1;
     };

@@ -37,7 +37,7 @@ export default function BottomNav({ hidden = false }) {
   return (
     <nav
       className={cn(
-        "fixed bottom-4 left-4 right-4 z-40 lg:hidden",
+        "fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] left-4 right-4 z-40 lg:hidden",
         "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
         hidden
           ? "pointer-events-none translate-y-[calc(100%+1.5rem)] opacity-0"

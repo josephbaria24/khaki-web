@@ -95,12 +95,24 @@
     color-scheme: dark;
   }
 
+  html {
+    height: 100%;
+  }
+
   body {
     @apply bg-background font-sans text-foreground antialiased;
-    min-height: 100vh;
+    min-height: 100%;
+    min-height: 100dvh;
     background-color: #FBF8F1;
     touch-action: manipulation;
     overscroll-behavior-y: contain;
+  }
+
+  /* Authenticated shell is position:fixed — stop document rubber-band stealing the header in installed PWAs */
+  body:has(> #__next .khaki-landing.fixed),
+  body:has(.khaki-landing.fixed) {
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   html.dark body {
