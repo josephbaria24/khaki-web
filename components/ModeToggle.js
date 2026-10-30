@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
+import { cn } from "@/lib/khaki";
 import { activeMode, mustCompleteVerification } from "@/lib/roles";
 import { toast } from "@/lib/toast";
 
-export default function ModeToggle({ className = "" }) {
+export default function ModeToggle({ className = "", track = "bg-[#163044] dark:bg-[#163044]" }) {
   const { user, setMode, modeFlash } = useAuth();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -34,7 +35,7 @@ export default function ModeToggle({ className = "" }) {
 
   return (
     <div
-      className={`inline-flex rounded-full bg-[#163044] p-1 dark:bg-[#163044] ${className}`}
+      className={cn("inline-flex rounded-full p-1", track, className)}
       role="tablist"
       aria-label="Account mode"
     >
@@ -44,8 +45,8 @@ export default function ModeToggle({ className = "" }) {
         aria-selected={mode === "poster"}
         disabled={locked}
         onClick={() => switchTo("poster")}
-        className={`rounded-full px-3.5 py-1.5 text-xs font-black transition sm:px-4 ${
-          mode === "poster" ? "bg-[#C6ECD9] text-[#163044] shadow-sm dark:bg-[#C6ECD9] dark:text-[#11141A]" : "text-[#F7F4EC] hover:bg-white/15 dark:text-[#F7F4EC]"
+        className={`rounded-full px-2.5 py-1 text-[11px] font-black transition min-[400px]:px-3.5 min-[400px]:py-1.5 min-[400px]:text-xs sm:px-4 ${
+          mode === "poster" ? "mode-toggle-on bg-[#C6ECD9] text-[#163044] shadow-sm dark:bg-[#C6ECD9]" : "text-[#F7F4EC] hover:bg-white/15 dark:text-[#F7F4EC]"
         }`}
       >
         Poster
@@ -56,8 +57,8 @@ export default function ModeToggle({ className = "" }) {
         aria-selected={mode === "tasker"}
         disabled={locked}
         onClick={() => switchTo("tasker")}
-        className={`rounded-full px-3.5 py-1.5 text-xs font-black transition sm:px-4 ${
-          mode === "tasker" ? "bg-[#C6ECD9] text-[#163044] shadow-sm dark:bg-[#C6ECD9] dark:text-[#11141A]" : "text-[#F7F4EC] hover:bg-white/15 dark:text-[#F7F4EC]"
+        className={`rounded-full px-2.5 py-1 text-[11px] font-black transition min-[400px]:px-3.5 min-[400px]:py-1.5 min-[400px]:text-xs sm:px-4 ${
+          mode === "tasker" ? "mode-toggle-on bg-[#C6ECD9] text-[#163044] shadow-sm dark:bg-[#C6ECD9]" : "text-[#F7F4EC] hover:bg-white/15 dark:text-[#F7F4EC]"
         }`}
       >
         Tasker

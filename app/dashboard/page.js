@@ -226,7 +226,7 @@ export default function DashboardPage() {
         </div>
         ) : null}
 
-        <section className="bg-white pb-6 pt-0 dark:bg-[#11141A] sm:py-6">
+        <section className="bg-[#ffffff] pb-6 pt-0 dark:bg-[#11141A] sm:py-6">
           {poster ? (
             <>
               <div className="dash-sheet">

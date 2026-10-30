@@ -57,7 +57,7 @@ export default function ThemeToggle({ className }) {
   );
 }
 
-export function ThemeModeButton() {
+export function ThemeModeButton({ onNavy = false }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -68,7 +68,12 @@ export function ThemeModeButton() {
   return (
     <button
       type="button"
-      className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFFCF7] text-[#2A3F4D] shadow-card dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
+      className={cn(
+        "flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10",
+        onNavy
+          ? "bg-white/15 text-[#F7F4EC] hover:bg-white/25 dark:bg-white/10 dark:text-[#F7F4EC] dark:hover:bg-white/20"
+          : "bg-[#FFFCF7] text-[#2A3F4D] shadow-card dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
+      )}
       aria-label={dark ? "Turn on light mode" : "Turn on dark mode"}
       aria-pressed={dark}
       onClick={() => setTheme(dark ? "light" : "dark")}

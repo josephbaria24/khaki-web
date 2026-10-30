@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import PublicShell from "@/components/PublicShell";
 import BrowseTaskDetail from "@/components/browse/BrowseTaskDetail";
@@ -12,7 +11,6 @@ import Refreshable from "@/components/Refreshable";
 import { CHIP_CATEGORIES, shortCategory, taskMatchesChip } from "@/lib/catalog";
 import ChatAvatar from "@/components/chat/Avatar";
 import { cn } from "@/lib/khaki";
-import { LANDING } from "@/lib/landingContent";
 import { isTaskerMode } from "@/lib/roles";
 import { useAuth } from "@/lib/AuthContext";
 import { api } from "@/lib/store";
@@ -146,14 +144,8 @@ function BrowseBody() {
       : null;
 
   return (
-    <div
-      className="browse-page khaki-landing flex h-full min-h-0 flex-col overflow-hidden"
-      style={{ background: LANDING.page }}
-    >
-      <div
-        className="shrink-0 border-b border-[#E6DDD0]/80 px-4 py-3 backdrop-blur sm:px-6 dark:border-white/10"
-        style={{ background: `${LANDING.page}f2` }}
-      >
+    <div className="browse-page khaki-landing flex h-full min-h-0 flex-col overflow-hidden bg-[#FFFFFF] dark:bg-[#11141A]">
+      <div className="shrink-0 border-b border-[#E6DDD0]/80 bg-[#FFFFFF]/95 px-4 py-3 backdrop-blur sm:px-6 dark:border-white/10 dark:bg-[#11141A]/95">
         <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-3">
           {isAuthenticated ? (
             <div className="flex items-center justify-between gap-3">
@@ -232,7 +224,12 @@ function BrowseBody() {
         </div>
       </div>
 
-      <div className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col overflow-hidden md:flex-row">
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-[1600px] flex-1 flex-col overflow-hidden md:min-h-0 md:flex-row",
+          showMapMobile && !detailOpen ? "min-h-[70dvh]" : "min-h-0"
+        )}
+      >
         {/* List column */}
         <aside
           className={cn(
@@ -266,21 +263,13 @@ function BrowseBody() {
               ))
             )}
           </Refreshable>
-          <div className="border-t border-[#E6DDD0]/80 p-3 dark:border-white/10">
-            <Link
-              href="/post"
-              className="flex h-11 items-center justify-center rounded-xl bg-[#163044] text-sm font-black text-white dark:bg-[#F5F3EE] dark:text-[#11141A]"
-            >
-              Post a task
-            </Link>
-          </div>
         </aside>
 
         {/* Map stays mounted; detail crossfades over it on tablet+ (mobile detail uses portal) */}
         <section
           className={cn(
-            "relative min-h-0 min-w-0 flex-1 overflow-hidden",
-            detailOpen ? "hidden md:flex" : showMapMobile ? "flex" : "hidden md:flex"
+            "relative min-w-0 flex-1 overflow-hidden",
+            detailOpen ? "hidden min-h-0 md:flex" : showMapMobile ? "flex min-h-[70dvh] md:min-h-0" : "hidden min-h-0 md:flex"
           )}
         >
           <div

@@ -11,7 +11,7 @@ import { cn, noticeDateLabel, timeAgo } from "@/lib/khaki";
 import { api } from "@/lib/store";
 import { isVerificationSeen, markVerificationSeen, mergeNotificationFeed, noticeHref, noticeParts, verificationNotice } from "@/lib/verificationNotice";
 
-export default function NotificationsBell() {
+export default function NotificationsBell({ onNavy = false }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
@@ -26,13 +26,22 @@ export default function NotificationsBell() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FFFCF7] text-[#2A3F4D] shadow-card dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
+        className={cn(
+          "relative flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10",
+          onNavy
+            ? "bg-white/15 text-[#F7F4EC] hover:bg-white/25 dark:bg-white/10 dark:text-[#F7F4EC] dark:hover:bg-white/20"
+            : "bg-[#FFFCF7] text-[#2A3F4D] shadow-card dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
+        )}
         aria-label="Notifications"
         aria-expanded={open}
       >
         <Bell className="h-5 w-5" color="currentColor" />
         {unread > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#163044] px-1 text-[10px] font-bold text-[#F7F4EC]">
+          <span className={cn(
+            "absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold",
+            "notice-count",
+            onNavy ? "bg-[#C6ECD9] text-[#163044]" : "bg-[#163044] text-[#F7F4EC]"
+          )}>
             {unread}
           </span>
         ) : null}

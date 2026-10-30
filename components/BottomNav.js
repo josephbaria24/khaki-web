@@ -123,21 +123,13 @@ export default function BottomNav({ hidden = false }) {
                 <span
                   aria-hidden
                   className={cn(
-                    "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background transition-[width,height]",
-                    ease,
-                    compact ? "h-11 w-11" : "h-[3.25rem] w-[3.25rem]"
-                  )}
-                />
-                <span
-                  aria-hidden
-                  className={cn(
                     "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-card shadow-soft transition-[width,height]",
                     ease,
                     compact ? "h-10 w-10" : "h-12 w-12"
                   )}
                 />
                 <span className={cn(
-                  "float-nav-post-core relative z-10 flex shrink-0 items-center justify-center rounded-full bg-[#163044] text-[#F7F4EC] shadow-soft transition-[width,height]",
+                  "float-nav-post-core relative z-10 flex shrink-0 items-center justify-center rounded-full bg-[#163044] text-[#F7F4EC] shadow-soft transition-[width,height] dark:bg-[#F5F3EE] dark:text-[#11141A]",
                   ease,
                   compact ? "h-9 w-9" : "h-11 w-11"
                 )}>
@@ -147,7 +139,7 @@ export default function BottomNav({ hidden = false }) {
                   })()}
                 </span>
               </Link>
-              {showTip && postItem.href === "/post" ? (
+              {showTip && postItem.href === "/post" && !compact ? (
                 <div
                   className={cn(
                     "absolute bottom-[calc(100%+2.65rem)] left-1/2 z-30 flex origin-bottom -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-[#163044] py-1 pl-2.5 pr-1 text-[11px] font-bold text-[#F7F4EC] shadow-[0_8px_20px_rgba(22,48,68,0.28)]",

@@ -211,8 +211,8 @@
   /* Filled U: solid primary wash from the top of the dashboard body, rounded at the bottom. */
   .dash-sheet {
     background: linear-gradient(to top, #102636 0%, #163044 100%);
-    border-radius: 0 0 2.75rem 2.75rem;
-    padding-bottom: 1.35rem;
+    border-radius: 0 0 1rem 1rem;
+    padding-bottom: 0.75rem;
   }
 
   .dash-sheet .min-w-0 > div h2 {
@@ -580,9 +580,30 @@
   }
 
   .float-nav {
-    @apply overflow-visible rounded-full bg-card/95 shadow-soft backdrop-blur-md;
-    box-shadow: var(--shadow-soft);
+    @apply overflow-visible rounded-full bg-transparent;
+    box-shadow: none;
     animation: nav-slide-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Bar fill is a separate layer so the plus can punch a real hole. */
+  .float-nav::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: hsl(var(--card) / 0.95);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    --notch: 1.9rem;
+    -webkit-mask-image: radial-gradient(circle var(--notch) at 50% 0, transparent 98%, #000 100%);
+    mask-image: radial-gradient(circle var(--notch) at 50% 0, transparent 98%, #000 100%);
+  }
+
+  .float-nav.is-compact::after {
+    --notch: 1.6rem;
   }
 
   @keyframes active-job-pulse {
@@ -601,8 +622,8 @@
     display: flex;
     min-width: 0;
     flex: 1;
+    align-self: center;
     height: calc(100% - 8px);
-    margin-block: 4px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -617,23 +638,7 @@
   }
 
   .float-nav-notch::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 0;
-    z-index: 1;
-    width: 3.25rem;
-    height: 3.25rem;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1), height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    border-radius: 9999px;
-    background: hsl(var(--background));
-    box-shadow: 0 0 0 0.15rem hsl(var(--background));
-  }
-
-  .float-nav-notch.is-compact::before {
-    width: 2.75rem;
-    height: 2.75rem;
+    content: none;
   }
 
   .chat-bubble {
@@ -1860,9 +1865,8 @@
     color: #2A3F4D;
     background: #C9D6E0;
     box-shadow:
-      inset 0 2px 5px rgba(22, 48, 68, 0.24),
+      inset 0 1px 2px rgba(22, 48, 68, 0.12),
       inset 0 -1px 0 rgba(255, 252, 247, 0.4);
-    transform: translateY(1px) scale(0.97);
   }
 
   html.dark .khaki-landing a.float-nav-tab.is-active {
@@ -2003,6 +2007,12 @@ html.dark .khaki-landing [class*="text-[#1F2937]"] {
   color: #F5F3EE !important;
 }
 
+html.dark .khaki-landing .mode-toggle-on,
+html.dark .khaki-landing .notice-count {
+  color: #163044 !important;
+  background-color: #C6ECD9 !important;
+}
+
 html.dark .khaki-landing .bg-\[\#C8F0D8\] {
   background-color: #C8F0D8 !important;
   color: #163044 !important;
@@ -2130,10 +2140,56 @@ html.dark .khaki-landing .browse-page :is([class*="text-[#2A3F4D]/"], [class*="t
   color: rgba(245, 243, 238, 0.58) !important;
 }
 
+html.dark .khaki-landing.browse-page .chip-active {
+  background: #F5F3EE;
+  color: #11141A;
+  box-shadow: none;
+}
+
+.browse-hero {
+  background: linear-gradient(145deg, var(--hero-accent, #E7EEF4) 0%, #FFFCF7 55%, #F7F4EC 100%);
+  box-shadow: 0 10px 28px rgba(42, 63, 77, 0.08);
+}
+
+html.dark .browse-hero {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--hero-accent, #E7EEF4) 46%, #1A1E27) 0%,
+    #1A1E27 58%,
+    #151922 100%
+  );
+  box-shadow: none;
+}
+
+.browse-hero-icon {
+  background: #fff;
+}
+
 .browse-tasks-map .leaflet-container {
   width: 100%;
   height: 100%;
-  background: #fff;
+  background: #FBF8F1;
+}
+
+html.dark .browse-tasks-map .leaflet-container {
+  background: #1A1E27;
+}
+
+html.dark .browse-tasks-map .leaflet-bar a {
+  background-color: #1A1E27;
+  color: #F5F3EE;
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+html.dark .browse-tasks-map .leaflet-bar a:hover,
+html.dark .browse-tasks-map .leaflet-bar a:focus {
+  background-color: #252A35;
+  color: #F5F3EE;
+}
+
+html.dark .browse-tasks-map .leaflet-bar a.leaflet-disabled {
+  background-color: #1A1E27;
+  color: rgba(245, 243, 238, 0.35);
 }
 
 .browse-tasks-map .leaflet-marker-icon {

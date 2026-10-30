@@ -121,17 +121,12 @@ export default function BrowseTaskDetail({
 
             {/* Hero */}
             <div
-              className="relative overflow-hidden rounded-[1.35rem] px-4 py-4 shadow-[0_10px_28px_rgba(42,63,77,0.08)] sm:px-5 sm:py-5"
-              style={{
-                background: `linear-gradient(145deg, ${graphic.bg} 0%, #FFFCF7 55%, #F7F4EC 100%)`,
-              }}
+              className="browse-hero relative overflow-hidden rounded-[1.35rem] px-4 py-4 sm:px-5 sm:py-5"
+              style={{ "--hero-accent": graphic.bg }}
             >
               <div className="pointer-events-none absolute -right-6 -top-8 h-28 w-28 rounded-full opacity-40" style={{ background: graphic.bg }} />
               <div className="relative flex items-start gap-3">
-                <span
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-sm"
-                  style={{ backgroundColor: "#fff" }}
-                >
+                <span className="browse-hero-icon flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-sm">
                   <HugeIcon name={graphic.icon} className="h-7 w-7" color={graphic.ink} strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -139,23 +134,23 @@ export default function BrowseTaskDetail({
                     <span className="rounded-full bg-[#163044] px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#F7F4EC]">
                       {statusLabel}
                     </span>
-                    <span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#163044]">
+                    <span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#163044] dark:bg-white/10 dark:text-[#F5F3EE]">
                       {category}
                     </span>
                   </div>
-                  <h2 className="mt-2 text-[1.55rem] font-black leading-tight tracking-tight text-[#163044] sm:text-[1.75rem]">
+                  <h2 className="mt-2 text-[1.55rem] font-black leading-tight tracking-tight text-[#163044] dark:text-[#F5F3EE] sm:text-[1.75rem]">
                     {task.title}
                   </h2>
-                  <p className="mt-1 text-xs font-semibold text-[#2A3F4D]/65">
+                  <p className="mt-1 text-xs font-semibold text-[#2A3F4D]/65 dark:text-[#F5F3EE]/60">
                     Posted {timeAgo(task.created_at)}
                     {task.created_at ? ` · ${formatDateTime(task.created_at)}` : ""}
                   </p>
                 </div>
               </div>
-              <div className="relative mt-4 flex items-end justify-between gap-3 border-t border-[#163044]/10 pt-3">
+              <div className="relative mt-4 flex items-end justify-between gap-3 border-t border-[#163044]/10 pt-3 dark:border-white/10">
                 <div>
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/45">Budget</p>
-                  <p className="mt-0.5 text-2xl font-black text-[#163044]">{formatPHP(task.budget_php)}</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/45 dark:text-[#F5F3EE]/45">Budget</p>
+                  <p className="mt-0.5 text-2xl font-black text-[#163044] dark:text-[#F5F3EE]">{formatPHP(task.budget_php)}</p>
                 </div>
                 {minStage ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-[#163044]/90 px-2.5 py-1.5 text-[11px] font-black text-[#F7F4EC]">

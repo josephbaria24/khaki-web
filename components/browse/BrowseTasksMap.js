@@ -319,13 +319,12 @@ export default function BrowseTasksMap({ tasks, selectedId, onSelect, onExit }) 
   return (
     <div
       ref={shellRef}
-      className={`browse-tasks-map relative h-full min-h-[16rem] w-full overflow-hidden transition-[box-shadow] duration-300 dark:bg-[#1A1E27] ${expanded && !narrow ? "fixed inset-0 z-[80] min-h-0" : ""}`}
-      style={{ background: "#FBF8F1" }}
+      className={`browse-tasks-map relative h-full min-h-[16rem] w-full overflow-hidden bg-[#FBF8F1] transition-[box-shadow] duration-300 dark:bg-[#1A1E27] ${expanded && !narrow ? "fixed inset-0 z-[80] min-h-0" : ""}`}
     >
       <div
         ref={boxRef}
-        className="absolute inset-0 z-0 h-full w-full"
-        style={{ minHeight: "16rem", background: "#FBF8F1" }}
+        className="absolute inset-0 z-0 h-full w-full bg-[#FBF8F1] dark:bg-[#1A1E27]"
+        style={{ minHeight: "16rem" }}
       />
       <button
         type="button"

@@ -11,7 +11,7 @@ import TeamLeadWelcomeDialog from "@/components/team/TeamLeadWelcomeDialog";
 import { useAuth } from "@/lib/AuthContext";
 import { useAdminPreview } from "@/lib/AdminPreviewContext";
 import { cn, isConversationPath, isFillPage, isTaskDetailPath, isTrackPath } from "@/lib/khaki";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin, isPosterMode } from "@/lib/roles";
 import { api } from "@/lib/store";
 
 const PUBLIC_EXACT = new Set(["/", "/about", "/privacy", "/terms", "/jobs"]);
@@ -40,6 +40,7 @@ export default function AppFrame({ children }) {
   const lockScroll = isFillPage(pathname);
   const showUserChrome = !onAdmin || previewing;
   const compactNav = pathname === "/browse" || pathname?.startsWith("/browse/");
+  const sheetHeader = pathname === "/dashboard" && isPosterMode(user);
 
   const handleRefresh = useCallback(async () => {
     api.clearCaches();
@@ -65,7 +66,7 @@ export default function AppFrame({ children }) {
         hideNav ? "pb-0" : compactNav ? "pb-[4.25rem]" : "pb-[4.5rem]"
       )}
     >
-      <div className="relative z-40 shrink-0 bg-white pt-[env(safe-area-inset-top,0px)] dark:bg-[#11141A]">
+      <div className={cn("relative z-40 shrink-0 pt-[env(safe-area-inset-top,0px)]", sheetHeader ? "bg-[#163044]" : "bg-white dark:bg-[#11141A]")}>
         {isAdmin(user) && previewing ? <AdminPreviewBanner /> : null}
         <AppHeader />
       </div>
