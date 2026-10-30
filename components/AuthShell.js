@@ -2,7 +2,26 @@ import Link from "next/link";
 import { MapPin, ShieldCheck } from "@/components/icons";
 import Logo from "@/components/Logo";
 
-export default function AuthShell({ title, subtitle, footer, children }) {
+export default function AuthShell({ title, subtitle, footer, children, plain = false }) {
+  if (plain) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(to_top,#d5e3ee_0%,#ffffff_46%,#ffffff_100%)] px-6 py-12 dark:bg-[linear-gradient(to_top,#1a3348_0%,#11141A_48%,#11141A_100%)]">
+        <div className="w-full max-w-[22rem]">
+          <div className="mb-8 flex justify-center">
+            <Logo href="/" />
+          </div>
+          <h1 className="text-center text-[1.7rem] font-black tracking-tight text-foreground">{title}</h1>
+          <p className="mt-1.5 text-center text-sm text-muted-foreground">{subtitle}</p>
+          <div className="mt-8">{children}</div>
+          {footer && <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>}
+          <p className="mt-3 text-center text-sm">
+            <Link href="/" className="font-semibold text-muted-foreground hover:text-foreground">Back to home</Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-2">
       <aside className="relative hidden overflow-hidden bg-auth-aside p-10 text-foreground lg:flex lg:flex-col lg:justify-between">

@@ -31,7 +31,7 @@ function TaskShell({ children }) {
   const { ready, isAuthenticated } = useAuth();
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FBF8F1]">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#C9D6E0] border-t-[#163044]" />
       </div>
     );
@@ -1175,7 +1175,7 @@ function JobDock({ children }) {
           onPointerUp={pointerUp}
           onPointerCancel={pointerUp}
           onClickCapture={swallowClick}
-          className="overflow-hidden rounded-t-[1.4rem] border border-b-0 border-[#E6DDD0] bg-[#FBF8F1] shadow-[0_-12px_32px_rgba(22,48,68,0.14)] dark:border-white/10 dark:bg-[#11141A]"
+          className="overflow-hidden rounded-t-[1.4rem] border border-b-0 border-[#E6DDD0] bg-white shadow-[0_-12px_32px_rgba(22,48,68,0.14)] dark:border-white/10 dark:bg-[#11141A]"
         >
           <div
             data-sheet-handle

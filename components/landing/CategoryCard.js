@@ -50,10 +50,10 @@ export default function CategoryCard({ cat, compact = false }) {
           <ArrowRight className={compact ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2.25} />
         </span>
       </div>
-      <p className={cn("font-black leading-tight text-foreground", compact ? "mt-2 text-[13px]" : "mt-3 text-base")}>
+      <p className={cn("font-black leading-tight text-[#F7F4EC]", compact ? "mt-2 text-[13px]" : "mt-3 text-base")}>
         {cat.title}
       </p>
-      <p className={cn("leading-snug text-muted-foreground", compact ? "mt-0.5 line-clamp-2 text-[11px]" : "mt-1 text-sm")}>
+      <p className={cn("leading-snug text-[#F7F4EC]/75", compact ? "mt-0.5 line-clamp-2 text-[11px]" : "mt-1 text-sm")}>
         {cat.desc}
       </p>
     </Link>

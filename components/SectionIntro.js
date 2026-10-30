@@ -4,7 +4,7 @@ export default function SectionIntro({ pill, title, sub, action, className = "" 
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           {pill ? (
-            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-[#163044] px-2.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#F7F4EC] dark:bg-[#2BA3D9] dark:text-[#0B1A24]">
+            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-[#E7EEF3] px-2.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#163044] dark:bg-white/10 dark:text-[#F5F3EE]">
               {pill}
             </span>
           ) : null}

@@ -84,6 +84,16 @@ export default function DashboardShortcuts({ user, postingFees = 0, releasedPayo
       />
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
+        {poster ? (
+          <Link href={hero.href} className="group col-span-2 block overflow-hidden rounded-[1.6rem] shadow-[0_12px_28px_rgba(22,48,68,0.12)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(22,48,68,0.2)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/Post%20a%20task%2C%20find%20taskers.png"
+              alt="Need a hand? Post a task. Connect with taskers who can help."
+              className="block h-auto w-full transition duration-300 ease-out group-hover:scale-[1.03]"
+            />
+          </Link>
+        ) : (
         <Link
           href={hero.href}
           className="bento-widget col-span-2 min-h-[7.25rem] sm:min-h-[11.5rem]"
@@ -96,6 +106,7 @@ export default function DashboardShortcuts({ user, postingFees = 0, releasedPayo
           </div>
           <Reicon name={hero.icon} color={hero.iconColor} className="bento-icon" />
         </Link>
+        )}
 
         <Link href={left.href} className="bento-widget min-h-[6.5rem] sm:min-h-[10.5rem]" style={{ background: left.bg }}>
           <p className="relative z-[1] pr-[3.25rem] text-[13px] font-black text-[#163044] sm:pr-16 sm:text-sm">{left.title}</p>

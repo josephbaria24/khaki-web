@@ -39,6 +39,7 @@ export default function AppFrame({ children }) {
     isTaskDetailPath(pathname);
   const lockScroll = isFillPage(pathname);
   const showUserChrome = !onAdmin || previewing;
+  const compactNav = pathname === "/browse" || pathname?.startsWith("/browse/");
 
   const handleRefresh = useCallback(async () => {
     api.clearCaches();
@@ -61,10 +62,10 @@ export default function AppFrame({ children }) {
       className={cn(
         /* fixed inset-0: stop iOS/Android PWA body rubber-band from scrolling the header off-screen */
         "khaki-landing fixed inset-0 z-0 flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden overscroll-none transition-[padding-bottom] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:pb-0",
-        hideNav ? "pb-0" : "pb-[4.5rem]"
+        hideNav ? "pb-0" : compactNav ? "pb-[4.25rem]" : "pb-[4.5rem]"
       )}
     >
-      <div className="relative z-40 shrink-0 bg-[#FBF8F1] pt-[env(safe-area-inset-top,0px)] dark:bg-[#11141A]">
+      <div className="relative z-40 shrink-0 bg-white pt-[env(safe-area-inset-top,0px)] dark:bg-[#11141A]">
         {isAdmin(user) && previewing ? <AdminPreviewBanner /> : null}
         <AppHeader />
       </div>

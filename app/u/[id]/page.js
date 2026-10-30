@@ -46,7 +46,7 @@ export default function PublicProfilePage() {
     <p className="p-8 text-center">Hindi mahanap ang profile</p>
   ) : (
     <div className="landing-page">
-      <section className="bg-[#FBF8F1] py-8 lg:py-12">
+      <section className="bg-white py-8 lg:py-12">
         <Container>
           <TaskerProfileCard
             profile={profile}

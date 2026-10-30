@@ -31,7 +31,7 @@ export default function AppShell({ children }) {
 
   if (!seenAuth.current && (!ready || !isAuthenticated)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FBF8F1]">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#C9D6E0] border-t-[#163044]" />
       </div>
     );

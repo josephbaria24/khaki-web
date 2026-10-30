@@ -7,7 +7,7 @@ const LOCATIONS = ["Puerto Princesa", "El Nido", "Coron", "San Vicente"];
 
 export default function SiteFooter() {
   return (
-    <footer className="mt-auto bg-[#2C2A22] text-[#F7F4EC]">
+    <footer className="mt-auto bg-[#163044] text-[#F7F4EC]">
       <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-5">
         <div className="sm:col-span-2">
           <Logo light />

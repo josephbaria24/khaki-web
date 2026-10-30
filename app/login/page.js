@@ -37,39 +37,49 @@ export default function LoginPage() {
 
   return (
     <AuthShell
+      plain
       title="Welcome back"
-      subtitle="Log in to your Khaki account"
+      subtitle="Enter your email and password to log in"
       footer={
         <>
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-primary hover:underline">Create one</Link>
+          <Link href="/register" className="font-black text-[#163044] hover:underline dark:text-[#8EC8E8]">Create one</Link>
         </>
       }
     >
-      {error && <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+      {error && <div className="mb-4 rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
       <form onSubmit={onSubmit} className="space-y-4">
-        <label className="block text-sm font-medium text-foreground">
+        <label className="block text-sm font-semibold text-foreground">
           Email
-          <div className="relative mt-1">
-            <Mail className="pointer-events-none absolute left-3 top-1/2 z-[1] h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input className="auth-field pl-10" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <div className="relative mt-1.5">
+            <input
+              className="h-12 w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-4 pr-11 text-sm text-foreground outline-none placeholder:text-[#9CA3AF] focus:border-[#163044] dark:bg-[#252A35] dark:focus:border-[#8EC8E8]"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+            <Mail className="pointer-events-none absolute right-4 top-1/2 z-[1] h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
         </label>
-        <label className="block text-sm font-medium text-foreground">
+        <label className="block text-sm font-semibold text-foreground">
           Password
-          <div className="mt-1">
+          <div className="mt-1.5">
             <PasswordInput
+              leadingIcon={false}
+              className="h-12 w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-4 pr-11 text-sm text-foreground outline-none placeholder:text-[#9CA3AF] focus:border-[#163044] dark:bg-[#252A35] dark:focus:border-[#8EC8E8]"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder=""
+              placeholder="Enter your password"
             />
           </div>
         </label>
-        <p className="text-right text-xs">
-          <Link href="/forgot-password" className="text-primary hover:underline">Forgot password?</Link>
+        <p className="text-right text-sm">
+          <Link href="/forgot-password" className="font-bold text-[#163044] hover:underline dark:text-[#8EC8E8]">Forgot password?</Link>
         </p>
-        <button type="submit" disabled={loading} className="flex h-12 w-full items-center justify-center rounded-xl bg-primary font-bold text-primary-foreground">
+        <button type="submit" disabled={loading} className="flex h-12 w-full items-center justify-center rounded-full bg-[#163044] text-sm font-black text-[#F7F4EC] disabled:opacity-60 dark:bg-[#F5F3EE] dark:text-[#11141A]">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Log in"}
         </button>
       </form>

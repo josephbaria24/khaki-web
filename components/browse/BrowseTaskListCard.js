@@ -4,7 +4,7 @@ import ChatAvatar from "@/components/chat/Avatar";
 import HugeIcon, { Calendar, MapPin } from "@/components/icons";
 import { locationLabel } from "@/lib/browseMap";
 import { graphicForTask, shortCategory } from "@/lib/catalog";
-import { cn, formatPHP, scheduleLabel } from "@/lib/khaki";
+import { cn, formatDateTime, formatPHP, scheduleLabel } from "@/lib/khaki";
 import { displayName } from "@/lib/taskerProfile";
 
 export default function BrowseTaskListCard({ task, poster, selected, onSelect, offerCount }) {
@@ -12,6 +12,7 @@ export default function BrowseTaskListCard({ task, poster, selected, onSelect, o
   const name = displayName(poster?.full_name || task?.client_name);
   const place = locationLabel(task);
   const when = scheduleLabel(task);
+  const posted = formatDateTime(task.created_at);
   const category = shortCategory(task?.category) || "Task";
   const offers =
     typeof offerCount === "number" && offerCount > 0
@@ -23,7 +24,7 @@ export default function BrowseTaskListCard({ task, poster, selected, onSelect, o
       type="button"
       onClick={() => onSelect?.(task.id)}
       className={cn(
-        "w-full rounded-2xl border bg-[#FFFCF7] p-3.5 text-left shadow-[0_4px_16px_rgba(42,63,77,0.06)] transition dark:bg-[#1A1E27]",
+        "w-full rounded-2xl border bg-white p-3.5 text-left shadow-[0_4px_16px_rgba(42,63,77,0.06)] transition dark:bg-[#1A1E27]",
         selected
           ? "border-[#2F8AD4] ring-2 ring-[#2F8AD4]/25"
           : "border-transparent hover:border-[#C9D6E0] dark:hover:border-white/15"
@@ -78,7 +79,12 @@ export default function BrowseTaskListCard({ task, poster, selected, onSelect, o
             <p className="text-[10px] font-bold text-[#2A3F4D]/45 dark:text-[#F5F3EE]/40">Poster</p>
           </div>
         </div>
-        <p className="shrink-0 text-xs font-bold text-[#2F8AD4]">{offers}</p>
+        <div className="shrink-0 text-right">
+          {posted ? (
+            <p className="text-[10px] font-semibold text-[#2A3F4D]/55 dark:text-[#F5F3EE]/45">{posted}</p>
+          ) : null}
+          <p className="text-xs font-bold text-[#2F8AD4]">{offers}</p>
+        </div>
       </div>
     </button>
   );

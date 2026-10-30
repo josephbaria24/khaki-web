@@ -158,7 +158,7 @@ export default function DashboardPage() {
     <AppShell>
       <div className="landing-page">
         {promoOpen || needsTaskerVerification(user) ? (
-        <div className="bg-[#FBF8F1] px-4 pt-4 sm:px-6 lg:px-8">
+        <div className="bg-white px-4 pt-4 sm:px-6 lg:px-8">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-3">
             {promoOpen ? (
               <div className={`relative overflow-hidden rounded-[1.4rem] shadow-card ${poster ? "bg-gradient-to-br from-[#2C6484] via-[#163044] to-[#0C2230]" : "bg-gradient-to-br from-[#4B93C4] via-[#1E5684] to-[#102636]"}`}>
@@ -226,24 +226,22 @@ export default function DashboardPage() {
         </div>
         ) : null}
 
-        <section className="bg-[#FBF8F1] py-6 sm:py-8">
-          <InstallAppBanner />
+        <section className="bg-white pb-6 pt-0 dark:bg-[#11141A] sm:py-6">
           {poster ? (
             <>
-              <DashboardShortcuts user={user} postingFees={postingFees} releasedPayouts={releasedPayouts} myTasks={myTasks} />
+              <div className="dash-sheet">
+                <InstallAppBanner />
+                <DashboardShortcuts user={user} postingFees={postingFees} releasedPayouts={releasedPayouts} myTasks={myTasks} />
+              </div>
               <div className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
                 <SectionIntro
                   pill="Poster"
                   title="Mga naka-post mong gawain"
                   sub="Status, kung sino'ng kumuha, i-edit, at i-rate after a successful job."
-                  action={
-                    <Link href="/post" className="btn-olive hidden h-9 items-center px-4 text-[11px] sm:inline-flex">
-                      Mag-post ng gawain
-                    </Link>
-                  }
                 />
                 {!ready ? <div className="mt-4"><PageSkeleton rows={3} /></div> : (
                 <PostedJobsList
+                  preview
                   tasks={posted}
                   people={people}
                   reviews={reviews}
@@ -283,6 +281,8 @@ export default function DashboardPage() {
               </div>
             </>
           ) : (
+            <>
+            <InstallAppBanner />
             <div className="mx-auto w-full max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
               <div>
                 <SectionIntro
@@ -408,6 +408,7 @@ export default function DashboardPage() {
                 Maghanap ng gawain
               </Link>
             </div>
+            </>
           )}
         </section>
       </div>

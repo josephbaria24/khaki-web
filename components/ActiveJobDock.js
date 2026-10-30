@@ -198,7 +198,7 @@ export default function ActiveJobDock() {
     <div
       ref={dockRef}
       className={cn(
-        "pointer-events-auto z-30 flex w-max max-w-[min(100%,320px)] flex-col items-end",
+        "pointer-events-none z-30 flex w-max flex-col items-end",
         tablet
           ? "fixed bottom-5 right-5 z-50 md:bottom-6 md:right-6"
           : "absolute bottom-[calc(100%+10px)] right-1"
@@ -209,15 +209,15 @@ export default function ActiveJobDock() {
     >
       <div
         className={cn(
-          "w-[min(78vw,320px)] origin-bottom-right overflow-hidden transition-[max-height,opacity,transform,margin] ",
+          "absolute bottom-full right-0 flex w-[min(78vw,320px)] origin-bottom-right flex-col items-end overflow-hidden transition-[max-height,opacity,transform,margin] ",
           ease,
           panelActive
-            ? "mb-2 max-h-[min(46vh,320px)] translate-y-0 scale-100 opacity-100"
-            : "mb-0 max-h-0 translate-y-2 scale-[0.96] opacity-0 pointer-events-none"
+            ? "pointer-events-auto mb-2 max-h-[min(46vh,320px)] translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none mb-0 max-h-0 translate-y-2 scale-[0.96] opacity-0"
         )}
         aria-hidden={!panelActive}
       >
-          <div className="max-h-[min(46vh,300px)] overflow-y-auto rounded-[1.35rem] bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)]">
+          <div className="max-h-[min(46vh,300px)] w-full overflow-y-auto rounded-[1.35rem] rounded-br-md bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)]">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#3D5C6E]">
               {displayTaskCategory(task)}
             </p>
@@ -268,6 +268,10 @@ export default function ActiveJobDock() {
               Tingnan ang buong detalye
             </Link>
           </div>
+          <span
+            className="mr-6 h-0 w-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-white drop-shadow-[0_2px_1px_rgba(42,63,77,0.08)]"
+            aria-hidden
+          />
       </div>
 
       <button
@@ -278,7 +282,7 @@ export default function ActiveJobDock() {
         onPointerCancel={onPointerUp}
         aria-expanded={open}
         className={cn(
-          "relative flex h-10 max-w-[240px] cursor-grab touch-none items-center gap-2 rounded-full bg-[#2A3F4D] px-3 text-left text-[#F7F4EC] shadow-[0_10px_24px_rgba(42,63,77,0.28)] transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:cursor-grabbing active:scale-[0.97]",
+          "pointer-events-auto relative flex h-10 max-w-[240px] cursor-grab touch-none items-center gap-2 rounded-full bg-[#2A3F4D] px-3 text-left text-[#F7F4EC] shadow-[0_10px_24px_rgba(42,63,77,0.28)] transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:cursor-grabbing active:scale-[0.97]",
           panelActive && "scale-[0.98]"
         )}
       >

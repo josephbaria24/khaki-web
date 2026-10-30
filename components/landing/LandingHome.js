@@ -14,7 +14,6 @@ import {
   LANDING_FAQS,
   LANDING_STEPS,
   LANDING_TASK_TABS,
-  LANDING_TASKERS,
   LANDING_TASKS,
   LANDING_TRUST,
 } from "@/lib/landingContent";
@@ -143,13 +142,13 @@ export default function LandingHome() {
       <div className="pt-3">
         <InstallAppBanner />
       </div>
-      <section className="overflow-x-clip bg-[#FBF8F1] px-0 pb-3 pt-0 sm:pt-1 md:px-8 md:pb-6 md:pt-1 lg:px-[6vw] lg:pb-8 lg:pt-2 dark:bg-[#11141A]">
+      <section className="overflow-x-clip bg-white px-0 pb-3 pt-0 dark:bg-[#11141A] sm:pt-1 md:px-8 md:pb-6 md:pt-1 lg:px-[6vw] lg:pb-8 lg:pt-2">
         <div className="hero-mobile-card relative mx-auto w-[95%] min-w-0 overflow-hidden rounded-[1.75rem] bg-[#163044] text-white shadow-[0_22px_50px_rgba(22,48,68,0.28)] min-[380px]:rounded-[1.85rem] md:w-full md:max-w-5xl md:rounded-[2.15rem] lg:max-w-none">
           <div
             className="pointer-events-none absolute inset-x-8 top-8 h-36 rounded-full bg-[#3E7498]/45 blur-3xl md:hidden"
             aria-hidden
           />
-          <div className="hero-art-stage relative overflow-hidden lg:hidden h-[min(105vw,24rem)] min-[400px]:h-[min(92vw,26rem)] sm:h-[min(72vw,28rem)]">
+          <div className="hero-art-stage relative overflow-hidden lg:hidden h-[min(68vw,16.5rem)] min-[400px]:h-[min(62vw,18rem)] sm:h-[min(48vw,20rem)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/transparent-hero-protrait.png"
@@ -167,31 +166,31 @@ export default function LandingHome() {
             />
             <div className="hero-art-fade pointer-events-none absolute inset-x-0 -bottom-px z-[2] h-[22%]" aria-hidden />
           </div>
-          <div className="stagger-children relative z-[1] min-w-0 px-4 pb-6 pt-1 text-center min-[380px]:px-5 min-[380px]:pb-7 sm:px-8 sm:pb-9 md:px-12 md:pb-12 md:pt-2 lg:mt-1 lg:px-16 lg:pb-8 lg:pt-3">
-            <h1 className="mx-auto max-w-full text-[1.7rem] font-black uppercase leading-[0.9] tracking-[-0.045em] text-white min-[360px]:text-[2rem] min-[400px]:text-[2.2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.15rem]">
+          <div className="stagger-children relative z-[1] min-w-0 px-4 pb-5 pt-0 text-center sm:px-6 sm:pb-6 md:px-12 md:pb-12 md:pt-2 lg:mt-1 lg:px-16 lg:pb-8 lg:pt-3">
+            <h1 className="mx-auto max-w-full text-[1.65rem] font-black uppercase leading-[0.9] tracking-[-0.045em] text-white min-[400px]:text-[1.85rem] sm:text-[2.15rem] md:text-[3rem] lg:text-[3.15rem]">
               Get anything
               <br />
               done
             </h1>
-            <p className="mx-auto mt-3 max-w-[16.5rem] text-[13.5px] font-medium leading-snug text-white/80 min-[380px]:mt-4 min-[380px]:text-[15px] sm:max-w-xs sm:text-base md:max-w-md md:text-lg lg:mt-3">
+            <p className="mx-auto mt-2 max-w-[16.5rem] text-[13px] font-medium leading-snug text-white/80 sm:text-sm md:mt-3 md:max-w-md md:text-lg">
               Post any task. Pick a trusted Palawan local. Get it done.
             </p>
-            <div className="mx-auto mt-5 flex w-full flex-col gap-2.5 min-[380px]:mt-6 md:mt-7 md:max-w-xl md:flex-row md:justify-center lg:mt-5">
+            <div className="mx-auto mt-4 flex w-full max-w-md flex-col gap-2 md:mt-7 md:max-w-xl md:flex-row md:justify-center">
               <Link
                 href={postHref}
-                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#2F8AD4] px-4 text-[13.5px] font-bold text-white shadow-[0_10px_24px_rgba(47,138,212,0.38)] transition-transform duration-200 active:scale-[0.98] min-[380px]:h-[3.25rem] min-[380px]:text-[15px] md:flex-1"
+                className="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#2F8AD4] px-4 text-[13px] font-bold text-white shadow-[0_8px_18px_rgba(47,138,212,0.32)] transition-transform duration-200 active:scale-[0.98] md:h-[3.25rem] md:flex-1 md:text-[15px]"
               >
                 Post your task now!
               </Link>
               <Link
                 href={earnHref}
-                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-4 text-[13.5px] font-bold text-[#163044] transition-transform duration-200 active:scale-[0.98] min-[380px]:h-[3.25rem] min-[380px]:text-[15px] md:flex-1"
+                className="inline-flex h-11 w-full items-center justify-center rounded-full bg-white px-4 text-[13px] font-bold text-[#163044] transition-transform duration-200 active:scale-[0.98] md:h-[3.25rem] md:flex-1 md:text-[15px]"
               >
                 Earn money as a Tasker
               </Link>
             </div>
-            <div className="mt-6 flex items-center justify-center gap-2.5 lg:mt-5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10" aria-hidden>
+            <div className="mt-3.5 flex items-center justify-center gap-2 md:mt-6 lg:mt-5">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 md:h-8 md:w-8" aria-hidden>
                 <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="currentColor">
                   <path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6.2-.4a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2ZM4.2 18.2c.4-2.3 2.4-3.7 4.8-3.7s4.4 1.4 4.8 3.7c.1.5-.3.8-.8.8H5c-.5 0-.9-.3-.8-.8Zm8.3-.2c-.2-1.5.2-2.8 1.2-3.7.4-.3.9-.5 1.4-.6 1.9.2 3.4 1.5 3.7 3.6.1.5-.3.9-.8.9h-4.8c-.3 0-.6-.1-.7-.2Z" />
                 </svg>
@@ -205,42 +204,42 @@ export default function LandingHome() {
         </div>
       </section>
 
-      <SectionWrap id="how-it-works" className="scroll-mt-24 bg-background py-16 lg:py-20">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#163044]">
+      <SectionWrap id="how-it-works" className="scroll-mt-24 bg-white py-12 dark:bg-[#11141A] lg:py-16">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#163044] dark:text-[#F5F3EE]">
           How it works
         </p>
-        <h2 className="mt-3 max-w-xl text-3xl font-black tracking-tight text-foreground sm:text-4xl">
+        <h2 className="mt-2 max-w-xl text-2xl font-black tracking-tight text-[#163044] dark:text-[#F5F3EE] sm:text-3xl">
           Post your first task in seconds
         </h2>
-        <p className="mt-3 max-w-lg text-muted-foreground">
+        <p className="mt-2 max-w-lg text-sm text-[#6B6558] dark:text-[#94A3B8]">
           Save yourself hours and get your Palawan to-do list completed.
         </p>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <div className="how-steps no-scrollbar relative -mx-4 mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0">
+          <span className="pointer-events-none absolute left-[18%] right-[18%] top-8 hidden h-px bg-[#E7E2D8] md:block dark:bg-[#2A303C]" aria-hidden />
           {LANDING_STEPS.map((step) => (
-            <article key={step.num} className="soft-card p-5">
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-black"
-                style={{ background: LANDING.sage, color: LANDING.oliveDeep }}
-              >
-                {step.num}
-              </span>
+            <article
+              key={step.num}
+              className="how-step relative flex w-[78%] shrink-0 snap-start flex-col rounded-2xl bg-white p-4 ring-1 ring-[#ECE7DE] shadow-[0_10px_28px_rgba(22,48,68,0.05)] dark:bg-[#1A1E27] dark:ring-[#2A303C] md:w-auto"
+            >
+              <div className="relative z-[1] flex items-center gap-2.5">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#163044] text-xs font-black text-[#F7F4EC] dark:bg-[#F5F3EE] dark:text-[#11141A]">
+                  {step.num}
+                </span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A8478] dark:text-[#94A3B8]">Step {step.num}</span>
+              </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={step.image}
-                alt=""
-                className="mx-auto mt-3 h-40 w-full object-contain sm:h-44"
-              />
-              <p className="mt-4 text-base font-black leading-snug text-foreground">{step.title}</p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
+              <img src={step.image} alt="" className="how-step-art mx-auto mt-2 h-24 w-full object-contain" />
+              <p className="mt-2 text-[15px] font-black leading-snug text-[#163044] dark:text-[#F5F3EE]">{step.title}</p>
+              <p className="mt-1 text-[12px] leading-snug text-[#6B6558] dark:text-[#94A3B8]">{step.desc}</p>
             </article>
           ))}
         </div>
-        <Link href={postHref} className="btn-olive mt-10 inline-flex h-12 items-center px-7 text-sm">
+        <Link href={postHref} className="btn-olive mt-6 inline-flex h-11 items-center px-6 text-sm">
           Post your task
         </Link>
       </SectionWrap>
 
-      <section className="bg-[#FBF8F1] py-12 lg:py-16">
+      <section className="bg-white dark:bg-[#11141A] py-12 lg:py-16">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-black text-foreground sm:text-3xl">{promo.headline}</h2>
           <p className="mt-2 text-muted-foreground">{promo.sub}</p>
@@ -265,7 +264,7 @@ export default function LandingHome() {
         </div>
       </section>
 
-      <SectionWrap className="bg-background py-16 lg:py-20">
+      <SectionWrap className="bg-white dark:bg-[#11141A] py-16 lg:py-20">
         <h2 className="text-3xl font-black tracking-tight text-foreground">See what others are getting done</h2>
         <div className="no-scrollbar mt-6 flex gap-2 overflow-x-auto pb-1">
           {LANDING_TASK_TABS.map((item) => {
@@ -295,7 +294,7 @@ export default function LandingHome() {
         </Link>
       </SectionWrap>
 
-      <section className="bg-[#FBF8F1] py-16 lg:py-20">
+      <section className="bg-white dark:bg-[#11141A] py-16 lg:py-20">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-black tracking-tight text-foreground">Trust and safety features for your protection</h2>
           <div className="mt-10 grid gap-8 md:grid-cols-3">
@@ -321,34 +320,8 @@ export default function LandingHome() {
       <QualificationPath href={isAuthenticated ? "/verify" : "/register"} />
 
       <section id="earn" className="landing-hero scroll-mt-24">
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
-          <div className="rounded-[2rem] bg-white p-6 shadow-[0_16px_40px_rgba(16,38,54,0.16)] sm:p-8">
-            <p className="text-sm font-black text-[#102636]">
-              160+ Palawan taskers already earning
-            </p>
-            <div className="mt-5 space-y-3">
-              {LANDING_TASKERS.slice(0, 3).map((person) => (
-                <div
-                  key={person.name}
-                  className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-[0_8px_22px_rgba(16,38,54,0.12)]"
-                >
-                  <span
-                    className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-black"
-                    style={{ background: person.tone, color: LANDING.oliveDeep }}
-                  >
-                    {person.initial}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate font-bold text-[#2C2A22]">{person.name}</p>
-                    <p className="text-xs text-[#2C2A22]/65">
-                      {person.rating} · {person.location}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="text-[#F7F4EC]">
+        <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <div className="max-w-xl text-[#F7F4EC]">
             <h2 className="text-3xl font-black tracking-tight sm:text-4xl">Be your own boss</h2>
             <p className="mt-3 max-w-md text-[#F7F4EC]/85">
               Whether you&apos;re great at pabili, tours, or home repair, find your next job on Khaki.
@@ -368,58 +341,7 @@ export default function LandingHome() {
         </div>
       </section>
 
-      <SectionWrap className="bg-background py-16 lg:py-20">
-        <p className="text-sm font-bold text-muted-foreground">Taskers have earned income on Khaki</p>
-        <h2 className="mt-2 max-w-2xl text-3xl font-black tracking-tight text-foreground">
-          Start earning with Palawan&apos;s local services marketplace.
-        </h2>
-        <div className="mt-10">
-          <ScrollRow>
-            {LANDING_TASKERS.map((person) => (
-              <article key={person.name} className="w-[300px] shrink-0 rounded-[1.5rem] bg-card p-6 shadow-card">
-                <div className="flex items-center gap-3">
-                  <span
-                    className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-black"
-                    style={{ background: person.tone, color: LANDING.oliveDeep }}
-                  >
-                    {person.initial}
-                  </span>
-                  <div>
-                    <p className="font-black text-foreground">{person.name}</p>
-                    <p className="text-sm text-muted-foreground">{person.location}</p>
-                  </div>
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="flex items-center gap-1 text-lg font-black">
-                      {person.rating} <Stars count={1} />
-                    </p>
-                    <p className="text-muted-foreground">Overall rating</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-black">{person.completion}</p>
-                    <p className="text-muted-foreground">Completion</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm text-muted-foreground">
-                  <span className="font-bold text-foreground">Specialties: </span>
-                  {person.specialties}
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-foreground/80">{person.bio}</p>
-                <div className="mt-4 rounded-2xl p-4" style={{ background: LANDING.cream }}>
-                  <p className="text-xs font-bold uppercase tracking-wide text-[#163044]">
-                    What the reviews say
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-[#2C2A22]">&ldquo;{person.quote}&rdquo;</p>
-                  <p className="mt-2 text-xs font-bold text-[#2C2A22]/60">— {person.reviewer}</p>
-                </div>
-              </article>
-            ))}
-          </ScrollRow>
-        </div>
-      </SectionWrap>
-
-      <SectionWrap id="faq" className="bg-[#FBF8F1] py-16 lg:py-20">
+      <SectionWrap id="faq" className="bg-white dark:bg-[#11141A] py-16 lg:py-20">
         <div className="flex items-center gap-3">
           <span
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg font-black"
@@ -436,7 +358,7 @@ export default function LandingHome() {
         </div>
       </SectionWrap>
 
-      <SectionWrap className="bg-background pb-16 lg:pb-20">
+      <SectionWrap className="bg-white dark:bg-[#11141A] pb-16 lg:pb-20">
         <div className="rounded-2xl border border-black/10 bg-card p-5 shadow-card sm:p-6">
           <div className="flex items-start gap-3">
             <span

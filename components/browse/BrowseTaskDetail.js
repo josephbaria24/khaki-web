@@ -103,7 +103,7 @@ export default function BrowseTaskDetail({
   }
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#FBF8F1] dark:bg-[#11141A]", className)}>
+    <div className={cn("flex h-full min-h-0 flex-col bg-white dark:bg-[#11141A]", className)}>
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* Block scroll flow — not flex-col — so hero/cards cannot shrink to a strip */}
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">

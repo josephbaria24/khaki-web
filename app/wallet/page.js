@@ -105,7 +105,7 @@ export default function WalletPage() {
 
   return (
     <AppShell>
-      <div className="min-h-full bg-[#FBF8F1] dark:bg-[#11141A]">
+      <div className="min-h-full bg-white dark:bg-[#11141A]">
         <div className="mx-auto w-full max-w-lg px-4 pb-10 pt-5 sm:px-6 lg:pt-8">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">

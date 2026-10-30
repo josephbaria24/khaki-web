@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import PostedJobCard from "@/components/PostedJobCard";
-import { cn, displayTaskCategory } from "@/lib/khaki";
+import { cn, displayTaskCategory, formatPHP, STATUS_CONFIG, timeAgo } from "@/lib/khaki";
 
 const TABS = [
   { id: "all", label: "All" },
@@ -41,7 +42,73 @@ function timeOf(task) {
   return Number.isFinite(n) ? n : 0;
 }
 
-export default function PostedJobsList({ tasks = [], people = {}, reviews = {}, bidCounts = {}, onCancel }) {
+const STATUS_ROW = {
+  open: {
+    wash: "bg-status-open/10 hover:bg-status-open/15 dark:bg-status-open/15 dark:hover:bg-status-open/25",
+    ink: "text-status-open",
+    bar: "bg-status-open",
+  },
+  offer_accepted: {
+    wash: "bg-emerald-50 hover:bg-emerald-100/80 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25",
+    ink: "text-emerald-700 dark:text-emerald-300",
+    bar: "bg-emerald-500",
+  },
+  escrow_locked: {
+    wash: "bg-blue-50 hover:bg-blue-100/80 dark:bg-blue-500/15 dark:hover:bg-blue-500/25",
+    ink: "text-blue-700 dark:text-blue-300",
+    bar: "bg-blue-600",
+  },
+  in_progress: {
+    wash: "bg-status-progress/20 hover:bg-status-progress/30 dark:bg-status-progress/15 dark:hover:bg-status-progress/25",
+    ink: "text-[#8A6A00] dark:text-status-progress",
+    bar: "bg-status-progress",
+  },
+  completed_pending_review: {
+    wash: "bg-purple-50 hover:bg-purple-100/80 dark:bg-purple-500/15 dark:hover:bg-purple-500/25",
+    ink: "text-purple-700 dark:text-purple-300",
+    bar: "bg-purple-500",
+  },
+  disputed: {
+    wash: "bg-amber-50 hover:bg-amber-100/80 dark:bg-amber-500/15 dark:hover:bg-amber-500/25",
+    ink: "text-amber-700 dark:text-amber-300",
+    bar: "bg-amber-500",
+  },
+  released: {
+    wash: "bg-status-done/10 hover:bg-status-done/15 dark:bg-status-done/20 dark:hover:bg-status-done/30",
+    ink: "text-status-done",
+    bar: "bg-status-done",
+  },
+  cancelled: {
+    wash: "bg-destructive/10 hover:bg-destructive/15 dark:bg-destructive/15 dark:hover:bg-destructive/25",
+    ink: "text-destructive",
+    bar: "bg-destructive",
+  },
+};
+
+function statusRow(status) {
+  return STATUS_ROW[status] || STATUS_ROW.open;
+}
+
+function previewTail(task, tasker, bids) {
+  const hired = tasker || (task.accepted_tasker_id ? { full_name: "Tasker" } : null);
+  const who = hired
+    ? `Kumuha: ${hired.full_name}`
+    : task.status === "cancelled"
+      ? "Cancelled"
+      : "Waiting pa";
+  const bidLabel = bids > 0 ? `${bids} ${bids === 1 ? "bid" : "bids"}` : "Walang bid pa";
+  return `${displayTaskCategory(task)} · ${timeAgo(task.created_at)} · ${bidLabel} · ${who}`;
+}
+
+export default function PostedJobsList({
+  tasks = [],
+  people = {},
+  reviews = {},
+  bidCounts = {},
+  onCancel,
+  preview = false,
+  showAllHref = "/my-jobs",
+}) {
   const [tab, setTab] = useState("all");
   const [sort, setSort] = useState("newest");
   const [query, setQuery] = useState("");
@@ -84,11 +151,59 @@ export default function PostedJobsList({ tasks = [], people = {}, reviews = {}, 
     return rows;
   }, [tasks, tab, sort, query, category, bidCounts]);
 
+  const newest = useMemo(
+    () => [...tasks].sort((a, b) => timeOf(b) - timeOf(a)),
+    [tasks]
+  );
+
   if (tasks.length === 0) {
     return (
       <p className="mt-6 rounded-[1.35rem] border border-dashed border-[#C9D6E0] bg-card py-12 text-center text-sm text-muted-foreground">
         Wala ka pang naka-post. Mag-post ng gawain para maghanap ng tulong.
       </p>
+    );
+  }
+
+  if (preview) {
+    return (
+      <div className="mt-4 overflow-hidden rounded-[1.35rem] bg-white ring-1 ring-[#EEF1F4] dark:bg-[#1A1E27] dark:ring-white/10">
+        <div className="h-72 overflow-y-auto overscroll-contain">
+          {newest.map((task) => {
+            const row = statusRow(task.status);
+            const bids = Number(bidCounts[task.id] ?? task.offer_count) || 0;
+            const status = STATUS_CONFIG[task.status]?.label || task.status || "Open";
+            return (
+              <Link
+                key={task.id}
+                href={`/task/${task.id}`}
+                className={cn(
+                  "flex items-center gap-3 border-b border-[#F0F3F6] px-3.5 py-3 last:border-b-0 dark:border-white/10",
+                  row.wash
+                )}
+              >
+                <span className={cn("h-9 w-1 shrink-0 rounded-full", row.bar)} aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-baseline justify-between gap-3">
+                    <span className="truncate text-sm font-bold text-foreground">{task.title}</span>
+                    <span className={cn("shrink-0 text-sm font-black", row.ink)}>{formatPHP(task.budget_php)}</span>
+                  </span>
+                  <span className="mt-0.5 block truncate text-[11px] font-medium text-muted-foreground">
+                    <span className={cn("font-bold", row.ink)}>{status}</span>
+                    {" · "}
+                    {previewTail(task, people[task.accepted_tasker_id], bids)}
+                  </span>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+        <Link
+          href={showAllHref}
+          className="flex h-11 items-center justify-center border-t border-[#EEF1F4] text-sm font-bold text-[#163044] hover:bg-[#F4F7FA] dark:border-white/10 dark:text-[#F7F4EC] dark:hover:bg-white/5"
+        >
+          Show all
+        </Link>
+      </div>
     );
   }
 

@@ -265,7 +265,7 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
         "overflow-hidden bg-white",
         fullscreen
           ? "fixed inset-0 z-[2000] flex h-dvh max-h-dvh w-dvw flex-col pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
-          : "relative z-0 rounded-2xl border border-[#EFE7DA]"
+          : "relative z-0 rounded-2xl"
       )}
     >
       {slots.length > 1 ? (
@@ -316,7 +316,7 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
 
       <div className="space-y-1.5 p-2.5">
         {slots.map((slot) => (
-          <div key={slot.key} className="flex items-center gap-2 rounded-xl bg-[#FBF8F1] px-3 py-2">
+          <div key={slot.key} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 dark:bg-[#1A1E27]">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: slot.color }} />
             <span className="min-w-0 flex-1 text-[12px] font-semibold text-[#163044]">
               {slot.label}:{" "}

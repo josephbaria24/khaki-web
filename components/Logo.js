@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function Logo({ href = "/", light = false }) {
+export default function Logo({ href = "/", light = false, compact = false }) {
   return (
     <Link href={href} className="flex min-w-0 items-center gap-2.5">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -9,7 +9,7 @@ export default function Logo({ href = "/", light = false }) {
         <span className={`block text-xl font-black uppercase leading-none tracking-tight ${light ? "text-white" : "text-foreground"}`}>
           KHAKI
         </span>
-        <span className={`mt-0.5 block truncate text-[10px] font-semibold max-[359px]:hidden ${light ? "text-white/75" : "text-muted-foreground"}`}>
+        <span className={`mt-0.5 block truncate text-[10px] font-semibold ${compact ? "hidden sm:block" : "max-[359px]:hidden"} ${light ? "text-white/75" : "text-muted-foreground"}`}>
           Jobs & Services in Palawan
         </span>
       </span>

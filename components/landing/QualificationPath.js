@@ -4,7 +4,7 @@ import { LANDING } from "@/lib/landingContent";
 
 export default function QualificationPath({ href = "/verify" }) {
   return (
-    <section className="bg-[#FBF8F1] py-16 lg:py-20">
+    <section className="bg-white py-16 dark:bg-[#11141A] lg:py-20">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <p className="text-xs font-black uppercase tracking-[0.18em]" style={{ color: LANDING.oliveMid }}>Tasker qualification</p>
         <h2 className="mt-2 max-w-3xl text-3xl font-black tracking-tight text-[#163044] sm:text-4xl">Five stages. Same Palawan colors.</h2>

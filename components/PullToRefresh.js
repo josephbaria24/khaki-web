@@ -134,7 +134,7 @@ export default function PullToRefresh({
   }
 
   return (
-    <div ref={scrollerRef} className={className}>
+    <div ref={scrollerRef} data-app-scroll="" className={className}>
       {indicator}
       {children}
     </div>

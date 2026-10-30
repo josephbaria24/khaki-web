@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Briefcase, Home, MessageSquare, Plus, Search, User } from "@/components/icons";
+import { Briefcase, Home, MessageSquare, Plus, Search, User, X } from "@/components/icons";
 import ActiveJobDock from "@/components/ActiveJobDock";
 import { cn } from "@/lib/khaki";
 import { canOpenPost, isAdmin, needsTaskerVerification } from "@/lib/roles";
@@ -21,9 +22,41 @@ function tabActive(pathname, href) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+const POST_TIP_KEY = "khaki.postTip";
+
 export default function BottomNav({ hidden = false }) {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [showTip, setShowTip] = useState(false);
+  const [tipLeaving, setTipLeaving] = useState(false);
+  const tipGone = useRef(false);
+
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(POST_TIP_KEY) !== "1") setShowTip(true);
+    } catch {
+      setShowTip(true);
+    }
+  }, []);
+
+  const finishTip = () => {
+    if (tipGone.current) return;
+    tipGone.current = true;
+    setShowTip(false);
+  };
+
+  const dismissTip = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (tipLeaving) return;
+    setTipLeaving(true);
+    try {
+      window.localStorage.setItem(POST_TIP_KEY, "1");
+    } catch {
+      /* private mode */
+    }
+    window.setTimeout(finishTip, 300);
+  };
 
   const items = ITEMS.map((item) => {
     if (!item.center) return item;
@@ -33,12 +66,18 @@ export default function BottomNav({ hidden = false }) {
     return { ...item, href: "/browse", label: "Hanap", icon: Search };
   });
   const postItem = items.find((item) => item.center);
+  const compact = pathname === "/browse" || pathname.startsWith("/browse/");
+  const ease = "duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]";
 
   return (
     <nav
       className={cn(
-        "fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] left-4 right-4 z-40 lg:hidden",
-        "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "fixed left-4 right-4 z-40 lg:hidden",
+        compact
+          ? "bottom-[max(0.5rem,env(safe-area-inset-bottom,0px))]"
+          : "bottom-[max(1rem,env(safe-area-inset-bottom,0px))]",
+        "transition-[bottom,transform,opacity]",
+        ease,
         hidden
           ? "pointer-events-none translate-y-[calc(100%+1.5rem)] opacity-0"
           : "translate-y-0 opacity-100"
@@ -48,7 +87,7 @@ export default function BottomNav({ hidden = false }) {
     >
       <div className="relative mx-auto max-w-md pt-3">
         <ActiveJobDock />
-        <div className="float-nav float-nav-notch relative flex h-14 items-center justify-around px-1.5">
+        <div className={cn("float-nav float-nav-notch relative flex items-center justify-around px-1.5 transition-[height]", ease, compact ? "is-compact h-12" : "h-14")}>
           {items.map((item) => {
             const active = tabActive(pathname, item.href);
             const Icon = item.icon;
@@ -71,26 +110,64 @@ export default function BottomNav({ hidden = false }) {
           })}
 
           {postItem ? (
-            <Link
-              href={postItem.href}
-              aria-label={postItem.label}
-              className="float-nav-post absolute left-1/2 top-0 z-20 flex h-[3.25rem] w-[3.25rem] items-center justify-center"
-            >
-              <span
-                aria-hidden
-                className="absolute left-1/2 top-1/2 h-[3.25rem] w-[3.25rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
-              />
-              <span
-                aria-hidden
-                className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-card shadow-soft"
-              />
-              <span className="float-nav-post-core relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#163044] text-[#F7F4EC] shadow-soft">
-                {(() => {
-                  const CenterIcon = postItem.icon || Plus;
-                  return <CenterIcon className="h-5 w-5" color="currentColor" />;
-                })()}
-              </span>
-            </Link>
+            <>
+              <Link
+                href={postItem.href}
+                aria-label={postItem.label}
+                className={cn(
+                  "float-nav-post absolute left-1/2 top-0 z-20 flex items-center justify-center transition-[width,height]",
+                  ease,
+                  compact ? "h-11 w-11" : "h-[3.25rem] w-[3.25rem]"
+                )}
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background transition-[width,height]",
+                    ease,
+                    compact ? "h-11 w-11" : "h-[3.25rem] w-[3.25rem]"
+                  )}
+                />
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-card shadow-soft transition-[width,height]",
+                    ease,
+                    compact ? "h-10 w-10" : "h-12 w-12"
+                  )}
+                />
+                <span className={cn(
+                  "float-nav-post-core relative z-10 flex shrink-0 items-center justify-center rounded-full bg-[#163044] text-[#F7F4EC] shadow-soft transition-[width,height]",
+                  ease,
+                  compact ? "h-9 w-9" : "h-11 w-11"
+                )}>
+                  {(() => {
+                    const CenterIcon = postItem.icon || Plus;
+                    return <CenterIcon className="float-nav-post-icon h-5 w-5" color="currentColor" />;
+                  })()}
+                </span>
+              </Link>
+              {showTip && postItem.href === "/post" ? (
+                <div
+                  className={cn(
+                    "absolute bottom-[calc(100%+2.65rem)] left-1/2 z-30 flex origin-bottom -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-[#163044] py-1 pl-2.5 pr-1 text-[11px] font-bold text-[#F7F4EC] shadow-[0_8px_20px_rgba(22,48,68,0.28)]",
+                    tipLeaving && "post-tip-out"
+                  )}
+                  onAnimationEnd={finishTip}
+                >
+                  Post a task
+                  <button
+                    type="button"
+                    onClick={dismissTip}
+                    className="flex h-5 w-5 items-center justify-center rounded-full text-[#F7F4EC] hover:bg-white/15"
+                    aria-label="Close"
+                  >
+                    <X className="h-3 w-3" color="currentColor" />
+                  </button>
+                  <span className="absolute left-1/2 top-full -translate-x-1/2 border-x-[6px] border-b-0 border-t-[7px] border-x-transparent border-t-[#163044]" aria-hidden />
+                </div>
+              ) : null}
+            </>
           ) : null}
         </div>
       </div>

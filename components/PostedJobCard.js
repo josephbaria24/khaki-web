@@ -64,11 +64,10 @@ export default function PostedJobCard({ task, tasker, review, onCancel, bidCount
       : "Waiting pa sa mag-a-accept.";
 
   return (
-    <article className="relative overflow-hidden rounded-2xl bg-[#FFFCF7] py-3 pl-4 pr-3 shadow-card">
-      <span className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: tone.ink }} />
-
+    <article className="rounded-2xl bg-white px-3.5 py-3 shadow-card ring-1 ring-[#EEF1F4] dark:bg-[#1A1E27] dark:ring-[#2A303C]">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-1.5">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="h-7 w-1 shrink-0 rounded-full" style={{ backgroundColor: tone.ink }} aria-hidden />
           <StatusPill status={task.status} />
           <span
             className="truncate rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"

@@ -3,59 +3,74 @@
 import { useState } from "react";
 import Link from "next/link";
 import { LANDING_CATEGORIES } from "@/lib/landingContent";
-import { Collapse } from "@/components/ui/motion";
 
 export default function CategoryBreakdown({ categories = LANDING_CATEGORIES }) {
-  const [openKey, setOpenKey] = useState(null);
+  const list = categories.length ? categories : LANDING_CATEGORIES;
+  const [activeKey, setActiveKey] = useState(list[0]?.key ?? null);
+  const active = list.find((cat) => cat.key === activeKey) || list[0];
+  const index = Math.max(0, list.findIndex((cat) => cat.key === active?.key));
+
+  if (!active) return null;
 
   return (
-    <div className="mt-10 grid items-start gap-2 sm:grid-cols-2 sm:gap-3">
-      {categories.map((cat, i) => {
-        const open = openKey === cat.key;
-        return (
-          <article
-            key={cat.key}
-            className="overflow-hidden rounded-2xl bg-[#FFFCF7] shadow-[0_8px_28px_rgba(42,63,77,0.08)]"
-          >
+    <div className="mt-6">
+      <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-6 px-6 pb-1 sm:mx-0 sm:scroll-px-0 sm:px-0">
+        {list.map((cat) => {
+          const selected = cat.key === active.key;
+          return (
             <button
+              key={cat.key}
               type="button"
-              onClick={() => setOpenKey(open ? null : cat.key)}
-              aria-expanded={open}
-              className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
+              onClick={() => setActiveKey(cat.key)}
+              aria-pressed={selected}
+              className={`inline-flex h-11 shrink-0 snap-start items-center gap-2 rounded-full pl-1.5 pr-3.5 text-left transition duration-200 ${
+                selected
+                  ? "bg-[#163044] text-[#F7F4EC] shadow-[0_8px_20px_rgba(22,48,68,0.18)] dark:bg-[#F5F3EE] dark:text-[#11141A]"
+                  : "bg-white text-[#163044] ring-1 ring-[#E7E2D8] hover:bg-[#F7F8FA] dark:bg-[#1A1E27] dark:text-[#F5F3EE] dark:ring-[#2A303C]"
+              }`}
             >
-              <span className="w-7 shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#163044]">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="min-w-0 flex-1 truncate text-[15px] font-black text-foreground">{cat.title}</span>
-              <span
-                className={`shrink-0 text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "rotate-180" : "rotate-0"}`}
-                aria-hidden
-              >
-                ▾
-              </span>
+              {cat.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={cat.image} alt="" className="h-8 w-8 rounded-full object-cover" />
+              ) : (
+                <span className={`h-8 w-8 rounded-full ${selected ? "bg-white/15" : "bg-[#F3EFE3]"}`} />
+              )}
+              <span className="max-w-[9.5rem] truncate text-[13px] font-black">{cat.title}</span>
             </button>
-            <Collapse open={open}>
-              <div className="px-4 pb-4">
-                <p className="text-sm text-muted-foreground">{cat.desc}</p>
-                <ul className="mt-3 space-y-2.5">
-                  {cat.groups.map((group) => (
-                    <li key={group.title}>
-                      <p className="text-sm font-bold text-foreground">{group.title}</p>
-                      <p className="mt-0.5 text-[13px] leading-relaxed text-muted-foreground">{group.desc}</p>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={cat.href || "/browse"}
-                  className="mt-3 inline-flex text-sm font-bold text-[#163044] underline-offset-4 hover:underline"
-                >
-                  {cat.key === "other" ? `Post ${cat.title}` : `Browse ${cat.title}`}
-                </Link>
-              </div>
-            </Collapse>
-          </article>
-        );
-      })}
+          );
+        })}
+      </div>
+
+      <article
+        key={active.key}
+        className="animate-fade-in-up mt-4 rounded-[1.35rem] bg-white p-4 ring-1 ring-[#E7E2D8] dark:bg-[#1A1E27] dark:ring-[#2A303C] sm:p-5"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8A8478] dark:text-[#94A3B8]">
+              {String(index + 1).padStart(2, "0")}
+            </p>
+            <h3 className="mt-1 text-lg font-black tracking-tight text-[#163044] dark:text-[#F5F3EE]">{active.title}</h3>
+            <p className="mt-1 text-sm leading-snug text-[#6B6558] dark:text-[#94A3B8]">{active.desc}</p>
+          </div>
+        </div>
+
+        <ul className="mt-4 grid gap-2 sm:grid-cols-3">
+          {(active.groups || []).map((group) => (
+            <li key={group.title} className="rounded-2xl bg-[#F7F8FA] px-3 py-3 dark:bg-[#151922]">
+              <p className="text-[13px] font-black leading-snug text-[#163044] dark:text-[#F5F3EE]">{group.title}</p>
+              <p className="mt-1 text-[12px] leading-snug text-[#6B6558] dark:text-[#94A3B8]">{group.desc}</p>
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          href={active.href || "/browse"}
+          className="mt-4 inline-flex h-10 items-center rounded-full bg-[#163044] px-4 text-xs font-black text-[#F7F4EC] dark:bg-[#F5F3EE] dark:text-[#11141A]"
+        >
+          {active.key === "other" ? `Post ${active.title}` : `Browse ${active.title}`}
+        </Link>
+      </article>
     </div>
   );
 }

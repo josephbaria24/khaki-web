@@ -14,15 +14,6 @@ import {
   promptInstall,
 } from "@/lib/installApp";
 
-function DownloadIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" aria-hidden="true">
-      <path d="M12 4v10m0 0 3.5-3.5M12 14 8.5 10.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M5 16.5V18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function ShareGlyph() {
   return (
     <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
@@ -160,53 +151,50 @@ export default function InstallAppBanner() {
   };
 
   return (
-    <div className="mx-auto mb-4 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-      <div className="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-r from-[#163044] via-[#1F6A62] to-[#3A73C4] p-1.5 shadow-[0_12px_28px_rgba(22,48,68,0.28)]">
-        <span className="pointer-events-none absolute -right-4 -top-8 h-20 w-20 rounded-full bg-[#C8F0D8]/35" aria-hidden />
-        <span className="pointer-events-none absolute -bottom-8 right-24 h-16 w-16 rounded-full bg-[#FAD4DC]/45" aria-hidden />
-
-        <div className="relative flex items-start gap-1">
+    <div className="mx-auto mb-4 w-full max-w-6xl px-4 pt-2 sm:px-6 lg:px-8">
+      <div className="install-banner-float">
+      <div className="overflow-hidden rounded-[1.35rem] bg-white shadow-[0_8px_18px_rgba(22,48,68,0.12)] ring-1 ring-[#E6DFD2] dark:bg-[#1A1E27] dark:ring-[#2A303C]">
+        <div className="flex items-center gap-1.5 py-2 pl-2.5 pr-1.5 sm:gap-2 sm:py-2.5 sm:pl-3 sm:pr-2">
           <button
             type="button"
             onClick={install}
             disabled={busy}
-            className="flex min-h-12 min-w-0 flex-1 items-center gap-2.5 rounded-[1rem] px-2 py-1.5 text-left disabled:opacity-70"
+            className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-2xl text-left disabled:opacity-70"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C8F0D8] text-[#163044]">
-              <DownloadIcon />
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo.png" alt="" className="h-11 w-11 shrink-0 rounded-[22%] bg-[#F3EFE3] object-contain dark:bg-[#252A35]" />
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-black text-white">{copy.title}</span>
-              <span className="mt-0.5 block text-[11px] font-semibold leading-snug text-[#C8F0D8]">{copy.subtitle}</span>
+              <span className="block truncate text-[15px] font-black tracking-tight text-[#163044] dark:text-[#F5F3EE]">{copy.title}</span>
+              <span className="mt-0.5 block text-[12px] font-medium leading-snug text-[#6B6558] dark:text-[#94A3B8]">{copy.subtitle}</span>
             </span>
-            <span className="shrink-0 rounded-full bg-[#FAD4DC] px-2.5 py-1 text-[11px] font-black text-[#9D3A5C]">
+            <span className="inline-flex h-9 shrink-0 items-center rounded-full bg-[#163044] px-3.5 text-xs font-black text-[#F7F4EC] dark:bg-[#F5F3EE] dark:text-[#11141A]">
               {busy ? "…" : copy.cta}
             </span>
           </button>
           <button
             type="button"
             onClick={close}
-            className="mt-1.5 mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-white"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#6B6558] transition hover:bg-[#F3EFE3] dark:text-[#94A3B8] dark:hover:bg-[#252A35]"
             aria-label="Close"
           >
-            <X className="h-3.5 w-3.5" color="currentColor" />
+            <X className="h-4 w-4" color="currentColor" />
           </button>
         </div>
 
         {showIosSteps ? (
-          <div className="relative mt-1.5 rounded-[1rem] bg-[#0F2433]/55 px-3 py-3 text-[#F7F4EC]">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#C8F0D8]">
+          <div className="border-t border-[#E6DFD2] bg-[#FBF8F1] px-3 py-3 dark:border-[#2A303C] dark:bg-[#151922] sm:px-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#6B6558] dark:text-[#94A3B8]">
               {platform === "ios-safari" ? "Safari install" : "Finish in Safari"}
             </p>
-            <ol className="mt-2 space-y-2">
+            <ol className="mt-2.5 space-y-2.5">
               {IOS_STEPS.map((step, index) => (
                 <li key={step.title} className="flex gap-2.5">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#C8F0D8] text-[10px] font-black text-[#163044]">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#163044] text-[11px] font-black text-[#F7F4EC] dark:bg-[#F5F3EE] dark:text-[#11141A]">
                     {index === 0 ? <ShareGlyph /> : index + 1}
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-[12px] font-black">{step.title}</span>
-                    <span className="block text-[11px] font-semibold leading-snug text-[#F7F4EC]/75">{step.detail}</span>
+                    <span className="block text-[13px] font-black text-[#163044] dark:text-[#F5F3EE]">{step.title}</span>
+                    <span className="block text-[12px] font-medium leading-snug text-[#6B6558] dark:text-[#94A3B8]">{step.detail}</span>
                   </span>
                 </li>
               ))}
@@ -215,10 +203,11 @@ export default function InstallAppBanner() {
         ) : null}
 
         {hint ? (
-          <p className="relative mt-1.5 rounded-[1rem] bg-[#0F2433]/55 px-3 py-2 text-[11px] font-semibold leading-snug text-[#F7F4EC]">
+          <p className="border-t border-[#E6DFD2] px-3 py-2.5 text-[12px] font-medium leading-snug text-[#6B6558] dark:border-[#2A303C] dark:text-[#94A3B8] sm:px-4">
             {hint}
           </p>
         ) : null}
+      </div>
       </div>
     </div>
   );

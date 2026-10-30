@@ -75,7 +75,7 @@ function Chip({ on, icon, color, children, onClick }) {
       onClick={onClick}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold leading-none",
-        on ? "border-[#163044] bg-[#163044] text-[#F7F4EC]" : "border-[#E6DDD0] bg-white text-[#163044]"
+        on ? "border-[#163044] bg-[#163044] text-[#F7F4EC]" : "border border-[#163044] bg-white text-[#163044]"
       )}
     >
       {icon ? <Glyph name={icon} color={on ? "#F7F4EC" : color} className="h-3.5 w-3.5" /> : null}
@@ -92,7 +92,7 @@ function ChoiceCard({ on, icon, color, label, lines, onClick, compact = false })
       className={cn(
         "flex w-full items-start text-left",
         compact ? "gap-2.5 rounded-xl border px-2.5 py-2" : "gap-3 rounded-2xl border px-3.5 py-3",
-        on ? "border-[#163044] bg-white shadow-sm" : "border-[#EFE7DA] bg-[#FBF8F1]"
+        on ? "border-[#163044] bg-white shadow-sm" : "border border-[#163044] bg-white"
       )}
     >
       <span className={cn("flex shrink-0 items-center justify-center rounded-xl", compact ? "h-8 w-8" : "h-11 w-11")} style={{ backgroundColor: `${color}1A` }}>
@@ -151,8 +151,12 @@ const CATEGORY_ICONS = {
 
 const fieldClass =
   "h-9 w-full rounded-xl border border-[#E6DDD0] bg-[#F3EFE3] px-3 text-sm font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#2A3F4D]/40 sm:h-11 sm:px-4";
+const whiteFieldClass =
+  "h-9 w-full rounded-xl border border-[#163044] bg-white px-3 text-sm font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#2A3F4D]/40 sm:h-11 sm:px-4 dark:border-[#163044] dark:bg-[#1A1E27] dark:text-[#F5F3EE]";
+const accentFieldClass =
+  "h-9 w-full rounded-xl border border-[#C6ECD9] bg-[#C6ECD9] px-3 text-sm font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#163044]/45 sm:h-11 sm:px-4 dark:border-[#C6ECD9] dark:bg-[#C6ECD9] dark:text-[#11141A]";
 
-function PostSelect({ id, openId, setOpenId, value, options, onChange, placeholder = "Select", variant = "field", leading = null, compact = false }) {
+function PostSelect({ id, openId, setOpenId, value, options, onChange, placeholder = "Select", variant = "field", leading = null, compact = false, accent = false }) {
   const open = openId === id;
   const [shown, setShown] = useState(open);
   const [query, setQuery] = useState("");
@@ -206,7 +210,9 @@ function PostSelect({ id, openId, setOpenId, value, options, onChange, placehold
       <button
         type="button"
         className={cn(
-          variant === "header" ? "flex w-full items-center gap-3 py-1 text-left" : `${fieldClass} flex items-center justify-between gap-2 text-left`,
+          variant === "header"
+            ? "flex w-full items-center gap-3 py-1 text-left"
+            : `${accent ? accentFieldClass : fieldClass} flex items-center justify-between gap-2 text-left`,
           "relative z-30"
         )}
         aria-haspopup="listbox"
@@ -507,7 +513,7 @@ function PostPage() {
           ))}
         </div>
         <form onSubmit={submit} className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start lg:gap-4">
-          <div className={cn("rounded-[1.25rem] bg-[#FFFCF7] shadow-card sm:rounded-[1.5rem]", postStep !== 1 && "hidden", stacked ? "space-y-2.5 p-3 sm:space-y-3 sm:p-4" : "space-y-4 p-4 sm:p-5")}>
+          <div className={cn("rounded-[1.25rem] bg-white shadow-card sm:rounded-[1.5rem] dark:bg-[#1A1E27]", postStep !== 1 && "hidden", stacked ? "space-y-2.5 p-3 sm:space-y-3 sm:p-4" : "space-y-4 p-4 sm:p-5")}>
             {error ? <p className="rounded-2xl bg-destructive/10 px-3 py-2 text-[12px] font-semibold text-destructive">{error}</p> : null}
 
             <PostSelect
@@ -561,7 +567,7 @@ function PostPage() {
               ) : null}
               {stacked ? null : (
               <input
-                className={cn(fieldClass, "mt-3")}
+                className={cn(whiteFieldClass, "mt-3")}
                 placeholder="O i-type ang gawain"
                 value={form.title}
                 onChange={(e) => set("title", e.target.value)}
@@ -733,6 +739,7 @@ function PostPage() {
                 <div className="grid gap-2 sm:grid-cols-2">
                   <PostSelect
                     id="town"
+                    accent
                     openId={openSelect}
                     setOpenId={setOpenSelect}
                     value={form.location_area}
@@ -745,6 +752,7 @@ function PostPage() {
                   />
                   <PostSelect
                     id="barangay"
+                    accent
                     openId={openSelect}
                     setOpenId={setOpenSelect}
                     value={form.barangay}
@@ -756,7 +764,7 @@ function PostPage() {
                     onChange={(b) => set("barangay", b)}
                   />
                   <input
-                    className={`${fieldClass} sm:col-span-2`}
+                    className={`${accentFieldClass} sm:col-span-2`}
                     placeholder="Sitio, street, or landmark"
                     value={form.location_detail}
                     onChange={(e) => set("location_detail", e.target.value)}
@@ -781,7 +789,7 @@ function PostPage() {
 
             <Field label="Detalye">
               <textarea
-                className={cn("w-full rounded-xl border border-[#E6DDD0] bg-[#F3EFE3] p-3 text-sm font-medium text-[#163044] outline-none placeholder:text-[#2A3F4D]/40", stacked ? "min-h-16" : "min-h-24")}
+                className={cn("w-full rounded-xl border border-[#163044] bg-white p-3 text-sm font-medium text-[#163044] outline-none placeholder:text-[#2A3F4D]/40 dark:border-[#163044] dark:bg-[#1A1E27] dark:text-[#F5F3EE]", stacked ? "min-h-16" : "min-h-24")}
                 placeholder="Dagdag detalye, notes, or instructions"
                 value={form.details}
                 onChange={(e) => set("details", e.target.value)}
@@ -790,7 +798,7 @@ function PostPage() {
           </div>
 
           {postStep === 2 ? (
-            <div className="rounded-[1.25rem] bg-[#FFFCF7] p-4 shadow-card sm:p-5">
+            <div className="rounded-[1.25rem] bg-white p-4 shadow-card sm:p-5 dark:bg-[#1A1E27]">
               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#0D666A]">Step 2 · Antas ng kwalipikasyon</p>
               <h2 className="mt-1 text-xl font-black text-[#163044]">Anong antas ng tasker ang kailangan?</h2>
               <p className="mt-1 text-sm text-[#163044]/70">I-filter ang inaasahan. Makikita ito sa gawain. Hindi nito binabago ang 2% posting fee.</p>
@@ -817,7 +825,7 @@ function PostPage() {
           ) : null}
 
           {postStep === 3 ? (
-            <div className="rounded-[1.25rem] bg-[#FFFCF7] p-4 shadow-card sm:p-5">
+            <div className="rounded-[1.25rem] bg-white p-4 shadow-card sm:p-5 dark:bg-[#1A1E27]">
               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#0D666A]">Step 3 · Review</p>
               <div className="mt-3 rounded-2xl border border-[#E6DDD0] bg-[#FBF8F1] p-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
@@ -924,7 +932,7 @@ function PostPage() {
                 <p className="mt-2 rounded-2xl bg-[#F0A8A8]/15 px-3 py-2 text-[11px] font-semibold leading-snug text-[#F3C3C3]">
                   {BUDGET_DISCLAIMER}
                 </p>
-                <button type="submit" className="mt-4 h-11 w-full rounded-full bg-[#E8DCC4] text-sm font-black text-[#163044]">
+                <button type="submit" className="mt-4 h-11 w-full rounded-full bg-white text-sm font-black text-[#163044]">
                   Magpatuloy
                 </button>
               </>

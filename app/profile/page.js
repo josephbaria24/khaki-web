@@ -36,7 +36,7 @@ export default function ProfilePage() {
   return (
     <AppShell>
       <div className="landing-page">
-        <section className="bg-[#FBF8F1] py-8 lg:py-12">
+        <section className="bg-white py-8 lg:py-12">
           <Container>
             {!ready ? <PageSkeleton rows={3} /> : (
             <TaskerProfileCard

@@ -121,7 +121,7 @@ function BrowseBody() {
     detailOpen && portalReady
       ? createPortal(
           <div
-            className="browse-mobile-detail fixed inset-0 z-[90] flex flex-col bg-[#FBF8F1] md:hidden dark:bg-[#11141A]"
+            className="browse-mobile-detail fixed inset-0 z-[90] flex flex-col bg-white md:hidden dark:bg-[#11141A]"
             style={{ height: "100dvh" }}
           >
             <button
@@ -147,7 +147,7 @@ function BrowseBody() {
 
   return (
     <div
-      className="browse-page khaki-landing flex h-[calc(100svh-4rem)] flex-col overflow-hidden md:h-[calc(100svh-4.25rem)]"
+      className="browse-page khaki-landing flex h-full min-h-0 flex-col overflow-hidden"
       style={{ background: LANDING.page }}
     >
       <div
@@ -176,7 +176,7 @@ function BrowseBody() {
           <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
             <form
               onSubmit={(e) => e.preventDefault()}
-              className="search-pill flex h-11 flex-1 items-center gap-2.5 rounded-xl border border-[#E6DDD0] bg-[#FFFCF7] px-3 shadow-sm dark:border-white/10 dark:bg-[#1A1E27]"
+              className="search-pill flex h-11 flex-1 items-center gap-2.5 rounded-xl border border-[#E6DDD0] bg-white px-3 shadow-sm dark:border-white/10 dark:bg-[#1A1E27]"
             >
               <Search className="h-4 w-4 shrink-0 text-[#163044]/55 dark:text-[#F5F3EE]/50" />
               <input
@@ -299,7 +299,7 @@ function BrowseBody() {
           {detailOpen && selected ? (
             <div
               key={selected.id}
-              className="browse-detail-panel absolute inset-0 z-10 bg-[#FBF8F1]/96 backdrop-blur-[2px] dark:bg-[#11141A]/96"
+              className="browse-detail-panel absolute inset-0 z-10 bg-white/96 backdrop-blur-[2px] dark:bg-[#11141A]/96"
             >
               <BrowseTaskDetail
                 task={selected}

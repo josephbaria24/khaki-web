@@ -57,12 +57,12 @@ export default function AppHeader() {
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-40 border-b border-transparent bg-[#FBF8F1] dark:border-white/10 dark:bg-[#11141A]"
+      className="sticky top-0 z-40 border-b-0 bg-white dark:bg-[#11141A] sm:border-b sm:border-transparent sm:dark:border-white/10"
     >
-      <Container className="flex h-16 items-center justify-between gap-4 lg:h-[72px]">
+      <Container className="flex h-16 items-center justify-between gap-2 sm:gap-4 lg:h-[72px]">
         <div className="flex min-w-0 items-center gap-3 sm:gap-6 lg:gap-8">
           {showAdminToggle ? <AdminMenuButton /> : null}
-          <Logo href={admin && onAdmin && !previewing ? "/admin" : "/dashboard"} />
+          <Logo compact href={admin && onAdmin && !previewing ? "/admin" : "/dashboard"} />
           {showUserNav ? (
             <nav className="hidden items-center gap-1 lg:flex">
               {NAV.map((item) => {
@@ -83,10 +83,10 @@ export default function AppHeader() {
             </nav>
           ) : null}
         </div>
-        <div className="hidden items-center gap-2 sm:flex">
+        <div className="flex min-w-0 flex-1 items-center justify-center sm:flex-none">
           {showModeToggle ? <ModeToggle /> : null}
         </div>
-        <div className="flex items-center gap-2 text-[#2A3F4D]">
+        <div className="flex shrink-0 items-center gap-2 text-[#2A3F4D]">
           <ThemeModeButton />
           {showUserNav ? <NotificationsBell /> : null}
           {showUserNav && canPostTask(user) && (
@@ -105,11 +105,6 @@ export default function AppHeader() {
           <AccountMenu />
         </div>
       </Container>
-      {showModeToggle ? (
-        <div className="flex justify-center gap-2 px-4 pb-2 sm:hidden">
-          <ModeToggle />
-        </div>
-      ) : null}
     </header>
   );
 }
