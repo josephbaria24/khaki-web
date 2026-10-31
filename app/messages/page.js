@@ -113,7 +113,7 @@ export default function MessagesPage() {
             </div>
           </div>
           {contacts.length > 0 ? (
-            <div className="no-scrollbar mt-3 flex gap-3 overflow-x-auto pb-0.5">
+            <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto pb-0.5 pt-1">
               {contacts.map((c) => (
                 <Link key={c.id} href={c.href} className="flex w-11 shrink-0 flex-col items-center gap-1">
                   <span className="relative">
@@ -129,8 +129,8 @@ export default function MessagesPage() {
           ) : null}
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[1.75rem] bg-[#FFFCF7] px-4 pt-5 sm:px-6">
-          <label className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-[#F3EFE3] px-4">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[1.75rem] bg-white px-4 pt-5 sm:px-6 dark:bg-[#1A1E27]">
+          <label className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-white px-4 shadow-[0_2px_8px_rgba(22,48,68,0.08)] dark:bg-[#252A35] dark:shadow-[0_2px_10px_rgba(0,0,0,0.28)]">
             <Search className="h-4 w-4 shrink-0" color="#6B6558" />
             <input
               value={query}
@@ -170,7 +170,7 @@ export default function MessagesPage() {
                   <Link
                     key={task.id}
                     href={`/task/${task.id}/chat`}
-                    className="flex items-center gap-3 rounded-2xl px-2 py-3 hover:bg-[#F3EFE3]"
+                    className="flex items-center gap-3 rounded-2xl px-2 py-3 hover:bg-black/[0.04] dark:hover:bg-white/5"
                   >
                     <ChatAvatar name={name} src={profile?.avatar_url} size="md" />
                     <div className="min-w-0 flex-1">

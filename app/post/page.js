@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Basket, Beach, Briefcase, Calendar, Car, ChevronLeft, Clean, Clock, Compass, Door, ElectricPlugs, Flash, GasPipe, Grid, Hammer, Home, Laptop,
-  Leaf, Luggage, MessageSquare, Moon, MoreHorizontal, Motorbike, Package, Refresh, Repair, Scooter, Scissor, Search, ShieldCheck, Snowflake, Sparkles, Tools, Users, Van, Wallet, WashingMachine, Wrench,
+  Leaf, Luggage, MapPin, MessageSquare, Moon, MoreHorizontal, Motorbike, Package, Refresh, Repair, Scooter, Scissor, Search, ShieldCheck, Snowflake, Sparkles, Tools, Users, Van, Wallet, WashingMachine, Wrench,
 } from "@/components/icons";
 import AppShell from "@/components/AppShell";
 import Container from "@/components/Container";
@@ -56,7 +56,7 @@ const LocationPinMap = dynamic(() => import("@/components/LocationPinMap"), {
 });
 
 const GLYPHS = {
-  Car, Motorbike, Van, Package, Scooter, Basket, Flash, Calendar, Refresh, Users, Luggage,
+  Car, Motorbike, Van, Package, Scooter, Basket, Flash, Calendar, Refresh, Users, Luggage, MapPin, Clock,
   Wrench, Beach, Clean, Laptop, Scissor, Compass, Sparkles, Tools, Home,
   Snowflake, GasPipe, Repair, ElectricPlugs, Hammer, WashingMachine, Door, Grid, MoreHorizontal,
   Briefcase, MessageSquare, Leaf, Moon, ShieldCheck,
@@ -74,8 +74,8 @@ function Chip({ on, icon, color, children, onClick }) {
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold leading-none",
-        on ? "border-[#163044] bg-[#163044] text-[#F7F4EC]" : "border border-[#163044] bg-white text-[#163044]"
+        "inline-flex items-center gap-1.5 rounded-full border-0 px-3 py-1.5 text-[12px] font-bold leading-none shadow-[0_2px_8px_rgba(22,48,68,0.08)] dark:shadow-[0_2px_10px_rgba(0,0,0,0.28)]",
+        on ? "bg-[#163044] text-[#F7F4EC]" : "bg-white text-[#163044] dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
       )}
     >
       {icon ? <Glyph name={icon} color={on ? "#F7F4EC" : color} className="h-3.5 w-3.5" /> : null}
@@ -88,24 +88,33 @@ function ChoiceCard({ on, icon, color, label, lines, onClick, compact = false })
   return (
     <button
       type="button"
+      aria-pressed={on}
       onClick={onClick}
       className={cn(
-        "flex w-full items-start text-left",
-        compact ? "gap-2.5 rounded-xl border px-2.5 py-2" : "gap-3 rounded-2xl border px-3.5 py-3",
-        on ? "border-[#163044] bg-white shadow-sm" : "border border-[#163044] bg-white"
+        "flex w-full cursor-pointer items-start border-0 text-left shadow-[0_2px_8px_rgba(22,48,68,0.08)] transition dark:shadow-[0_2px_10px_rgba(0,0,0,0.28)]",
+        compact ? "gap-2.5 rounded-xl px-2.5 py-2" : "gap-3 rounded-2xl px-3.5 py-3",
+        on
+          ? "bg-[#163044] text-[#F7F4EC] dark:bg-[#F5F3EE] dark:text-[#11141A]"
+          : "bg-white text-[#163044] dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
       )}
     >
-      <span className={cn("flex shrink-0 items-center justify-center rounded-xl", compact ? "h-8 w-8" : "h-11 w-11")} style={{ backgroundColor: `${color}1A` }}>
-        <Glyph name={icon} color={color} className={compact ? "h-4 w-4" : "h-5 w-5"} />
+      <span
+        className={cn("flex shrink-0 items-center justify-center rounded-xl", compact ? "h-8 w-8" : "h-11 w-11", on && "bg-white/15 dark:bg-[#163044]/10")}
+        style={on ? undefined : { backgroundColor: `${color}1A` }}
+      >
+        <Glyph name={icon} color={on ? "currentColor" : color} className={compact ? "h-4 w-4" : "h-5 w-5"} />
       </span>
-      <span className="min-w-0 pt-0.5">
-        <span className={cn("block font-black text-[#163044]", compact ? "text-[13px]" : "text-[15px]")}>{label}</span>
+      <span className="min-w-0 flex-1 pt-0.5">
+        <span className={cn("block font-black", compact ? "text-[13px]" : "text-[15px]", on ? "text-[#F7F4EC] dark:text-[#11141A]" : "text-[#163044] dark:text-[#F5F3EE]")}>{label}</span>
         {(lines?.length ? lines : []).map((line) => (
-          <span key={line.text} className="mt-0.5 flex items-start gap-1.5 text-[12px] font-medium leading-snug text-[#2A3F4D]/70">
-            {line.icon ? <Glyph name={line.icon} color={line.color} className="mt-0.5 h-3.5 w-3.5 shrink-0" /> : null}
+          <span key={line.text} className={cn("mt-0.5 flex items-start gap-1.5 text-[12px] font-medium leading-snug", on ? "text-[#F7F4EC]/75 dark:text-[#11141A]/70" : "text-[#2A3F4D]/70 dark:text-[#F5F3EE]/60")}>
+            {line.icon ? <Glyph name={line.icon} color={on ? "currentColor" : line.color} className="mt-0.5 h-3.5 w-3.5 shrink-0" /> : null}
             <span>{line.text}</span>
           </span>
         ))}
+      </span>
+      <span className={cn("mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-[0.5px] text-[11px] font-black", on ? "border-transparent bg-[#F7F4EC] text-[#163044] dark:bg-[#163044] dark:text-[#F7F4EC]" : "border-[#C9D6E0] dark:border-white/20")} aria-hidden>
+        {on ? "✓" : ""}
       </span>
     </button>
   );
@@ -150,13 +159,12 @@ const CATEGORY_ICONS = {
 };
 
 const fieldClass =
-  "h-9 w-full rounded-xl border border-[#E6DDD0] bg-[#F3EFE3] px-3 text-sm font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#2A3F4D]/40 sm:h-11 sm:px-4";
+  "h-9 w-full rounded-xl border-0 bg-white px-3 text-sm font-semibold text-[#163044] shadow-[0_2px_8px_rgba(22,48,68,0.08)] outline-none placeholder:font-medium placeholder:text-[#2A3F4D]/40 sm:h-11 sm:px-4 dark:bg-[#1A1E27] dark:text-[#F5F3EE] dark:shadow-[0_2px_10px_rgba(0,0,0,0.28)] dark:placeholder:text-[#F5F3EE]/45";
 const whiteFieldClass =
-  "h-9 w-full rounded-xl border border-[#163044] bg-white px-3 text-sm font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#2A3F4D]/40 sm:h-11 sm:px-4 dark:border-[#163044] dark:bg-[#1A1E27] dark:text-[#F5F3EE]";
-const accentFieldClass =
-  "h-9 w-full rounded-xl border border-[#C6ECD9] bg-[#C6ECD9] px-3 text-sm font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#163044]/45 sm:h-11 sm:px-4 dark:border-[#C6ECD9] dark:bg-[#C6ECD9] dark:text-[#11141A]";
+  "h-9 w-full rounded-xl border-[0.5px] border-[#163044]/25 bg-white px-3 text-sm font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#2A3F4D]/40 sm:h-11 sm:px-4 dark:border-white/10 dark:bg-[#1A1E27] dark:text-[#F5F3EE]";
+const accentFieldClass = fieldClass;
 
-function PostSelect({ id, openId, setOpenId, value, options, onChange, placeholder = "Select", variant = "field", leading = null, compact = false, accent = false }) {
+function PostSelect({ id, openId, setOpenId, value, options, onChange, placeholder = "Select", variant = "field", leading = null, compact = false, accent = false, icon = null, iconColor = "#2F6F9A" }) {
   const open = openId === id;
   const [shown, setShown] = useState(open);
   const [query, setQuery] = useState("");
@@ -211,7 +219,7 @@ function PostSelect({ id, openId, setOpenId, value, options, onChange, placehold
         type="button"
         className={cn(
           variant === "header"
-            ? "flex w-full items-center gap-3 py-1 text-left"
+            ? "flex w-full items-center gap-3 rounded-2xl bg-[#E7F1FA] px-3 py-2.5 text-left shadow-[0_2px_8px_rgba(22,48,68,0.08)] dark:bg-[#1B3044] dark:shadow-[0_2px_10px_rgba(0,0,0,0.28)]"
             : `${accent ? accentFieldClass : fieldClass} flex items-center justify-between gap-2 text-left`,
           "relative z-30"
         )}
@@ -219,13 +227,20 @@ function PostSelect({ id, openId, setOpenId, value, options, onChange, placehold
         aria-expanded={open}
         onClick={() => setOpenId(open ? null : id)}
       >
-        {variant === "header" ? leading : selected?.icon ? (
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md" style={{ backgroundColor: `${selected.color || "#2F6F9A"}1A` }}>
-            <Glyph name={selected.icon} color={selected.color || "#2F6F9A"} className="h-3.5 w-3.5" />
+        {variant === "header" ? leading : (selected?.icon || icon) ? (
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${selected?.icon ? selected.color || iconColor : iconColor}1A` }}>
+            <Glyph name={selected?.icon || icon} color={selected?.icon ? selected.color || iconColor : iconColor} className="h-3.5 w-3.5" />
           </span>
         ) : null}
-        <span className={cn("min-w-0 flex-1 truncate", variant === "header" ? "text-lg font-black text-[#163044]" : "", !selected && variant !== "header" && "font-medium text-[#2A3F4D]/40")}>
-          {selected?.label || placeholder}
+        <span className={cn("min-w-0 flex-1", variant === "header" ? "" : "truncate", variant !== "header" && "text-left", !selected && variant !== "header" && "font-medium text-[#2A3F4D]/40")}>
+          {variant === "header" ? (
+            <>
+              <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/45 dark:text-[#F5F3EE]/50">Category</span>
+              <span className="mt-0.5 block truncate text-[17px] font-black leading-tight text-[#163044] dark:text-[#F5F3EE]">{selected?.label || placeholder}</span>
+            </>
+          ) : (
+            selected?.label || placeholder
+          )}
         </span>
         <ChevronLeft className={cn("post-select-chevron h-4 w-4 shrink-0 text-[#163044]/55", open && "is-open")} />
       </button>
@@ -250,7 +265,7 @@ function PostSelect({ id, openId, setOpenId, value, options, onChange, placehold
                   if (e.key === "Enter") e.preventDefault();
                 }}
                 placeholder="Search"
-                className="h-9 w-full rounded-lg bg-[#F3EFE3] pl-8 pr-3 text-xs font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#2A3F4D]/40"
+                className="h-9 w-full rounded-lg bg-[#E7F1FA] pl-8 pr-3 text-xs font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#2A3F4D]/40 dark:bg-[#1B3044] dark:text-[#F5F3EE] dark:placeholder:text-[#F5F3EE]/45"
               />
             </label>
           </div>
@@ -268,8 +283,8 @@ function PostSelect({ id, openId, setOpenId, value, options, onChange, placehold
                     role="option"
                     aria-selected={active}
                     className={cn(
-                      "flex w-full items-start gap-2.5 px-3 py-2 text-left text-sm font-bold text-[#163044] hover:bg-[#F3EFE3]",
-                      active && "bg-[#F3EFE3]"
+                      "flex w-full items-start gap-2.5 px-3 py-2 text-left text-sm font-bold text-[#163044] hover:bg-[#E7F1FA] dark:text-[#F5F3EE] dark:hover:bg-[#1B3044]",
+                      active && "bg-[#E7F1FA] dark:bg-[#1B3044]"
                     )}
                     onClick={() => {
                       onChange(option.value);
@@ -315,7 +330,7 @@ function formForCategory(key) {
     schedule_type: next?.scheduleOptions ? next.scheduleOptions[0].value : "flexible",
     schedule_date: "",
     details: "",
-    budget_php: 200,
+    budget_php: 15,
     extras: initialExtras(key),
     pins: {},
   };
@@ -353,7 +368,8 @@ function PostPage() {
   const service = serviceByKey(form.categoryKey);
   const template = templateForKey(form.categoryKey);
   const stacked = template?.layout === "stacked";
-  const panel = "rounded-xl border border-[#E6DDD0] bg-white p-2.5 sm:rounded-2xl sm:p-3.5";
+  const panel = "rounded-xl bg-white p-2.5 sm:rounded-2xl sm:p-3.5 dark:bg-[#1A1E27]";
+  const promptPanel = "rounded-xl border border-[#E7F1FA] bg-white p-2.5 sm:rounded-2xl sm:p-3.5 dark:border-[#2A4A66] dark:bg-[#1A1E27]";
 
   useEffect(() => {
     if (template?.fields?.some((field) => field.key === "price_type") && !form.extras.price_type) setExtra("price_type", "per_hour");
@@ -402,8 +418,8 @@ function PostPage() {
       toast.error(msg);
       return;
     }
-    if (Number(form.budget_php) < 50) {
-      const msg = "Minimum budget is ₱50";
+    if (Number(form.budget_php) < 15) {
+      const msg = "Minimum budget is ₱15";
       setError(msg);
       toast.error(msg);
       return;
@@ -520,7 +536,7 @@ function PostPage() {
               id="category"
               variant="header"
               leading={(
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl" style={{ backgroundColor: (CATEGORY_ICONS[form.categoryKey] || CATEGORY_ICONS.other).bg }}>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FFFFFF] dark:bg-[#11141A]">
                   <Glyph name={(CATEGORY_ICONS[form.categoryKey] || CATEGORY_ICONS.other).icon} color={(CATEGORY_ICONS[form.categoryKey] || CATEGORY_ICONS.other).color} className="h-5 w-5" />
                 </span>
               )}
@@ -543,7 +559,7 @@ function PostPage() {
               }}
             />
 
-            <div className={stacked ? panel : ""}>
+            <div className={stacked ? promptPanel : ""}>
               <p className={cn("font-black leading-snug text-[#163044]", stacked ? "text-sm sm:text-base" : "text-base")}>
                 {template?.prompt || "Ano ang kailangan mo?"}
                 {template?.promptHint ? <span className="font-semibold text-[#163044]/40"> ({template.promptHint})</span> : null}
@@ -585,6 +601,8 @@ function PostPage() {
                     <PostSelect
                       id={field.key}
                       compact
+                      icon="Grid"
+                      iconColor="#2F6F9A"
                       openId={openSelect}
                       setOpenId={setOpenSelect}
                       value={form.extras[field.key] || ""}
@@ -625,7 +643,7 @@ function PostPage() {
                               onClick={() => setExtra(field.key, option.value)}
                               className={cn(
                                 "h-9 w-full rounded-full text-[12px] font-black sm:h-10",
-                                on ? "bg-[#163044] text-white" : "bg-[#F3EFE3] text-[#163044]/45"
+                                on ? "bg-[#163044] text-white" : "bg-white text-[#163044]/45 shadow-[0_2px_8px_rgba(22,48,68,0.08)] dark:bg-[#1A1E27] dark:text-[#F5F3EE]/70 dark:shadow-[0_2px_10px_rgba(0,0,0,0.28)]"
                               )}
                             >
                               {on ? "✓  " : ""}{option.label}
@@ -643,12 +661,12 @@ function PostPage() {
                         );
                       })}
                     </div>
-                    <label className="mt-2 flex h-9 items-center gap-2 rounded-xl border border-[#E6DDD0] bg-[#FFFCF7] px-3 sm:h-11">
-                      <span className="text-base font-black text-[#163044]">₱</span>
+                    <label className="mt-2 flex h-9 items-center gap-2 rounded-xl border border-[#E7F1FA] bg-white px-3 sm:h-11 dark:border-[#2A4A66] dark:bg-[#1A1E27]">
+                      <span className="text-base font-black text-[#163044] dark:text-[#F5F3EE]">₱</span>
                       <input
-                        className="h-full w-full bg-transparent text-base font-black text-[#163044] outline-none"
+                        className="h-full w-full bg-transparent text-base font-black text-[#163044] outline-none dark:text-[#F5F3EE]"
                         type="number"
-                        min={50}
+                        min={15}
                         value={form.budget_php}
                         onChange={(e) => set("budget_php", e.target.value)}
                         required
@@ -683,6 +701,8 @@ function PostPage() {
               <Field label={`What kind of ${service.title.toLowerCase()}?`}>
                 <PostSelect
                   id="kind"
+                  icon="Grid"
+                  iconColor="#2F6F9A"
                   openId={openSelect}
                   setOpenId={setOpenSelect}
                   value={form.groupTitle}
@@ -705,6 +725,8 @@ function PostPage() {
               ) : (
               <PostSelect
                 id="schedule"
+                icon="Clock"
+                iconColor="#3A73C4"
                 openId={openSelect}
                 setOpenId={setOpenSelect}
                 value={form.schedule_type}
@@ -718,7 +740,7 @@ function PostPage() {
                   <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#163044]/45" />
                   <input
                     type="date"
-                    className={`${fieldClass} pl-9`}
+                    className="h-9 w-full rounded-xl border border-[#E6DDD0] bg-white px-3 pl-9 text-sm font-semibold text-[#163044] outline-none sm:h-11 sm:px-4 dark:border-white/15 dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
                     value={form.schedule_date}
                     onChange={(e) => set("schedule_date", e.target.value)}
                   />
@@ -740,6 +762,8 @@ function PostPage() {
                   <PostSelect
                     id="town"
                     accent
+                    icon="MapPin"
+                    iconColor="#1F9D6A"
                     openId={openSelect}
                     setOpenId={setOpenSelect}
                     value={form.location_area}
@@ -753,6 +777,8 @@ function PostPage() {
                   <PostSelect
                     id="barangay"
                     accent
+                    icon="Home"
+                    iconColor="#C46A2E"
                     openId={openSelect}
                     setOpenId={setOpenSelect}
                     value={form.barangay}
@@ -763,12 +789,15 @@ function PostPage() {
                     ]}
                     onChange={(b) => set("barangay", b)}
                   />
-                  <input
-                    className={`${accentFieldClass} sm:col-span-2`}
-                    placeholder="Sitio, street, or landmark"
-                    value={form.location_detail}
-                    onChange={(e) => set("location_detail", e.target.value)}
-                  />
+                  <div className="relative sm:col-span-2">
+                    <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" color="#2F6F9A" />
+                    <input
+                      className={`${accentFieldClass} pl-9`}
+                      placeholder="Sitio, street, or landmark"
+                      value={form.location_detail}
+                      onChange={(e) => set("location_detail", e.target.value)}
+                    />
+                  </div>
                   {form.categoryKey !== "digital" ? (
                     <div className="sm:col-span-2">
                       <p className="mb-1.5 mt-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/45">
@@ -789,7 +818,7 @@ function PostPage() {
 
             <Field label="Detalye">
               <textarea
-                className={cn("w-full rounded-xl border border-[#163044] bg-white p-3 text-sm font-medium text-[#163044] outline-none placeholder:text-[#2A3F4D]/40 dark:border-[#163044] dark:bg-[#1A1E27] dark:text-[#F5F3EE]", stacked ? "min-h-16" : "min-h-24")}
+                className={cn("w-full rounded-xl border-[0.5px] border-[#163044]/25 bg-white p-3 text-sm font-medium text-[#163044] outline-none placeholder:text-[#2A3F4D]/40 dark:border-white/10 dark:bg-[#1A1E27] dark:text-[#F5F3EE]", stacked ? "min-h-16" : "min-h-24")}
                 placeholder="Dagdag detalye, notes, or instructions"
                 value={form.details}
                 onChange={(e) => set("details", e.target.value)}
@@ -858,7 +887,7 @@ function PostPage() {
                   <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F7F4EC]/55">Fee 2%</p>
                   <p className="text-sm font-black">{fee}</p>
                 </div>
-                <button type="submit" className="h-10 min-w-0 flex-1 rounded-full bg-[#E8DCC4] text-[13px] font-black text-[#163044]">
+                <button type="submit" className="h-10 min-w-0 flex-1 rounded-full bg-[#FFFFFF] text-[13px] font-black text-[#11141A]">
                   Magpatuloy
                 </button>
               </div>
@@ -867,7 +896,7 @@ function PostPage() {
               <div className="lg:hidden">
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F7F4EC]/55">Total</p>
                 <p className="text-lg font-black">{formatPHP(totalNum)}</p>
-                <button type="submit" className="mt-2 h-10 w-full rounded-full bg-[#E8DCC4] text-[13px] font-black text-[#163044]">
+                <button type="submit" className="mt-2 h-10 w-full rounded-full bg-[#FFFFFF] text-[13px] font-black text-[#11141A]">
                   Confirm Posting · {formatPHP(totalNum)}
                 </button>
               </div>
@@ -896,7 +925,7 @@ function PostPage() {
                 <p className="mt-1.5 text-[11px] leading-snug text-[#F7F4EC]/55">
                   Tasker pay is settled directly between you and the tasker.
                 </p>
-                <button type="submit" className="mt-4 h-11 w-full rounded-full bg-[#E8DCC4] text-sm font-black text-[#163044]">
+                <button type="submit" className="mt-4 h-11 w-full rounded-full bg-[#FFFFFF] text-sm font-black text-[#11141A]">
                   Confirm Posting · {formatPHP(totalNum)}
                 </button>
               </>
@@ -904,7 +933,7 @@ function PostPage() {
               <>
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#F7F4EC]/55">Budget guide</p>
-                  <span className="rounded-full bg-[#F7F4EC]/10 px-2 py-0.5 text-[10px] font-bold text-[#F7F4EC]/70">Min ₱50</span>
+                  <span className="rounded-full bg-[#F7F4EC]/10 px-2 py-0.5 text-[10px] font-bold text-[#F7F4EC]/70">Min ₱15</span>
                 </div>
                 {template?.layout === "stacked" ? (
                   <p className="mt-2 text-2xl font-black">{formatPHP(form.budget_php)}{form.extras.price_type === "per_hour" ? " / hr" : ""}</p>
@@ -915,7 +944,7 @@ function PostPage() {
                   <input
                     className="h-11 w-full bg-transparent text-lg font-black text-[#F7F4EC] outline-none"
                     type="number"
-                    min={50}
+                    min={15}
                     value={form.budget_php}
                     onChange={(e) => set("budget_php", e.target.value)}
                     required
@@ -932,7 +961,7 @@ function PostPage() {
                 <p className="mt-2 rounded-2xl bg-[#F0A8A8]/15 px-3 py-2 text-[11px] font-semibold leading-snug text-[#F3C3C3]">
                   {BUDGET_DISCLAIMER}
                 </p>
-                <button type="submit" className="mt-4 h-11 w-full rounded-full bg-white text-sm font-black text-[#163044]">
+                <button type="submit" className="mt-4 h-11 w-full rounded-full bg-[#FFFFFF] text-sm font-black text-[#11141A]">
                   Magpatuloy
                 </button>
               </>

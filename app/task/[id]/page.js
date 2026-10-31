@@ -610,7 +610,7 @@ export default function TaskDetailPage() {
                 </select>
               ) : null}
               <textarea className="min-h-24 w-full rounded-xl border p-3 text-sm" value={edit.details} onChange={(e) => setEdit({ ...edit, details: e.target.value })} />
-              <input className="h-11 w-full rounded-xl border px-3" type="number" min={50} value={edit.budget_php} onChange={(e) => setEdit({ ...edit, budget_php: e.target.value })} />
+              <input className="h-11 w-full rounded-xl border px-3" type="number" min={15} value={edit.budget_php} onChange={(e) => setEdit({ ...edit, budget_php: e.target.value })} />
               <button className="h-11 w-full rounded-xl bg-[#163044] font-bold text-white">I-save</button>
             </form>
           ) : null}
@@ -791,7 +791,7 @@ export default function TaskDetailPage() {
                   </select>
                 ) : null}
                 <textarea className="min-h-24 w-full rounded-xl border p-3 text-sm" value={edit.details} onChange={(e) => setEdit({ ...edit, details: e.target.value })} />
-                <input className="h-11 w-full rounded-xl border px-3" type="number" min={50} value={edit.budget_php} onChange={(e) => setEdit({ ...edit, budget_php: e.target.value })} />
+                <input className="h-11 w-full rounded-xl border px-3" type="number" min={15} value={edit.budget_php} onChange={(e) => setEdit({ ...edit, budget_php: e.target.value })} />
                 <button className="h-11 w-full rounded-xl bg-primary font-bold text-white">I-save</button>
               </form>
             ) : null}

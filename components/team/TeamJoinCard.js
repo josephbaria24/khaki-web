@@ -187,7 +187,7 @@ export default function TeamJoinCard({ className = "", onChange }) {
 
 function Stat({ label, value }) {
   return (
-    <div className="rounded-xl bg-[#F3EFE3] px-3 py-2 dark:bg-[#252A35]">
+    <div className="rounded-xl bg-white px-3 py-2 shadow-[0_2px_8px_rgba(22,48,68,0.06)] dark:bg-[#1A1E27]">
       <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#163044]/55 dark:text-[#F5F3EE]/55">{label}</p>
       <p className="text-xl font-black tabular-nums text-[#163044] dark:text-[#F5F3EE]">{Number(value || 0)}</p>
     </div>

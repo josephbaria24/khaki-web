@@ -61,6 +61,8 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
   const markersRef = useRef({});
   const activeRef = useRef(slots[0]?.key);
   const pinsRef = useRef(pins);
+  const onChangeRef = useRef(onChange);
+  const slotsRef = useRef(slots);
   const [active, setActive] = useState(slots[0]?.key);
   const [ready, setReady] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -68,13 +70,16 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
   const restoreAncestorsRef = useRef(null);
 
   pinsRef.current = pins;
+  onChangeRef.current = onChange;
+  slotsRef.current = slots;
   activeRef.current = active;
 
   const place = (key, latlng) => {
+    const currentSlots = slotsRef.current || [];
     const next = { ...pinsRef.current, [key]: { lat: latlng.lat, lng: latlng.lng } };
-    onChange(next);
-    const idx = slots.findIndex((s) => s.key === key);
-    const nextEmpty = slots.find((s, i) => i > idx && !next[s.key]);
+    onChangeRef.current?.(next);
+    const idx = currentSlots.findIndex((s) => s.key === key);
+    const nextEmpty = currentSlots.find((s, i) => i > idx && !next[s.key]);
     if (nextEmpty) setActive(nextEmpty.key);
   };
 
@@ -92,7 +97,10 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
       if (!box || box.clientWidth < 20 || box.clientHeight < 20) return;
       booting = true;
       import("leaflet").then((mod) => {
-        if (cancelled || !boxRef.current || mapRef.current) return;
+        if (cancelled || !boxRef.current || mapRef.current) {
+          booting = false;
+          return;
+        }
         const L = mod.default || mod;
         leafletRef.current = L;
         const host = boxRef.current;
@@ -100,15 +108,29 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
           host._leaflet_id = undefined;
           host.replaceChildren();
         }
-        const map = L.map(host, { zoomControl: true, attributionControl: true }).setView(center, 14);
+        const map = L.map(host, {
+          zoomControl: true,
+          attributionControl: true,
+        }).setView(center, 14);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
           attribution: "&copy; OpenStreetMap",
         }).addTo(map);
-        map.on("click", (e) => place(activeRef.current, e.latlng));
+        if (L.DomEvent?.disableScrollPropagation) L.DomEvent.disableScrollPropagation(host);
+        map.on("click", (e) => {
+          if (e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
+          place(activeRef.current, e.latlng);
+        });
         mapRef.current = map;
         setReady(true);
-        requestAnimationFrame(() => map.invalidateSize({ animate: false, pan: false }));
+        const fit = () => {
+          if (!mapRef.current || host.clientWidth < 20 || host.clientHeight < 20) return;
+          mapRef.current.invalidateSize({ animate: false, pan: false });
+        };
+        requestAnimationFrame(fit);
+        const t1 = setTimeout(fit, 120);
+        const t2 = setTimeout(fit, 500);
+        host.__pinMapTimers = [t1, t2];
       });
     };
     const observer = new ResizeObserver(boot);
@@ -117,6 +139,8 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
     return () => {
       cancelled = true;
       observer.disconnect();
+      const host = boxRef.current;
+      (host?.__pinMapTimers || []).forEach((id) => clearTimeout(id));
       mapRef.current?.remove();
       mapRef.current = null;
       markersRef.current = {};

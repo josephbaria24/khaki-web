@@ -72,7 +72,7 @@ export function ThemeModeButton({ onNavy = false }) {
         "flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10",
         onNavy
           ? "bg-white/15 text-[#F7F4EC] hover:bg-white/25 dark:bg-white/10 dark:text-[#F7F4EC] dark:hover:bg-white/20"
-          : "bg-[#FFFCF7] text-[#2A3F4D] shadow-card dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
+          : "bg-[#FFFFFF] text-[#2A3F4D] shadow-card dark:bg-[#11141A] dark:text-[#F5F3EE]"
       )}
       aria-label={dark ? "Turn on light mode" : "Turn on dark mode"}
       aria-pressed={dark}

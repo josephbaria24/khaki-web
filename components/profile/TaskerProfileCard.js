@@ -80,7 +80,7 @@ function PersonFallback() {
 
 function SectionCard({ children, className = "" }) {
   return (
-    <div className={`rounded-[1.25rem] bg-[#FFFCF7] p-3 shadow-[0_8px_28px_rgba(42,63,77,0.08)] min-[400px]:rounded-[1.45rem] min-[400px]:p-4 md:p-5 lg:rounded-[1.7rem] lg:p-6 ${className}`}>
+    <div className={`rounded-[1.25rem] bg-white p-3 shadow-[0_8px_28px_rgba(42,63,77,0.08)] min-[400px]:rounded-[1.45rem] min-[400px]:p-4 md:p-5 lg:rounded-[1.7rem] lg:p-6 dark:bg-[#1A1E27] ${className}`}>
       {children}
     </div>
   );
@@ -607,7 +607,7 @@ export default function TaskerProfileCard({
                 <p className="font-semibold text-muted-foreground">{isOwn ? "Categories" : "Task categories"}</p>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {card.skills.map((skill) => (
-                    <span key={skill} className="rounded-full bg-[#F3EFE3] px-3 py-1 text-[12px] font-bold text-foreground">
+                    <span key={skill} className="rounded-full bg-[#FFFFFF] px-3 py-1 text-[12px] font-bold text-foreground shadow-[0_2px_8px_rgba(22,48,68,0.08)] dark:bg-[#252A35] dark:text-[#F5F3EE]">
                       {skill}
                       {card.rateLabel !== "Quote per job" ? <span className="ml-1" style={{ color: OLIVE }}>· {card.rateLabel}</span> : null}
                     </span>
@@ -754,7 +754,7 @@ export default function TaskerProfileCard({
 function WorkPhotoGrid({ photos, count }) {
   const tiles = photos.length ? photos.slice(0, 4) : [];
   return (
-    <div className="relative mt-2 overflow-hidden rounded-[1.15rem] bg-[#EDE6D4]">
+    <div className="relative mt-2 overflow-hidden rounded-[1.15rem] bg-white dark:bg-[#1A1E27]">
       {tiles.length ? (
         <div className={`grid gap-1 ${tiles.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
           {tiles.map((src) => (
@@ -765,8 +765,8 @@ function WorkPhotoGrid({ photos, count }) {
       ) : (
         <div className="grid grid-cols-2 gap-1">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="flex h-24 items-center justify-center bg-[#E8DCC4]/70 lg:h-32">
-              <svg viewBox="0 0 24 24" className="h-7 w-7 text-[#7B8A6A]" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <div key={i} className="flex h-24 items-center justify-center bg-[#FFFFFF] lg:h-32 dark:bg-[#252A35]">
+              <svg viewBox="0 0 24 24" className="h-7 w-7 text-[#94A3B8]" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <rect x="3" y="5" width="18" height="14" rx="2" />
                 <circle cx="9" cy="11" r="2" />
                 <path d="m21 16-4.5-4.5L8 20" />
