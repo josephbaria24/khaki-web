@@ -16,14 +16,12 @@ import { LANDING } from "@/lib/landingContent";
 import { useMarketingLanding } from "@/lib/useMarketingLanding";
 import { formatPHP, skillFitsTask } from "@/lib/khaki";
 import { useAuth } from "@/lib/AuthContext";
-import { canOpenPost, isPosterMode, needsTaskerVerification } from "@/lib/roles";
+import { isPosterMode, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
 import { toast } from "@/lib/toast";
-import { CircleAlert, X } from "@/components/icons";
+import { CircleAlert } from "@/components/icons";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import InstallAppBanner from "@/components/InstallAppBanner";
-
-const PROMO_DISMISS_KEY = "khaki.dashboardPromoDismissed";
 
 function interactionBadge(task, userId, bid) {
   if (userId && task.client_id === userId) return { label: "Your post", bg: "#E8DCC4", fg: "#163044" };
@@ -48,25 +46,7 @@ export default function DashboardPage() {
   const [reviews, setReviews] = useState({});
   const [myBids, setMyBids] = useState([]);
   const [bidCounts, setBidCounts] = useState({});
-  const [promoOpen, setPromoOpen] = useState(true);
   const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    try {
-      if (window.localStorage.getItem(PROMO_DISMISS_KEY) === "1") setPromoOpen(false);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  const dismissPromo = () => {
-    setPromoOpen(false);
-    try {
-      window.localStorage.setItem(PROMO_DISMISS_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-  };
 
   useEffect(() => {
     api.tasks.list()
@@ -147,7 +127,6 @@ export default function DashboardPage() {
     };
   }, [poster, user, openPosterIdsKey]);
 
-  const postHref = canOpenPost(user) ? "/post" : "/browse";
   const pendingBids = myBids.filter((o) => o.status === "pending");
   const bidsByTask = new Map();
   for (const bid of myBids) {
@@ -157,49 +136,9 @@ export default function DashboardPage() {
   return (
     <AppShell>
       <div className="landing-page">
-        {promoOpen || needsTaskerVerification(user) ? (
+        {needsTaskerVerification(user) ? (
         <div className="bg-white px-4 pt-4 sm:px-6 lg:px-8">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-3">
-            {promoOpen ? (
-              <div className={`relative overflow-hidden rounded-[1.4rem] shadow-card ${poster ? "bg-gradient-to-br from-[#2C6484] via-[#163044] to-[#0C2230]" : "bg-gradient-to-br from-[#4B93C4] via-[#1E5684] to-[#102636]"}`}>
-                <div className="pointer-events-none absolute -left-10 -top-12 h-36 w-36 rounded-full bg-white/10" />
-                {!poster ? (
-                  <>
-                    <div className="pointer-events-none absolute -right-4 top-6 h-36 w-36 rounded-full bg-[#8EC8F5]/30 blur-2xl" />
-                    <img
-                      src="/images/find-tasks-banner-3d-transparent.png"
-                      alt=""
-                      className="pointer-events-none absolute -right-3 bottom-0 h-[118%] w-auto max-w-[52%] object-contain object-right-bottom sm:right-1"
-                    />
-                  </>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={dismissPromo}
-                  className="absolute right-2.5 top-2.5 z-20 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/25 text-[#F7F4EC] transition hover:bg-black/40"
-                  aria-label="Dismiss promo"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-                <div className={`relative z-10 flex flex-col items-start gap-3 px-4 py-4 sm:px-5 sm:py-5 ${poster ? "sm:flex-row sm:items-center sm:justify-between sm:pr-12" : "min-h-[9.75rem] max-w-[64%] pr-2 sm:max-w-[58%]"}`}>
-                  <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#F7F4EC]/55">{poster ? "Poster" : "Tasker"}</p>
-                    <p className="mt-1 text-base font-black leading-tight text-[#F7F4EC] sm:text-lg">
-                      {poster ? "Mag-post ng gawain" : "Maghanap ng gawain sa Palawan"}
-                    </p>
-                    <p className="mt-1 text-sm leading-snug text-[#F7F4EC]/80">
-                      {poster
-                        ? "Job payment stays between you and the tasker."
-                        : "Sumali sa bidding, i-adjust ang fee mo, at tingnan ang feedback ng poster."}
-                    </p>
-                  </div>
-                  <Link href={postHref} className="btn-sand inline-flex h-10 shrink-0 items-center px-5 text-xs">
-                    {poster ? "Mag-post ngayon" : "Maghanap"}
-                  </Link>
-                </div>
-              </div>
-            ) : null}
-
             {needsTaskerVerification(user) ? (
               <div className="relative overflow-hidden rounded-[1.4rem] bg-gradient-to-r from-[#FFF6DC] via-[#FFE4A3] to-[#F6C56B] shadow-card">
                 <div className="pointer-events-none absolute -right-6 -top-8 h-28 w-28 rounded-full bg-white/45" />
