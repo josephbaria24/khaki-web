@@ -150,7 +150,7 @@ export default function BrowseTaskDetail({
               <div className="relative mt-4 flex items-end justify-between gap-3 border-t border-[#163044]/10 pt-3 dark:border-white/10">
                 <div>
                   <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/45 dark:text-[#F5F3EE]/45">Budget</p>
-                  <p className="mt-0.5 text-2xl font-black text-[#163044] dark:text-[#F5F3EE]">{formatPHP(task.budget_php)}</p>
+                  <p className="money mt-0.5 text-2xl font-black text-[#163044] dark:text-[#F5F3EE]">{formatPHP(task.budget_php)}</p>
                 </div>
                 {minStage ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-[#163044]/90 px-2.5 py-1.5 text-[11px] font-black text-[#F7F4EC]">
@@ -256,7 +256,7 @@ export default function BrowseTaskDetail({
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#F7F4EC]/55">
               Task budget
             </p>
-            <p className="mt-1 text-3xl font-black">{formatPHP(task.budget_php)}</p>
+            <p className="money mt-1 text-3xl font-black">{formatPHP(task.budget_php)}</p>
             <p className="mt-1 text-[11px] font-semibold text-[#F7F4EC]/55">
               Settled directly with the tasker
             </p>

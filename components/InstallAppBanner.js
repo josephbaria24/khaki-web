@@ -162,7 +162,7 @@ export default function InstallAppBanner() {
             className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-2xl text-left disabled:opacity-70"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo.png" alt="" className="h-11 w-11 shrink-0 rounded-[22%] bg-[#F3EFE3] object-contain dark:bg-[#252A35]" />
+            <img src="/images/logo-mark.png" alt="" className="h-11 w-11 shrink-0 bg-transparent object-contain" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[15px] font-black tracking-tight text-[#163044] dark:text-[#F5F3EE]">{copy.title}</span>
               <span className="mt-0.5 block text-[12px] font-medium leading-snug text-[#6B6558] dark:text-[#94A3B8]">{copy.subtitle}</span>

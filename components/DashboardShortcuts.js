@@ -119,7 +119,7 @@ export default function DashboardShortcuts({ user, postingFees = 0, releasedPayo
 
         <Link href={right.href} className="bento-widget min-h-[6.5rem] sm:min-h-[10.5rem]" style={{ background: right.bg }}>
           <p className="relative z-[1] pr-[3.25rem] text-[13px] font-black text-[#163044] sm:pr-16 sm:text-sm">{right.title}</p>
-          <p className="relative z-[1] mt-1.5 truncate pr-[3.25rem] text-2xl font-black leading-none tracking-tight text-[#163044] sm:mt-3 sm:pr-16 sm:text-3xl">
+          <p className="money relative z-[1] mt-1.5 truncate pr-[3.25rem] text-2xl font-black leading-none tracking-tight text-[#163044] sm:mt-3 sm:pr-16 sm:text-3xl">
             {right.value}
           </p>
           <p className="relative z-[1] mt-1 pr-[3.25rem] text-[11px] font-semibold text-[#2A3F4D]/65 sm:pr-16 sm:text-xs">{right.label}</p>

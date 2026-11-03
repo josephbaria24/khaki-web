@@ -38,7 +38,7 @@ export default function PageErrorFallback({ error, onRetry }) {
       <div className="flex w-full max-w-sm flex-col items-center text-center">
         <a href="/" className="mb-8 flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo.png" alt="" className="h-10 w-10 rounded-[22.5%] object-contain" />
+          <img src="/images/logo-mark.png" alt="" className="h-10 w-10 bg-transparent object-contain" />
           <span className="text-left">
             <span className="block text-xl font-black uppercase leading-none tracking-tight text-foreground">KHAKI</span>
             <span className="mt-0.5 block text-[10px] font-semibold text-muted-foreground">{t("Jobs & Services in Palawan")}</span>

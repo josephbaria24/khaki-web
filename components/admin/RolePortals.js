@@ -455,7 +455,7 @@ function AccountingOverview({ snap, fees, onOpenSection }) {
           <div className="relative flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/55">Collected this month</p>
-              <p className="mt-1 text-4xl font-black tabular-nums tracking-tight sm:text-5xl">{formatPHP(snap.dash.feesThisMonth)}</p>
+              <p className="mt-1 text-4xl font-black money tabular-nums tracking-tight sm:text-5xl">{formatPHP(snap.dash.feesThisMonth)}</p>
               <p className="mt-2 text-sm font-semibold text-[#B7E4C7]">
                 {growth >= 0 ? "+" : ""}{growth.toFixed(0)}% vs last month · {formatPHP(lastMonth)} prior
               </p>
@@ -496,7 +496,7 @@ function AccountingOverview({ snap, fees, onOpenSection }) {
         <div className="mt-4 flex h-32 items-end gap-2">
           {snap.dash.months.map((month) => (
             <div key={month.key} className="flex flex-1 flex-col items-center gap-1">
-              <span className="text-[10px] font-bold tabular-nums text-muted-foreground">
+              <span className="text-[10px] font-bold money tabular-nums text-muted-foreground">
                 {month.fees > 0 ? formatPHP(month.fees) : "—"}
               </span>
               <div
@@ -630,7 +630,7 @@ function AccountingCategories({ snap }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <p className="truncate text-sm font-black">{cat.short}</p>
-                    <p className="shrink-0 text-sm font-black tabular-nums">{formatPHP(cat.value)}</p>
+                    <p className="shrink-0 text-sm font-black money tabular-nums">{formatPHP(cat.value)}</p>
                   </div>
                   <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#EDE6D6] dark:bg-white/10">
                     <div
@@ -676,11 +676,11 @@ function AccountingLedger({ snap, fees, onOpen, mods }) {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="rounded-2xl bg-[#163044] p-3 text-[#F7F4EC]">
           <p className="text-[10px] font-bold uppercase tracking-wide text-white/55">Records</p>
-          <p className="mt-1 text-xl font-black tabular-nums">{fees.length}</p>
+          <p className="mt-1 text-xl font-black money tabular-nums">{fees.length}</p>
         </div>
         <div className="rounded-2xl bg-[#E7F6EC] p-3 text-[#146C3A] dark:bg-[#143028] dark:text-[#B7E4C7]">
           <p className="text-[10px] font-bold uppercase tracking-wide opacity-80">Total</p>
-          <p className="mt-1 text-xl font-black tabular-nums">{formatPHP(total || snap.dash.postingFees)}</p>
+          <p className="mt-1 text-xl font-black money tabular-nums">{formatPHP(total || snap.dash.postingFees)}</p>
         </div>
         <Mini label="Average" value={formatPHP(average)} />
         <Mini label="This month" value={formatPHP(snap.dash.feesThisMonth)} />
@@ -688,7 +688,7 @@ function AccountingLedger({ snap, fees, onOpen, mods }) {
 
       <div className="rounded-[1.5rem] bg-[#E7F6EC] p-4 dark:bg-[#143028]">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#146C3A] dark:text-[#B7E4C7]">Month vs prior</p>
-        <p className="mt-1 text-2xl font-black tabular-nums text-[#163044] dark:text-[#F5F3EE]">
+        <p className="mt-1 text-2xl font-black money tabular-nums text-[#163044] dark:text-[#F5F3EE]">
           {growth >= 0 ? "+" : ""}{growth.toFixed(0)}%
         </p>
         <p className="text-xs font-semibold text-[#146C3A] dark:text-[#B7E4C7]">
@@ -714,7 +714,7 @@ function AccountingLedger({ snap, fees, onOpen, mods }) {
                     {row.created_at ? new Date(row.created_at).toLocaleString() : "—"}
                   </p>
                 </div>
-                <p className="shrink-0 text-sm font-black tabular-nums text-[#146C3A]">{formatPHP(row.amount)}</p>
+                <p className="shrink-0 text-sm font-black money tabular-nums text-[#146C3A]">{formatPHP(row.amount)}</p>
               </li>
             ))}
           </ul>
@@ -738,7 +738,7 @@ function HeroMini({ label, value }) {
   return (
     <div className="rounded-2xl bg-white/10 px-3 py-2.5">
       <p className="text-[10px] font-bold uppercase tracking-wide text-white/55">{label}</p>
-      <p className="mt-0.5 text-sm font-black tabular-nums sm:text-base">{value}</p>
+      <p className="mt-0.5 text-sm font-black money tabular-nums sm:text-base">{value}</p>
     </div>
   );
 }
@@ -863,7 +863,7 @@ function InvestorView({ mods, allowed, counts, snap, section, setSection, onOpen
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-2xl bg-[#163044] p-4 text-[#F7F4EC]">
                 <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Fees collected</p>
-                <p className="mt-1 text-2xl font-black tabular-nums">{formatPHP(snap.dash.postingFees)}</p>
+                <p className="mt-1 text-2xl font-black money tabular-nums">{formatPHP(snap.dash.postingFees)}</p>
                 <p className="text-[11px] text-[#E6D3A1]">{growth >= 0 ? "+" : ""}{growth.toFixed(0)}% this month</p>
               </div>
               <Mini label="Task value" value={formatPHP(snap.gmv)} />
@@ -902,7 +902,7 @@ function InvestorView({ mods, allowed, counts, snap, section, setSection, onOpen
                 <li key={cat.key} className="flex items-center gap-2 text-[11px]">
                   <span className="h-2 w-2 rounded-full" style={{ background: CAT_COLORS[index % CAT_COLORS.length] }} />
                   <span className="font-semibold">{cat.short}</span>
-                  <span className="ml-auto tabular-nums text-muted-foreground">{Math.round((cat.value / totalCat) * 100)}%</span>
+                  <span className="ml-auto money tabular-nums text-muted-foreground">{Math.round((cat.value / totalCat) * 100)}%</span>
                 </li>
               ))}
             </ul>
@@ -1006,7 +1006,7 @@ function StatCard({ label, value, hint, accent }) {
   return (
     <div className="rounded-[1.35rem] border border-[#163044]/8 bg-card p-4 shadow-card dark:border-white/10">
       <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 text-3xl font-black tabular-nums" style={accent ? { color: accent } : undefined}>{value}</p>
+      <p className="mt-1 text-3xl font-black money tabular-nums" style={accent ? { color: accent } : undefined}>{value}</p>
       <p className="text-xs text-muted-foreground">{hint}</p>
     </div>
   );
@@ -1016,7 +1016,7 @@ function Mini({ label, value }) {
   return (
     <div className="rounded-2xl bg-[#F7F1E4] p-3 dark:bg-white/5">
       <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 text-lg font-black tabular-nums">{value}</p>
+      <p className="mt-1 text-lg font-black money tabular-nums">{value}</p>
     </div>
   );
 }

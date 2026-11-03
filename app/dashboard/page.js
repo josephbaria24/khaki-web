@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import ChatAvatar from "@/components/chat/Avatar";
+import OpenJobCard from "@/components/dashboard/OpenJobCard";
 import CategoryCard from "@/components/landing/CategoryCard";
 import CategoryChips from "@/components/ui/CategoryChips";
 import SearchPill from "@/components/ui/SearchPill";
@@ -14,7 +14,7 @@ import { FadeIn } from "@/components/ui/motion";
 import { CHIP_CATEGORIES, taskMatchesChip } from "@/lib/catalog";
 import { LANDING } from "@/lib/landingContent";
 import { useMarketingLanding } from "@/lib/useMarketingLanding";
-import { displayTaskCategory, formatPHP, skillFitsTask } from "@/lib/khaki";
+import { formatPHP, skillFitsTask } from "@/lib/khaki";
 import { useAuth } from "@/lib/AuthContext";
 import { canOpenPost, isPosterMode, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -315,41 +315,13 @@ export default function DashboardPage() {
                     const posterProfile = people[task.client_id];
                     const posterName = posterProfile?.full_name || task.client_name || "Khaki user";
                     return (
-                    <Link
-                      key={task.id}
-                      href={`/task/${task.id}`}
-                      className="w-[min(78vw,280px)] shrink-0 snap-start rounded-[1.35rem] bg-card p-5 shadow-card transition hover:-translate-y-0.5 sm:w-[260px]"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: LANDING.olive }}>
-                          {displayTaskCategory(task)}
-                        </p>
-                        {badge ? (
-                          <span
-                            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold leading-4"
-                            style={{ backgroundColor: badge.bg, color: badge.fg }}
-                          >
-                            {badge.label}
-                          </span>
-                        ) : null}
-                      </div>
-                      <p className="mt-2 min-h-[48px] text-[15px] font-bold leading-snug text-foreground">{task.title}</p>
-                      <div className="mt-4 flex items-end justify-between gap-3">
-                        <p className="text-lg font-black text-foreground">{formatPHP(task.budget_php)}</p>
-                        <p className="text-xs text-muted-foreground">{task.is_remote ? "Remote" : task.location_area}</p>
-                      </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <ChatAvatar
-                          name={posterName}
-                          src={posterProfile?.avatar_url || posterProfile?.profile_photo}
-                          size="sm"
-                          className="h-7 w-7 text-[10px]"
-                        />
-                        <p className="min-w-0 truncate text-[11px] font-semibold text-muted-foreground">
-                          {posterName}
-                        </p>
-                      </div>
-                    </Link>
+                      <OpenJobCard
+                        key={task.id}
+                        task={task}
+                        badge={badge}
+                        posterName={posterName}
+                        posterSrc={posterProfile?.avatar_url || posterProfile?.profile_photo}
+                      />
                     );
                   })}
                 </div>
@@ -371,7 +343,7 @@ export default function DashboardPage() {
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     {pendingBids.map((bid) => (
                       <Link key={bid.id} href={`/task/${bid.task_id}`} className="rounded-2xl bg-[#F3EFE3] p-4">
-                        <p className="text-sm font-black">{formatPHP(bid.amount_php)}</p>
+                        <p className="money text-sm font-black">{formatPHP(bid.amount_php)}</p>
                         <p className="mt-1 text-xs text-muted-foreground">{bid.pitch || "Walang pitch"}</p>
                         <p className="mt-2 text-[11px] font-bold" style={{ color: LANDING.olive }}>I-adjust ang fee →</p>
                       </Link>

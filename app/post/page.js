@@ -13,15 +13,11 @@ import Container from "@/components/Container";
 import SectionIntro from "@/components/SectionIntro";
 import { useAuth } from "@/lib/AuthContext";
 import { LOCATIONS, SCHEDULE_LABELS, SERVICE_CATEGORIES, cn, formatPHP, postingFee, scheduleLabel, serviceByKey } from "@/lib/khaki";
+import PostingExpectations from "@/components/post/PostingExpectations";
 import { BUDGET_DISCLAIMER, cleanExtras, cleanPins, describeFormExtras, initialExtras, missingRequiredField, pinSlotsFor, templateForKey } from "@/lib/serviceTemplates";
+import { POSTING_EXPECTATIONS, postingFeeLabel, postingRateForStage } from "@/lib/qualification";
 
-const STAGE_BADGES = {
-  1: "Stage 1 · Registered",
-  2: "Stage 2 · ID verified",
-  3: "Stage 3 · Skill verified",
-  4: "Stage 4 · Licensed",
-  5: "Stage 5 · Pioneer",
-};
+const STAGE_BADGES = Object.fromEntries(POSTING_EXPECTATIONS.map((item) => [item.stage, item.title]));
 
 function clampPostStep(value) {
   const n = Number(value);
@@ -52,7 +48,7 @@ function Field({ label, children }) {
 
 const LocationPinMap = dynamic(() => import("@/components/LocationPinMap"), {
   ssr: false,
-  loading: () => <div className="h-64 w-full animate-pulse rounded-2xl bg-[#F3EFE3] sm:h-72" />,
+  loading: () => <div className="skeleton-shine h-64 w-full rounded-2xl sm:h-72" />,
 });
 
 const GLYPHS = {
@@ -380,7 +376,8 @@ function PostPage() {
     || Object.entries(SCHEDULE_LABELS).map(([k, v]) => ({ value: k, label: v }));
   const needsDate = form.schedule_type === "on_date" || form.schedule_type === "before_date";
   const budgetNum = Number(form.budget_php) || 0;
-  const feeNum = postingFee(budgetNum);
+  const feeRateLabel = postingFeeLabel(minStage);
+  const feeNum = postingFee(budgetNum, postingRateForStage(minStage));
   const totalNum = budgetNum + feeNum;
   const fee = formatPHP(feeNum);
   const reviewExtras = describeFormExtras(template, form.extras);
@@ -828,28 +825,10 @@ function PostPage() {
 
           {postStep === 2 ? (
             <div className="rounded-[1.25rem] bg-white p-4 shadow-card sm:p-5 dark:bg-[#1A1E27]">
-              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#0D666A]">Step 2 · Antas ng kwalipikasyon</p>
-              <h2 className="mt-1 text-xl font-black text-[#163044]">Anong antas ng tasker ang kailangan?</h2>
-              <p className="mt-1 text-sm text-[#163044]/70">I-filter ang inaasahan. Makikita ito sa gawain. Hindi nito binabago ang 2% posting fee.</p>
-              <div className="mt-4 space-y-2">
-                {[
-                  [1, "Stage 1 · Registered", "Kahit bagong account, basta makakita ng post."],
-                  [2, "Stage 2 · ID at face verified", "May government ID at face photo na inaprubahan."],
-                  [3, "Stage 3 · Skill verified", "May natapos nang job sa skill nila."],
-                  [4, "Stage 4 · Licensed", "May naka-save na license number."],
-                  [5, "Stage 5 · Pioneer", "8 jobs, 4.8 stars."],
-                ].map(([stage, label, detail]) => (
-                  <button
-                    key={stage}
-                    type="button"
-                    onClick={() => setMinStage(stage)}
-                    className={cn("block w-full rounded-2xl border px-3 py-3 text-left", minStage === stage ? "border-[#163044] bg-white" : "border-[#E6DDD0] bg-[#FBF8F1]")}
-                  >
-                    <span className="block text-sm font-black text-[#163044]">{label}</span>
-                    <span className="mt-0.5 block text-xs font-medium text-[#163044]/65">{detail}</span>
-                  </button>
-                ))}
-              </div>
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#0D666A]">Step 2 · Posting expectations</p>
+              <h2 className="mt-1 text-xl font-black text-[#163044]">What tasker level do you need?</h2>
+              <p className="mt-1 text-sm text-[#163044]/70">Choose quality, pay fair. The posting fee follows the stage.</p>
+              <PostingExpectations stage={minStage} onChange={setMinStage} />
             </div>
           ) : null}
 
@@ -884,8 +863,8 @@ function PostPage() {
             {stacked && postStep < 3 ? (
               <div className="flex items-center gap-3 lg:hidden">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F7F4EC]/55">Fee 2%</p>
-                  <p className="text-sm font-black">{fee}</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F7F4EC]/55">Fee {feeRateLabel}</p>
+                  <p className="money text-sm font-black">{fee}</p>
                 </div>
                 <button type="submit" className="h-10 min-w-0 flex-1 rounded-full bg-[#FFFFFF] text-[13px] font-black text-[#11141A]">
                   Magpatuloy
@@ -895,7 +874,7 @@ function PostPage() {
             {stacked && postStep === 3 ? (
               <div className="lg:hidden">
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F7F4EC]/55">Total</p>
-                <p className="text-lg font-black">{formatPHP(totalNum)}</p>
+                <p className="money text-lg font-black">{formatPHP(totalNum)}</p>
                 <button type="submit" className="mt-2 h-10 w-full rounded-full bg-[#FFFFFF] text-[13px] font-black text-[#11141A]">
                   Confirm Posting · {formatPHP(totalNum)}
                 </button>
@@ -908,15 +887,15 @@ function PostPage() {
                 <div className="mt-3 space-y-2 text-sm">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold text-[#F7F4EC]/70">Posted budget</span>
-                    <span className="font-black">{formatPHP(budgetNum)}</span>
+                    <span className="money font-black">{formatPHP(budgetNum)}</span>
                   </div>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="font-semibold text-[#F7F4EC]/70">Platform fee 2%</span>
-                    <span className="font-black">{fee}</span>
+                    <span className="font-semibold text-[#F7F4EC]/70">Platform fee {feeRateLabel}</span>
+                    <span className="money font-black">{fee}</span>
                   </div>
                   <div className="flex items-center justify-between gap-3 border-t border-[#F7F4EC]/15 pt-2">
                     <span className="font-black">Total</span>
-                    <span className="text-lg font-black">{formatPHP(totalNum)}</span>
+                    <span className="money text-lg font-black">{formatPHP(totalNum)}</span>
                   </div>
                 </div>
                 <p className="mt-3 text-[11px] font-bold leading-snug text-[#C8F0D8]">
@@ -936,7 +915,7 @@ function PostPage() {
                   <span className="rounded-full bg-[#F7F4EC]/10 px-2 py-0.5 text-[10px] font-bold text-[#F7F4EC]/70">Min ₱15</span>
                 </div>
                 {template?.layout === "stacked" ? (
-                  <p className="mt-2 text-2xl font-black">{formatPHP(form.budget_php)}{form.extras.price_type === "per_hour" ? " / hr" : ""}</p>
+                  <p className="money mt-2 text-2xl font-black">{formatPHP(form.budget_php)}{form.extras.price_type === "per_hour" ? " / hr" : ""}</p>
                 ) : (
                 <label className="mt-2 flex items-center gap-2 rounded-xl bg-[#102636] px-4">
                   <Wallet className="h-4 w-4 shrink-0 text-[#C9D6E0]" />
@@ -952,8 +931,8 @@ function PostPage() {
                 </label>
                 )}
                 <div className="mt-3 flex items-center justify-between rounded-2xl bg-[#F7F4EC]/10 px-3 py-2">
-                  <span className="text-[11px] font-semibold text-[#F7F4EC]/70">Posting fee 2%</span>
-                  <span className="rounded-full bg-[#C8F0D8] px-2.5 py-0.5 text-[11px] font-black text-[#163044]">{fee}</span>
+                  <span className="text-[11px] font-semibold text-[#F7F4EC]/70">Posting fee {feeRateLabel}</span>
+                  <span className="money rounded-full bg-[#C8F0D8] px-2.5 py-0.5 text-[11px] font-black text-[#163044]">{fee}</span>
                 </div>
                 <p className="mt-2 text-[11px] leading-snug text-[#F7F4EC]/55">
                   Guide lang — kayo ng tasker ang mag-aayos ng bayad sa work.

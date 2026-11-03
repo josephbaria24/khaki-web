@@ -1,10 +1,20 @@
-import { Geist } from "next/font/google";
+import { DM_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  style: ["normal", "italic"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const money = DM_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-money",
+  display: "swap",
 });
 
 export const metadata = {
@@ -46,7 +56,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistSans.className} font-sans antialiased`}>
+      <body className={`${sans.variable} ${money.variable} ${sans.className} font-sans antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

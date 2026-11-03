@@ -16,7 +16,7 @@ export default function ServiceListCard({ task, href }) {
         <p className="mt-1 text-xs font-medium text-[#0F172A]/65">
           {task.is_remote ? "Remote" : task.location_area}
         </p>
-        <p className="mt-2 text-sm font-black text-[#0F172A]">{formatPHP(task.budget_php)}</p>
+        <p className="money mt-2 text-sm font-black text-[#0F172A]">{formatPHP(task.budget_php)}</p>
         <span className="glass-cta mt-4">
           <span className="glass-cta-icon">
             <ArrowRight className="h-3.5 w-3.5" color="#fff" />

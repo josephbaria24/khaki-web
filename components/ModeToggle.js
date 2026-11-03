@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { cn } from "@/lib/khaki";
 import { activeMode, mustCompleteVerification } from "@/lib/roles";
 import { toast } from "@/lib/toast";
 
+const HOME = "/dashboard";
+
 export default function ModeToggle({ className = "", track = "bg-[#163044] dark:bg-[#163044]" }) {
   const { user, setMode, modeFlash } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [busy, setBusy] = useState(false);
   const mode = activeMode(user);
   const locked = busy || Boolean(modeFlash);
@@ -26,6 +29,8 @@ export default function ModeToggle({ className = "", track = "bg-[#163044] dark:
     try {
       await setMode(next);
       toast.success(next === "poster" ? "Switched to Poster" : "Switched to Tasker");
+      if (pathname !== HOME) router.push(HOME);
+      router.refresh();
     } catch (err) {
       toast.error(err?.message || "Could not switch mode");
     } finally {

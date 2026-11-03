@@ -55,7 +55,7 @@ export function SignaturePreview({ value, className = "" }) {
       </svg>
     );
   }
-  if (value) return <p className={`font-serif italic text-sm ${className}`}>{value}</p>;
+  if (value) return <p className={`italic text-sm ${className}`}>{value}</p>;
   return null;
 }
 

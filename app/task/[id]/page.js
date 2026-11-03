@@ -403,7 +403,7 @@ export default function TaskDetailPage() {
                 <span className="font-semibold text-[#2A3F4D]/70">Budget:</span>
                 <span className="flex items-center gap-1.5 font-black text-[#163044]">
                   <TintIcon bg="bg-[#D8F5E8]" label="Budget"><PesoIcon /></TintIcon>
-                  {formatPHP(task.budget_php)} <span className="font-semibold text-[#2A3F4D]/60">{task.extras?.price_type === "per_hour" ? "(Per hour)" : task.extras?.price_type === "contract" ? "(Contract)" : "(Fixed)"}</span>
+                  <span className="money">{formatPHP(task.budget_php)}</span> <span className="font-semibold text-[#2A3F4D]/60">{task.extras?.price_type === "per_hour" ? "(Per hour)" : task.extras?.price_type === "contract" ? "(Contract)" : "(Fixed)"}</span>
                 </span>
               </div>
               {task.extras?.min_qualification ? (
@@ -716,7 +716,7 @@ export default function TaskDetailPage() {
                   </div>
                 ))}
               </dl>
-              <p className="mt-4 text-3xl font-black text-primary">{formatPHP(task.budget_php)}</p>
+              <p className="money mt-4 text-3xl font-black text-primary">{formatPHP(task.budget_php)}</p>
               <p className="mt-1 text-xs text-muted-foreground">Listed budget (guide). Task payment is arranged privately.</p>
               <p className="mt-1 text-sm text-muted-foreground">{task.is_remote ? "Remote · Palawan-wide" : `${task.location_area}${task.barangay ? ` · ${task.barangay}` : ""}`}</p>
               <PinnedLocations pins={taskPins} />
@@ -799,7 +799,7 @@ export default function TaskDetailPage() {
             {canBid && !isAuthenticated ? (
               <div className="space-y-3 rounded-2xl border bg-card p-6 shadow-sm">
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#2A3F4D]/45">Task budget</p>
-                <p className="text-3xl font-black text-[#163044]">{formatPHP(task.budget_php)}</p>
+                <p className="money text-3xl font-black text-[#163044]">{formatPHP(task.budget_php)}</p>
                 <Link
                   href={`/login?next=${encodeURIComponent(`/task/${task.id}`)}`}
                   className="flex h-11 w-full items-center justify-center rounded-xl bg-[#2F8AD4] font-bold text-white"

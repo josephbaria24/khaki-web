@@ -76,7 +76,7 @@ export default function PostedJobCard({ task, tasker, review, onCancel, bidCount
             {displayTaskCategory(task)}
           </span>
         </div>
-        <span className="shrink-0 text-sm font-black" style={{ color: tone.ink }}>
+        <span className="money shrink-0 text-sm font-black" style={{ color: tone.ink }}>
           {formatPHP(task.budget_php)}
         </span>
       </div>

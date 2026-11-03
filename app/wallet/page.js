@@ -166,7 +166,7 @@ export default function WalletPage() {
                 />
                 <div className="relative text-[#163044]">
                   <p className="text-sm font-bold text-[#163044]/70">Total balance</p>
-                  <p className="mt-2 text-4xl font-black tracking-tight text-[#163044] sm:text-5xl">
+                  <p className="money mt-2 text-4xl font-black tracking-tight text-[#163044] sm:text-5xl">
                     {!ready ? "…" : formatPHP(releasedTotal)}
                   </p>
                   <p className="mt-2 text-xs font-semibold text-[#163044]/70">
@@ -178,11 +178,11 @@ export default function WalletPage() {
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-2xl bg-white px-4 py-3 shadow-card dark:bg-[#1A1E27] dark:shadow-none">
                   <p className="text-[11px] font-bold uppercase tracking-wide text-[#163044]/40 dark:text-white/40">On hold</p>
-                  <p className="mt-1 text-lg font-black text-[#D97706] dark:text-[#FBBF24]">{formatPHP(holdTotal)}</p>
+                  <p className="money mt-1 text-lg font-black text-[#D97706] dark:text-[#FBBF24]">{formatPHP(holdTotal)}</p>
                 </div>
                 <div className="rounded-2xl bg-white px-4 py-3 shadow-card dark:bg-[#1A1E27] dark:shadow-none">
                   <p className="text-[11px] font-bold uppercase tracking-wide text-[#163044]/40 dark:text-white/40">Posting fees</p>
-                  <p className="mt-1 text-lg font-black text-[#DC2626] dark:text-[#F87171]">{formatPHP(feeTotal)}</p>
+                  <p className="money mt-1 text-lg font-black text-[#DC2626] dark:text-[#F87171]">{formatPHP(feeTotal)}</p>
                 </div>
               </div>
 

@@ -1,12 +1,15 @@
 "use client";
 
-import { Geist } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import PageErrorFallback from "@/components/PageErrorFallback";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  style: ["normal", "italic"],
+  variable: "--font-sans",
+  display: "swap",
 });
 
 /** next-themes stores the choice under "theme". Apply it before paint so the fallback matches the app. */
@@ -18,7 +21,7 @@ export default function GlobalError({ error, reset }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBoot }} />
       </head>
-      <body className={`${geistSans.variable} ${geistSans.className} font-sans antialiased`}>
+      <body className={`${sans.variable} ${sans.className} font-sans antialiased`}>
         <PageErrorFallback error={error} onRetry={reset} />
       </body>
     </html>

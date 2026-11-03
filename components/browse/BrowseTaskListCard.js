@@ -48,7 +48,7 @@ export default function BrowseTaskListCard({ task, poster, selected, onSelect, o
                 {task.title}
               </p>
             </div>
-            <p className="shrink-0 text-[15px] font-black text-[#163044] dark:text-[#F5F3EE]">
+            <p className="money shrink-0 text-[15px] font-black text-[#163044] dark:text-[#F5F3EE]">
               {formatPHP(task.budget_php)}
             </p>
           </div>

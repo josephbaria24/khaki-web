@@ -185,7 +185,7 @@ export default function PostedJobsList({
                 <span className="min-w-0 flex-1">
                   <span className="flex items-baseline justify-between gap-3">
                     <span className="truncate text-sm font-bold text-foreground">{task.title}</span>
-                    <span className={cn("shrink-0 text-sm font-black", row.ink)}>{formatPHP(task.budget_php)}</span>
+                    <span className={cn("money shrink-0 text-sm font-black", row.ink)}>{formatPHP(task.budget_php)}</span>
                   </span>
                   <span className="mt-0.5 block truncate text-[11px] font-medium text-muted-foreground">
                     <span className={cn("font-bold", row.ink)}>{status}</span>

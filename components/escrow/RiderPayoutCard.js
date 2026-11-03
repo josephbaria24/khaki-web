@@ -59,7 +59,7 @@ export default function RiderPayoutCard({ task, amount }) {
   return (
     <section className="rounded-xl border border-[#E6D9C4] bg-white p-4 shadow-[0_10px_28px_rgba(42,63,77,0.08)]">
       <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#163044]/50">Payout</p>
-      <p className="mt-1 text-3xl font-black" style={{ color: TEAL }}>{formatPHP(payout)}</p>
+      <p className="money mt-1 text-3xl font-black" style={{ color: TEAL }}>{formatPHP(payout)}</p>
       <p className="mt-1 text-xs font-semibold text-[#163044]/60">
         {released ? "Released by admin." : onHold ? "On hold until an admin releases it after delivery." : "Waiting for the client to pay via GCash."}
       </p>

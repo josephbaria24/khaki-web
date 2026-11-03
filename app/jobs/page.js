@@ -28,7 +28,7 @@ export default function JobsPage() {
               <h2 className="mt-1 text-lg font-black">{job.job_title}</h2>
               <p className="text-sm text-muted-foreground">{job.company_name} · {job.location_area}</p>
               <p className="mt-2 text-sm leading-relaxed">{job.description}</p>
-              <p className="mt-3 font-bold text-primary">{formatPHP(job.salary_min)}–{formatPHP(job.salary_max)} / {job.salary_period}</p>
+              <p className="money mt-3 font-bold text-primary">{formatPHP(job.salary_min)}–{formatPHP(job.salary_max)} / {job.salary_period}</p>
             </article>
           )) : null}
           {ready && jobs.length === 0 && (

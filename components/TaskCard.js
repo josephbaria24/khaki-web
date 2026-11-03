@@ -20,7 +20,7 @@ export default function TaskCard({ task }) {
           {task.is_remote ? "Remote" : task.location_area}
           {task.offer_count > 0 ? ` · ${task.offer_count} ${task.offer_count === 1 ? "offer" : "offers"}` : ""}
         </p>
-        <p className="mt-2 text-sm font-black text-[#0F172A]">{formatPHP(task.budget_php)}</p>
+        <p className="money mt-2 text-sm font-black text-[#0F172A]">{formatPHP(task.budget_php)}</p>
         <p className="mt-1 text-[10px] font-semibold text-[#0F172A]/55">
           {scheduleLabel(task)} · {timeAgo(task.created_at)}
         </p>

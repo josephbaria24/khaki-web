@@ -77,7 +77,7 @@ export default function AdminOverview({ overview, users, logs, transactions, onO
               <Icon className={`h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${on ? "scale-110" : "scale-100"}`} color="currentColor" />
               <span className="truncate">{item.label}</span>
               {badge ? (
-                <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-black tabular-nums transition-colors duration-300 ${on ? "bg-[#F6C56B] text-[#7A4A00]" : "bg-[#FFF4D6] text-[#B45309]"}`}>
+                <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-black money tabular-nums transition-colors duration-300 ${on ? "bg-[#F6C56B] text-[#7A4A00]" : "bg-[#FFF4D6] text-[#B45309]"}`}>
                   {badge > 99 ? "99+" : badge}
                 </span>
               ) : null}
@@ -92,7 +92,7 @@ export default function AdminOverview({ overview, users, logs, transactions, onO
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#F7F4EC]/60">Marketplace pulse</p>
-                <p className="mt-2 text-4xl font-black tabular-nums sm:text-5xl">{formatPHP(data.postingFees)}</p>
+                <p className="mt-2 text-4xl font-black money tabular-nums sm:text-5xl">{formatPHP(data.postingFees)}</p>
                 <p className="mt-1 text-sm text-[#F7F4EC]/70">Posting fees collected · {data.tasks} gawain total</p>
               </div>
               <div className="grid grid-cols-3 gap-3 lg:min-w-[28rem]">
@@ -134,7 +134,7 @@ export default function AdminOverview({ overview, users, logs, transactions, onO
                 }`}
               >
                 <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{item.label}</p>
-                <p className="mt-1 text-2xl font-black tabular-nums">{item.value}</p>
+                <p className="mt-1 text-2xl font-black money tabular-nums">{item.value}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{item.hint}</p>
               </button>
             ))}
@@ -225,7 +225,7 @@ export default function AdminOverview({ overview, users, logs, transactions, onO
                       <p className="text-sm font-semibold capitalize">{row.kind} · {row.status}</p>
                       <p className="text-xs text-muted-foreground">{row.from} → {row.to}</p>
                     </div>
-                    <p className="font-black tabular-nums">{formatPHP(row.amount)}</p>
+                    <p className="font-black money tabular-nums">{formatPHP(row.amount)}</p>
                   </li>
                 ))}
               </ul>
@@ -245,7 +245,7 @@ function HeroMini({ label, value, accent }) {
   return (
     <div className="rounded-2xl bg-white/10 p-3">
       <p className="text-[10px] font-semibold uppercase tracking-wide text-[#F7F4EC]/55">{label}</p>
-      <p className="mt-1 text-base font-black tabular-nums sm:text-lg" style={accent ? { color: accent } : undefined}>{value}</p>
+      <p className="mt-1 text-base font-black money tabular-nums sm:text-lg" style={accent ? { color: accent } : undefined}>{value}</p>
     </div>
   );
 }
@@ -333,7 +333,7 @@ function Kpi({ theme = "users", icon: Icon, label, value, hint, pulse, onClick, 
           <p className="admin-kpi-muted text-[10px] font-black uppercase tracking-[0.14em] sm:text-[11px]" style={{ color: tone.muted }}>
             {label}
           </p>
-          <p className="mt-1 text-xl font-black tabular-nums leading-none sm:text-2xl xl:text-[1.7rem]">{value}</p>
+          <p className="mt-1 text-xl font-black money tabular-nums leading-none sm:text-2xl xl:text-[1.7rem]">{value}</p>
           <p className="admin-kpi-muted mt-1.5 text-[11px] font-semibold leading-tight sm:text-xs" style={{ color: tone.muted }}>
             {hint}
           </p>
@@ -418,7 +418,7 @@ function SingleBars({ data, valueKey, format, color }) {
         const value = Number(row[valueKey] || 0);
         return (
           <div key={row.key} className="flex min-w-0 flex-1 flex-col items-center gap-1">
-            <p className="text-[10px] font-bold tabular-nums text-muted-foreground">{value ? format(value) : "—"}</p>
+            <p className="text-[10px] font-bold money tabular-nums text-muted-foreground">{value ? format(value) : "—"}</p>
             <div
               className={`w-full rounded-t-lg ${value ? "" : "bg-[#EDE6D6] dark:bg-[#2A303C]"}`}
               style={{ height: `${value ? Math.max((value / max) * 140, 8) : 4}px`, background: value ? color : undefined }}
@@ -475,7 +475,7 @@ function SliceList({ slices }) {
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: slice.color }} />
             <span className="capitalize">{slice.label}</span>
           </span>
-          <span className="tabular-nums text-muted-foreground">{slice.value} · {Math.round((slice.value / total) * 100)}%</span>
+          <span className="money tabular-nums text-muted-foreground">{slice.value} · {Math.round((slice.value / total) * 100)}%</span>
         </li>
       ))}
     </ul>
@@ -501,7 +501,7 @@ function HBars({ rows }) {
         <div key={row.label}>
           <div className="mb-1 flex items-center justify-between text-sm">
             <span className="font-semibold">{row.label}</span>
-            <span className="tabular-nums text-muted-foreground">{row.value}</span>
+            <span className="money tabular-nums text-muted-foreground">{row.value}</span>
           </div>
           <div className="h-2.5 overflow-hidden rounded-full bg-[#EDE6D6] dark:bg-[#2A303C]">
             <div className="h-full rounded-full" style={{ width: `${Math.max((row.value / max) * 100, 6)}%`, background: row.color }} />

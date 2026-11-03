@@ -120,7 +120,7 @@ function TaskPreviewCard({ task }) {
       </p>
       <p className="mt-2 min-h-[48px] text-[15px] font-bold leading-snug text-foreground">{task.title}</p>
       <div className="mt-4 flex items-center justify-between">
-        <p className="text-lg font-black text-foreground">{formatPHP(task.budget)}</p>
+        <p className="money text-lg font-black text-foreground">{formatPHP(task.budget)}</p>
         <Stars count={task.stars} />
       </div>
     </article>

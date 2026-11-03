@@ -14,7 +14,11 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        money: ["var(--font-money)", "ui-monospace", "monospace"],
+      },
+      fontWeight: {
+        black: "800",
       },
       colors: {
         background: "hsl(var(--background))",

@@ -157,7 +157,7 @@ export default function AccountMenu() {
             onClick={() => closeMenu(true)}
           >
             <span>Wallet</span>
-            <span className="shrink-0 text-xs font-black text-[#0D666A] dark:text-[#7FD3CF]">
+            <span className="money shrink-0 text-xs font-black text-[#0D666A] dark:text-[#7FD3CF]">
               {walletAmount == null ? "…" : formatPHP(walletAmount)}
             </span>
           </Link>
