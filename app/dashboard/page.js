@@ -22,6 +22,7 @@ import { toast } from "@/lib/toast";
 import { CircleAlert } from "@/components/icons";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 import InstallAppBanner from "@/components/InstallAppBanner";
+import ReinstallAppBanner from "@/components/ReinstallAppBanner";
 
 function interactionBadge(task, userId, bid) {
   if (userId && task.client_id === userId) return { label: "Your post", bg: "#E8DCC4", fg: "#163044" };
@@ -169,6 +170,7 @@ export default function DashboardPage() {
           {poster ? (
             <>
               <div className="dash-sheet">
+                <ReinstallAppBanner />
                 <InstallAppBanner />
                 <DashboardShortcuts user={user} postingFees={postingFees} releasedPayouts={releasedPayouts} myTasks={myTasks} />
               </div>
@@ -221,6 +223,7 @@ export default function DashboardPage() {
             </>
           ) : (
             <>
+            <ReinstallAppBanner />
             <InstallAppBanner />
             <div className="mx-auto w-full max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
               <div>
