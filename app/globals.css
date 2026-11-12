@@ -663,6 +663,25 @@
     animation: active-job-pulse 1.5s ease-out infinite;
   }
 
+  /* Portaled to body, outside .khaki-landing, so dark styles are explicit. */
+  html.dark .job-dock-card {
+    background-color: #1A1E27 !important;
+    color: #F5F3EE;
+  }
+
+  html.dark .job-dock-tail {
+    border-top-color: #1A1E27 !important;
+  }
+
+  html.dark .job-dock-card .bg-\[\#FBF8F1\] {
+    background-color: #11141A !important;
+  }
+
+  html.dark .job-dock-card [class*="text-[#2A3F4D]"],
+  html.dark .job-dock-card [class*="text-[#3D5C6E]"] {
+    color: #F5F3EE !important;
+  }
+
   .float-nav-tab {
     position: relative;
     z-index: 2;

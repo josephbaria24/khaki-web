@@ -193,19 +193,29 @@ export default function ActiveJobDock() {
   // Prefer transform/opacity only — grid-template-rows often skips in iOS standalone PWAs.
   const ease = "duration-[340ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
   const dragged = offset.x !== 0 || offset.y !== 0;
+  const compact = pathname === "/browse" || pathname.startsWith("/browse/");
+  // Phone pill sits just above the floating tab bar. Portal it so it stays above the page dim.
+  const phoneBottom = compact
+    ? "calc(max(0.5rem, env(safe-area-inset-bottom, 0px)) + 70px)"
+    : "calc(max(1rem, env(safe-area-inset-bottom, 0px)) + 78px)";
 
   const dock = (
     <div
       ref={dockRef}
       className={cn(
-        "pointer-events-none z-30 flex w-max flex-col items-end",
+        "job-dock pointer-events-none flex w-max flex-col items-end",
         tablet
-          ? "fixed bottom-5 right-5 z-50 md:bottom-6 md:right-6"
-          : "absolute bottom-[calc(100%+10px)] right-1"
+          ? "fixed bottom-5 right-5 z-[90] md:bottom-6 md:right-6"
+          : mounted
+            ? "fixed right-5 z-[90]"
+            : "absolute bottom-[calc(100%+10px)] right-1 z-30"
       )}
       // Only apply a transform while dragging. A permanent translate3d(0,0,0) makes
       // child transitions skip in installed Safari/Chrome shortcuts (standalone WebKit).
-      style={dragged ? { transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` } : undefined}
+      style={{
+        ...(dragged ? { transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` } : {}),
+        ...(!tablet && mounted ? { bottom: phoneBottom } : {}),
+      }}
     >
       <div
         className={cn(
@@ -217,7 +227,7 @@ export default function ActiveJobDock() {
         )}
         aria-hidden={!panelActive}
       >
-          <div className="max-h-[min(46vh,300px)] w-full overflow-y-auto rounded-[1.35rem] rounded-br-md bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)]">
+          <div className="job-dock-card max-h-[min(46vh,300px)] w-full overflow-y-auto rounded-[1.35rem] rounded-br-md bg-white p-4 shadow-[0_16px_40px_rgba(42,63,77,0.16)]">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#3D5C6E]">
               {displayTaskCategory(task)}
             </p>
@@ -269,7 +279,7 @@ export default function ActiveJobDock() {
             </Link>
           </div>
           <span
-            className="mr-6 h-0 w-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-white drop-shadow-[0_2px_1px_rgba(42,63,77,0.08)]"
+            className="job-dock-tail mr-6 h-0 w-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-white drop-shadow-[0_2px_1px_rgba(42,63,77,0.08)]"
             aria-hidden
           />
       </div>
@@ -306,16 +316,17 @@ export default function ActiveJobDock() {
               type="button"
               aria-label="Close job details"
               className={cn(
-                "fixed inset-0 z-30 border-0 bg-[#163044]/30 transition-opacity",
+                "fixed inset-0 z-[80] border-0 bg-black/60 transition-opacity",
                 ease,
                 panelActive ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
+              style={{ backgroundColor: "rgba(0, 0, 0, 0.72)" }}
               onClick={() => setOpen(false)}
             />,
             document.body
           )
         : null}
-      {tablet && mounted && typeof document !== "undefined" ? createPortal(dock, document.body) : dock}
+      {mounted && typeof document !== "undefined" ? createPortal(dock, document.body) : dock}
     </>
   );
 }
