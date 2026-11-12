@@ -48,7 +48,7 @@ export default function ProfilePage() {
                 await api.profile.update(patch);
                 await refresh();
                 const keys = Object.keys(patch || {});
-                if (keys.length === 1 && keys[0] === "avatar_url") return;
+                if (keys.length === 1 && (keys[0] === "avatar_url" || keys[0] === "share_visibility")) return;
                 toast.success("Profile saved");
               }}
             />

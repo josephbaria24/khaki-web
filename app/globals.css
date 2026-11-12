@@ -1086,6 +1086,31 @@
     animation: fade-in-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
 
+  @keyframes sheet-up {
+    from { transform: translateY(100dvh); }
+    to { transform: translateY(0); }
+  }
+
+  @keyframes sheet-down {
+    from { transform: translateY(0); }
+    to { transform: translateY(100dvh); }
+  }
+
+  .sheet-page {
+    min-height: 100%;
+    background: #fff;
+    animation: sheet-up 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .sheet-page.is-leaving {
+    animation: sheet-down 0.34s cubic-bezier(0.4, 0, 1, 1) both;
+    pointer-events: none;
+  }
+
+  html.dark .sheet-page {
+    background: #11141A;
+  }
+
   .animate-fade-in-up {
     animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -1566,6 +1591,36 @@
   .account-menu.is-leaving {
     animation: account-menu-out 0.16s ease-in both;
     pointer-events: none;
+  }
+
+  .share-dialog-shade {
+    opacity: 0;
+    transition: opacity 0.22s ease;
+  }
+
+  .share-dialog-shade.is-open {
+    opacity: 1;
+  }
+
+  .share-dialog-card {
+    transform: translateY(120%);
+    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .share-dialog-card.is-open {
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .share-dialog-shade,
+    .share-dialog-card {
+      transition: none;
+    }
+
+    .sheet-page,
+    .sheet-page.is-leaving {
+      animation: none;
+    }
   }
 
   .account-menu [role="menuitem"] {

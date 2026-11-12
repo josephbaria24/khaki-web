@@ -4,7 +4,9 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { formatPHP } from "@/lib/khaki";
 import { displayName } from "@/lib/taskerProfile";
+import { shareVisibility, visiblePostedTasks } from "@/lib/shareVisibility";
 import AvatarCropper from "@/components/profile/AvatarCropper";
+import ShareProfileDialog from "@/components/profile/ShareProfileDialog";
 import { uploadToCloudinary } from "@/lib/uploadFile";
 import { toast } from "@/lib/toast";
 
@@ -38,30 +40,51 @@ export default function PosterProfileCard({ profile, tasks = [], isOwn = false, 
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoMenu, setPhotoMenu] = useState(false);
   const [cropFile, setCropFile] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareMode, setShareMode] = useState("share");
   const photoInputRef = useRef(null);
   const canEditPhoto = Boolean(isOwn && onSave);
   const name = displayName(profile?.full_name) || "Poster";
-  const verified = profile?.verification_status === "verified";
-  const posted = tasks.filter((task) => task.client_id === profile?.id);
+  const access = shareVisibility(profile);
+  const verified = access.verified && profile?.verification_status === "verified";
+  const posted = visiblePostedTasks(tasks, profile, { isOwn });
   const open = posted.filter((task) => task.status !== "released" && task.status !== "completed" && task.status !== "cancelled");
-  const about = (editing ? bio : profile?.bio || "").trim() || "I post tasks and hire trusted Taskers. I give clear instructions and pay fairly and on time.";
+  const aboutText = (editing ? bio : profile?.bio || "").trim() || "I post tasks and hire trusted Taskers. I give clear instructions and pay fairly and on time.";
+  const about = isOwn || access.about ? aboutText : "";
+  const showPhoto = isOwn || access.photo;
 
-  const share = async () => {
-    const url = `${window.location.origin}/u/${profile.id}`;
+  const openShare = (mode) => {
+    setShareMode(mode);
+    setShareOpen(true);
+  };
+
+  const confirmShare = async (next) => {
+    setSaving(true);
     try {
-      if (navigator.share) {
-        await navigator.share({ title: `${name} — Poster on Khaki`, text: about, url });
-        return;
+      if (onSave) await onSave({ share_visibility: next });
+      setShareOpen(false);
+      if (shareMode !== "share") return;
+      const url = `${window.location.origin}/u/${profile.id}`;
+      const text = next.about ? aboutText : `${name} — Poster on Khaki`;
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: `${name} — Poster on Khaki`, text, url });
+          return;
+        }
+      } catch {
+        /* clipboard fallback */
       }
-    } catch {
-      /* clipboard fallback */
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch {
-      /* ignore */
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1600);
+      } catch {
+        /* ignore */
+      }
+    } catch (err) {
+      toast.error(err.message || "Could not save what the public can see.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -118,16 +141,24 @@ export default function PosterProfileCard({ profile, tasks = [], isOwn = false, 
       {cropFile ? (
         <AvatarCropper file={cropFile} onCancel={() => setCropFile(null)} onConfirm={uploadCropped} />
       ) : null}
+      <ShareProfileDialog
+        open={shareOpen}
+        profile={profile}
+        saving={saving}
+        confirmLabel={shareMode === "share" ? "Share" : "Save"}
+        onClose={() => setShareOpen(false)}
+        onConfirm={confirmShare}
+      />
       <button
         type="button"
-        onClick={share}
+        onClick={() => openShare("share")}
         className="absolute right-4 top-4 rounded-full bg-[#E7F1FA] px-3 py-1.5 text-[11px] font-black text-[#163044] dark:bg-[#243445] dark:text-[#E7F1FA]"
       >
         {copied ? "Copied" : "Share"}
       </button>
       <div className="relative mx-auto h-20 w-20">
         <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-[#D6E6F4] dark:bg-[#1B3044]">
-          {profile?.avatar_url ? (
+          {showPhoto && profile?.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
           ) : (
@@ -165,9 +196,15 @@ export default function PosterProfileCard({ profile, tasks = [], isOwn = false, 
       </p>
       <p className="mx-auto mt-1 max-w-sm text-xs font-semibold text-[#5F6B76] dark:text-[#A8B3C0]">
         {sinceLabel(profile?.created_at) ? `Poster since ${sinceLabel(profile.created_at)}` : "Poster"}
-        {profile?.location_area ? ` · Active in ${profile.location_area}` : ""}
+        {(isOwn || access.location) && profile?.location_area ? ` · Active in ${profile.location_area}` : ""}
       </p>
+      {isOwn ? (
+        <button type="button" onClick={() => openShare("edit")} className="mt-3 text-[11px] font-black text-[#3E7498] dark:text-[#8EC4E8]">
+          Public access
+        </button>
+      ) : null}
 
+      {about || editing ? (
       <section className="mt-6 text-left">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-black text-[#163044] dark:text-[#F5F3EE]">About</h2>
@@ -187,6 +224,7 @@ export default function PosterProfileCard({ profile, tasks = [], isOwn = false, 
           <p className="mt-2 text-sm leading-relaxed text-[#2A3F4D] dark:text-[#E7EEF4]">{about}</p>
         )}
       </section>
+      ) : null}
 
       <section className="mt-6 text-left">
         <h2 className="text-sm font-black text-[#163044] dark:text-[#F5F3EE]">My posted tasks</h2>
@@ -213,12 +251,14 @@ export default function PosterProfileCard({ profile, tasks = [], isOwn = false, 
         )}
       </section>
 
+      {isOwn || access.history ? (
       <section className="mt-6">
         <h2 className="text-sm font-black text-[#163044] dark:text-[#F5F3EE]">Posted tasks history</h2>
         <p className="mt-2 text-sm text-[#5F6B76] dark:text-[#A8B3C0]">
           {posted.length} posted · {open.length} open
         </p>
       </section>
+      ) : null}
     </article>
   );
 }

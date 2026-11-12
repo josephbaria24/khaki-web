@@ -17,6 +17,7 @@ import { distanceLabel, townDistanceKm } from "@/lib/palawanLocations";
 import { canTrack } from "@/lib/deliveryTrack";
 import { describeExtras, describePins, vehicleLabel } from "@/lib/serviceTemplates";
 import { displayName } from "@/lib/taskerProfile";
+import { publicCanOpenTask, taskShareGroup } from "@/lib/shareVisibility";
 import { LANDING } from "@/lib/landingContent";
 import { canAcceptJobs, isTaskerMode, needsTaskerVerification } from "@/lib/roles";
 import { api } from "@/lib/store";
@@ -176,6 +177,24 @@ export default function TaskDetailPage() {
   const posterAvg = posterReviews.length
     ? (posterReviews.reduce((s, r) => s + Number(r.rating || 0), 0) / posterReviews.length).toFixed(1)
     : null;
+  const taskPrivate = Boolean(poster) && !isClient && !publicCanOpenTask(poster, task.status);
+
+  if (taskPrivate) {
+    const group = taskShareGroup(task.status);
+    return (
+      <TaskShell>
+        <Container className="max-w-lg py-10">
+          <h1 className="text-2xl font-black text-[#163044] dark:text-[#F5F3EE]">This task is private</h1>
+          <p className="mt-2 text-sm font-semibold text-[#5F6B76] dark:text-[#A8B3C0]">
+            The poster turned off public access for {group} tasks.
+          </p>
+          <Link href={`/u/${task.client_id}`} className="mt-5 inline-flex h-11 items-center rounded-full bg-[#163044] px-5 text-sm font-black text-[#F7F4EC] dark:bg-[#F5F3EE] dark:text-[#11141A]">
+            View profile
+          </Link>
+        </Container>
+      </TaskShell>
+    );
+  }
 
   const submitOffer = async (e) => {
     e.preventDefault();
@@ -673,7 +692,7 @@ export default function TaskDetailPage() {
             {canChat ? (
               <Link
                 href={`/task/${task.id}/chat`}
-                className="inline-flex h-10 items-center gap-2 rounded-full bg-[#FFFCF7] px-3.5 text-sm font-bold text-[#2A3F4D] shadow-card"
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-[#FFFCF7] px-3.5 text-sm font-bold text-[#2A3F4D] shadow-card dark:bg-[#252A35] dark:text-[#F5F3EE]"
               >
                 <MessageSquare className="h-4 w-4" color="#2A3F4D" /> Chat
               </Link>
@@ -696,23 +715,23 @@ export default function TaskDetailPage() {
               ) : null}
               <h1 className="text-2xl font-black sm:text-3xl">{task.title}</h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{task.details}</p>
-              <dl className="mt-4 grid gap-2 rounded-2xl bg-[#F3EFE3] p-4 sm:grid-cols-2">
+              <dl className="mt-4 grid gap-2 rounded-2xl bg-[#F3EFE3] p-4 dark:bg-[#1B2430] sm:grid-cols-2">
                 <div>
-                  <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50">Posted</dt>
-                  <dd className="mt-0.5 text-sm font-bold text-[#163044]">{formatDateTime(task.created_at) || "—"}</dd>
+                  <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50 dark:text-[#F5F3EE]/45">Posted</dt>
+                  <dd className="mt-0.5 text-sm font-bold text-[#163044] dark:text-[#F5F3EE]">{formatDateTime(task.created_at) || "—"}</dd>
                   {task.created_at ? (
-                    <dd className="text-[11px] font-medium leading-snug text-[#2A3F4D]/55">{timeAgo(task.created_at)}</dd>
+                    <dd className="text-[11px] font-medium leading-snug text-[#2A3F4D]/55 dark:text-[#A8B3C0]">{timeAgo(task.created_at)}</dd>
                   ) : null}
                 </div>
                 <div>
-                  <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50">Kailan</dt>
-                  <dd className="mt-0.5 text-sm font-bold text-[#163044]">{scheduleLabel(task)}</dd>
+                  <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50 dark:text-[#F5F3EE]/45">Kailan</dt>
+                  <dd className="mt-0.5 text-sm font-bold text-[#163044] dark:text-[#F5F3EE]">{scheduleLabel(task)}</dd>
                 </div>
                 {taskExtras.map((row) => (
                   <div key={row.key}>
-                    <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50">{row.label}</dt>
-                    <dd className="mt-0.5 text-sm font-bold text-[#163044]">{row.value}</dd>
-                    {row.desc ? <dd className="text-[11px] font-medium leading-snug text-[#2A3F4D]/55">{row.desc}</dd> : null}
+                    <dt className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#163044]/50 dark:text-[#F5F3EE]/45">{row.label}</dt>
+                    <dd className="mt-0.5 text-sm font-bold text-[#163044] dark:text-[#F5F3EE]">{row.value}</dd>
+                    {row.desc ? <dd className="text-[11px] font-medium leading-snug text-[#2A3F4D]/55 dark:text-[#A8B3C0]">{row.desc}</dd> : null}
                   </div>
                 ))}
               </dl>
@@ -798,8 +817,8 @@ export default function TaskDetailPage() {
 
             {canBid && !isAuthenticated ? (
               <div className="space-y-3 rounded-2xl border bg-card p-6 shadow-sm">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#2A3F4D]/45">Task budget</p>
-                <p className="money text-3xl font-black text-[#163044]">{formatPHP(task.budget_php)}</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#2A3F4D]/45 dark:text-[#F5F3EE]/45">Task budget</p>
+                <p className="money text-3xl font-black text-[#163044] dark:text-[#F5F3EE]">{formatPHP(task.budget_php)}</p>
                 <Link
                   href={`/login?next=${encodeURIComponent(`/task/${task.id}`)}`}
                   className="flex h-11 w-full items-center justify-center rounded-xl bg-[#2F8AD4] font-bold text-white"
@@ -822,10 +841,10 @@ export default function TaskDetailPage() {
                 </button>
               </form>
               ) : (
-              <div className="rounded-2xl border border-[#E6DDD0] bg-[#FFFCF7] p-5">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#8A6A32]">View only</p>
-                <h2 className="mt-1 text-lg font-black text-[#163044]">Not qualified for {displayTaskCategory(task)}</h2>
-                <p className="mt-1.5 text-sm font-medium leading-snug text-[#2A3F4D]/70">
+              <div className="rounded-2xl border border-[#E6DDD0] bg-[#FFFCF7] p-5 dark:border-white/10 dark:bg-[#1A1E27]">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#8A6A32] dark:text-[#E6C22E]">View only</p>
+                <h2 className="mt-1 text-lg font-black text-[#163044] dark:text-[#F5F3EE]">Not qualified for {displayTaskCategory(task)}</h2>
+                <p className="mt-1.5 text-sm font-medium leading-snug text-[#2A3F4D]/70 dark:text-[#A8B3C0]">
                   {skillSummary(user?.skills)
                     ? `You are registered for ${skillSummary(user?.skills)}. You cannot accept ${displayTaskCategory(task)}.`
                     : "Add a skill on your profile. You can only book gawain that match it."}
@@ -867,13 +886,13 @@ export default function TaskDetailPage() {
                 </p>
                 <div className="mt-4 space-y-3">
                   {posterReviews.slice(0, 4).map((r) => (
-                    <div key={r.id} className="rounded-xl bg-[#F3EFE3] p-3">
+                    <div key={r.id} className="rounded-xl bg-[#F3EFE3] p-3 dark:bg-[#1B2430]">
                       <StarRating value={r.rating} readOnly size="sm" />
-                      <p className="mt-1 text-sm text-muted-foreground">{r.comment || "Walang comment"}</p>
+                      <p className="mt-1 text-sm text-[#2A3F4D] dark:text-[#E7EEF4]">{r.comment || "Walang comment"}</p>
                     </div>
                   ))}
                 </div>
-                <Link href={`/u/${task.client_id}`} className="mt-3 inline-block text-sm font-bold" style={{ color: LANDING.olive }}>
+                <Link href={`/u/${task.client_id}`} className="mt-3 inline-block text-sm font-bold text-[#1B6B45] dark:text-[#3DDC97]">
                   Tingnan ang buong profile →
                 </Link>
               </div>

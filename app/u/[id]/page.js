@@ -50,7 +50,16 @@ export default function PublicProfilePage() {
       <section className="bg-white py-8 dark:bg-[#11141A] lg:py-12">
         <Container>
           {isPosterMode(profile) ? (
-            <PosterProfileCard profile={profile} tasks={tasks} isOwn={isOwn} />
+            <PosterProfileCard
+              profile={profile}
+              tasks={tasks}
+              isOwn={isOwn}
+              onSave={isOwn ? async (patch) => {
+                await api.profile.update(patch);
+                const next = await api.profile.get(id);
+                if (next) setProfile(next);
+              } : undefined}
+            />
           ) : (
           <TaskerProfileCard
             profile={profile}
@@ -64,19 +73,19 @@ export default function PublicProfilePage() {
         </Container>
       </section>
       {isPosterMode(profile) ? null : (
-      <section className="bg-background py-10">
+      <section className="bg-[#F7F4EC] py-10 dark:bg-[#0E1218]">
         <Container className="mx-auto max-w-[420px] space-y-4 md:max-w-[560px] lg:max-w-[720px] xl:max-w-[820px]">
-          <h2 className="text-2xl font-black">Feedback</h2>
+          <h2 className="text-2xl font-black text-[#163044] dark:text-[#F5F3EE]">Feedback</h2>
           {reviews.length === 0 ? (
-            <p className="rounded-[1.35rem] border border-dashed py-10 text-center text-sm text-muted-foreground">Walang reviews pa.</p>
+            <p className="rounded-[1.35rem] border border-dashed border-[#C9D6E0] py-10 text-center text-sm text-muted-foreground dark:border-white/15">Walang reviews pa.</p>
           ) : (
             reviews.map((r) => (
-              <div key={r.id} className="rounded-[1.5rem] bg-[#FFFCF7] p-5 shadow-card">
+              <div key={r.id} className="rounded-[1.5rem] bg-white p-5 shadow-card dark:bg-[#1A1E27]">
                 <div className="flex items-center justify-between gap-3">
                   <StarRating value={r.rating} readOnly size="sm" />
                   <span className="text-xs text-muted-foreground">{r.client_name || "Poster"}</span>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">{r.comment || "Walang comment"}</p>
+                <p className="mt-2 text-sm text-[#2A3F4D] dark:text-[#E7EEF4]">{r.comment || "Walang comment"}</p>
               </div>
             ))
           )}

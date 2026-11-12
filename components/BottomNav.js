@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { leaveSheet, markSheet } from "@/components/ui/motion";
 import { Briefcase, Home, MessageSquare, Plus, Search, User, X } from "@/components/icons";
 import ActiveJobDock from "@/components/ActiveJobDock";
 import { cn } from "@/lib/khaki";
@@ -26,6 +27,7 @@ const POST_TIP_KEY = "khaki.postTip";
 
 export default function BottomNav({ hidden = false }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
   const [showTip, setShowTip] = useState(false);
   const [tipLeaving, setTipLeaving] = useState(false);
@@ -102,6 +104,12 @@ export default function BottomNav({ hidden = false }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn("float-nav-tab", active && "is-active")}
+                onClick={(event) => {
+                  const sheet = document.querySelector(".sheet-page:not(.is-leaving)");
+                  if (!sheet || active) return;
+                  event.preventDefault();
+                  leaveSheet().then(() => router.push(item.href));
+                }}
               >
                 <Icon className="h-[18px] w-[18px]" />
                 {item.label}
@@ -114,6 +122,7 @@ export default function BottomNav({ hidden = false }) {
               <Link
                 href={postItem.href}
                 aria-label={postItem.label}
+                onClick={() => markSheet(postItem.href)}
                 className={cn(
                   "float-nav-post absolute left-1/2 top-0 z-20 flex items-center justify-center transition-[width,height]",
                   ease,

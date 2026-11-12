@@ -9,6 +9,7 @@ import {
   Leaf, Luggage, MapPin, MessageSquare, Moon, MoreHorizontal, Motorbike, Package, Refresh, Repair, Scooter, Scissor, Search, ShieldCheck, Snowflake, Sparkles, Tools, Users, Van, Wallet, WashingMachine, Wrench,
 } from "@/components/icons";
 import AppShell from "@/components/AppShell";
+import { leaveSheet } from "@/components/ui/motion";
 import Container from "@/components/Container";
 import SectionIntro from "@/components/SectionIntro";
 import { useAuth } from "@/lib/AuthContext";
@@ -498,7 +499,7 @@ function PostPage() {
       <Container className="py-5 lg:py-8">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => leaveSheet().then(() => router.back())}
           className="mb-3 inline-flex items-center gap-1 text-[12px] font-bold text-[#2A3F4D]/65 hover:text-[#163044] lg:hidden"
         >
           <ChevronLeft className="h-4 w-4" /> Back
