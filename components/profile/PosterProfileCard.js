@@ -53,7 +53,31 @@ export default function PosterProfileCard({ profile, tasks = [], isOwn = false, 
   const about = isOwn || access.about ? aboutText : "";
   const showPhoto = isOwn || access.photo;
 
+  const shareLink = async (visibility = access) => {
+    const url = `${window.location.origin}/u/${profile.id}`;
+    const text = visibility.about ? aboutText : `${name} — Poster on Khaki`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${name} — Poster on Khaki`, text, url });
+        return;
+      }
+    } catch {
+      /* clipboard fallback */
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* ignore */
+    }
+  };
+
   const openShare = (mode) => {
+    if (!isOwn) {
+      shareLink();
+      return;
+    }
     setShareMode(mode);
     setShareOpen(true);
   };
@@ -64,23 +88,7 @@ export default function PosterProfileCard({ profile, tasks = [], isOwn = false, 
       if (onSave) await onSave({ share_visibility: next });
       setShareOpen(false);
       if (shareMode !== "share") return;
-      const url = `${window.location.origin}/u/${profile.id}`;
-      const text = next.about ? aboutText : `${name} — Poster on Khaki`;
-      try {
-        if (navigator.share) {
-          await navigator.share({ title: `${name} — Poster on Khaki`, text, url });
-          return;
-        }
-      } catch {
-        /* clipboard fallback */
-      }
-      try {
-        await navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1600);
-      } catch {
-        /* ignore */
-      }
+      await shareLink(next);
     } catch (err) {
       toast.error(err.message || "Could not save what the public can see.");
     } finally {
@@ -141,14 +149,16 @@ export default function PosterProfileCard({ profile, tasks = [], isOwn = false, 
       {cropFile ? (
         <AvatarCropper file={cropFile} onCancel={() => setCropFile(null)} onConfirm={uploadCropped} />
       ) : null}
-      <ShareProfileDialog
-        open={shareOpen}
-        profile={profile}
-        saving={saving}
-        confirmLabel={shareMode === "share" ? "Share" : "Save"}
-        onClose={() => setShareOpen(false)}
-        onConfirm={confirmShare}
-      />
+      {isOwn ? (
+        <ShareProfileDialog
+          open={shareOpen}
+          profile={profile}
+          saving={saving}
+          confirmLabel={shareMode === "share" ? "Share" : "Save"}
+          onClose={() => setShareOpen(false)}
+          onConfirm={confirmShare}
+        />
+      ) : null}
       <button
         type="button"
         onClick={() => openShare("share")}
