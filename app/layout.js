@@ -31,8 +31,8 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     title: "Khaki",
-    /* Translucent bar + safe-area padding on headers keeps chrome visible in installed Safari */
-    statusBarStyle: "black-translucent",
+    /* Solid status bar. black-translucent lets iOS paint a blur over the header on a Home Screen app. */
+    statusBarStyle: "default",
   },
   formatDetection: {
     telephone: false,

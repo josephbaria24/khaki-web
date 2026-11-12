@@ -66,7 +66,7 @@ export default function AppFrame({ children }) {
         hideNav ? "pb-0" : compactNav ? "pb-[4.25rem]" : "pb-[4.5rem]"
       )}
     >
-      <div className={cn("relative z-40 shrink-0 pt-[env(safe-area-inset-top,0px)]", sheetHeader ? "bg-[#163044]" : "bg-white dark:bg-[#11141A]")}>
+      <div className={cn("sticky top-0 z-40 shrink-0 bg-white pt-[env(safe-area-inset-top,0px)] dark:bg-[#11141A]", sheetHeader && "bg-[#163044] dark:bg-[#163044]")}>
         {isAdmin(user) && previewing ? <AdminPreviewBanner /> : null}
         <AppHeader />
       </div>
