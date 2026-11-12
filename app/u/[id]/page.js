@@ -7,9 +7,10 @@ import AppShell from "@/components/AppShell";
 import PublicShell from "@/components/PublicShell";
 import Container from "@/components/Container";
 import StarRating from "@/components/StarRating";
+import PosterProfileCard from "@/components/profile/PosterProfileCard";
 import TaskerProfileCard from "@/components/profile/TaskerProfileCard";
 import { useAuth } from "@/lib/AuthContext";
-import { canOpenPost } from "@/lib/roles";
+import { canOpenPost, isPosterMode } from "@/lib/roles";
 import { api } from "@/lib/store";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 
@@ -46,8 +47,11 @@ export default function PublicProfilePage() {
     <p className="p-8 text-center">Hindi mahanap ang profile</p>
   ) : (
     <div className="landing-page">
-      <section className="bg-white py-8 lg:py-12">
+      <section className="bg-white py-8 dark:bg-[#11141A] lg:py-12">
         <Container>
+          {isPosterMode(profile) ? (
+            <PosterProfileCard profile={profile} tasks={tasks} isOwn={isOwn} />
+          ) : (
           <TaskerProfileCard
             profile={profile}
             reviews={reviews}
@@ -56,8 +60,10 @@ export default function PublicProfilePage() {
             ctaHref={ctaHref}
             showCta={!isOwn}
           />
+          )}
         </Container>
       </section>
+      {isPosterMode(profile) ? null : (
       <section className="bg-background py-10">
         <Container className="mx-auto max-w-[420px] space-y-4 md:max-w-[560px] lg:max-w-[720px] xl:max-w-[820px]">
           <h2 className="text-2xl font-black">Feedback</h2>
@@ -77,6 +83,7 @@ export default function PublicProfilePage() {
           <Link href="/browse" className="btn-olive inline-flex h-11 items-center px-5 text-sm">Back to jobs</Link>
         </Container>
       </section>
+      )}
     </div>
   );
 

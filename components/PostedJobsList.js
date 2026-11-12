@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import PostedJobCard from "@/components/PostedJobCard";
+import HugeIcon from "@/components/icons";
+import { graphicForTask } from "@/lib/catalog";
 import { cn, displayTaskCategory, formatPHP, STATUS_CONFIG, timeAgo } from "@/lib/khaki";
 
 const TABS = [
@@ -166,29 +168,35 @@ export default function PostedJobsList({
 
   if (preview) {
     return (
-      <div className="mt-4 overflow-hidden rounded-[1.35rem] bg-white ring-1 ring-[#EEF1F4] dark:bg-[#1A1E27] dark:ring-white/10">
-        <div className="h-72 overflow-y-auto overscroll-contain">
+      <div className="mt-4">
+        <div className="max-h-[22rem] space-y-2.5 overflow-y-auto overscroll-contain px-0.5 py-1">
           {newest.map((task) => {
             const row = statusRow(task.status);
+            const graphic = graphicForTask(task);
             const bids = Number(bidCounts[task.id] ?? task.offer_count) || 0;
             const status = STATUS_CONFIG[task.status]?.label || task.status || "Open";
             return (
               <Link
                 key={task.id}
                 href={`/task/${task.id}`}
-                className={cn(
-                  "flex items-center gap-3 border-b border-[#F0F3F6] px-3.5 py-3 last:border-b-0 dark:border-white/10",
-                  row.wash
-                )}
+                className="job-glass interactive-card flex items-center gap-3 rounded-[1.25rem] px-3 py-2.5"
+                style={{ "--job-tint": graphic.bg }}
               >
-                <span className={cn("h-9 w-1 shrink-0 rounded-full", row.bar)} aria-hidden />
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+                  style={{ backgroundColor: graphic.chipBg, color: graphic.chipInk }}
+                >
+                  <HugeIcon name={graphic.icon} className="h-5 w-5" color={graphic.chipInk} strokeWidth={1.75} />
+                </span>
                 <span className="min-w-0 flex-1">
-                  <span className="flex items-baseline justify-between gap-3">
-                    <span className="truncate text-sm font-bold text-foreground">{task.title}</span>
-                    <span className={cn("money shrink-0 text-sm font-black", row.ink)}>{formatPHP(task.budget_php)}</span>
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="truncate text-sm font-black text-[#163044] dark:text-[#F5F3EE]">{task.title}</span>
+                    <span className={cn("money shrink-0 rounded-full bg-white/80 px-2 py-0.5 text-[12px] font-black dark:bg-[#11141A]/55", row.ink)}>
+                      {formatPHP(task.budget_php)}
+                    </span>
                   </span>
-                  <span className="mt-0.5 block truncate text-[11px] font-medium text-muted-foreground">
-                    <span className={cn("font-bold", row.ink)}>{status}</span>
+                  <span className="mt-0.5 block truncate text-[11px] font-medium text-[#5F6B76] dark:text-[#A8B3C0]">
+                    <span className={cn("font-black", row.ink)}>{status}</span>
                     {" · "}
                     {previewTail(task, people[task.accepted_tasker_id], bids)}
                   </span>
@@ -199,7 +207,7 @@ export default function PostedJobsList({
         </div>
         <Link
           href={showAllHref}
-          className="flex h-11 items-center justify-center border-t border-[#EEF1F4] text-sm font-bold text-[#163044] hover:bg-[#F4F7FA] dark:border-white/10 dark:text-[#F7F4EC] dark:hover:bg-white/5"
+          className="mt-3 flex h-11 items-center justify-center rounded-full text-sm font-bold text-[#163044] hover:bg-[#E7F1FA] dark:text-[#F7F4EC] dark:hover:bg-white/5"
         >
           Show all
         </Link>

@@ -108,6 +108,34 @@
     overscroll-behavior-y: contain;
   }
 
+  .poster-photo-btn {
+    background-color: #163044;
+    color: #fff;
+  }
+
+  .job-glass {
+    border: 0;
+    background:
+      linear-gradient(165deg, color-mix(in srgb, var(--job-tint, #d6e6f2) 62%, #ffffff) 0%, rgba(255, 255, 255, 0.72) 48%, rgba(255, 255, 255, 0.88) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      0 10px 24px rgba(22, 48, 68, 0.08);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    backdrop-filter: blur(14px) saturate(1.4);
+  }
+
+  html.dark .job-glass {
+    border: 0;
+    background: linear-gradient(180deg, rgba(36, 50, 70, 0.42) 0%, rgba(17, 20, 26, 0.28) 100%);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+    backdrop-filter: blur(18px) saturate(1.5);
+  }
+
+  .poster-photo-btn.h-10 {
+    width: auto;
+  }
+
   .money {
     font-family: var(--font-sans), ui-sans-serif, sans-serif;
     font-variant-numeric: tabular-nums lining-nums;
@@ -125,6 +153,43 @@
 
   html.dark body {
     background-color: #11141A;
+  }
+
+  html,
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #163044 transparent;
+  }
+
+  html.dark,
+  html.dark * {
+    scrollbar-color: #F5F3EE transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #163044;
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: #102636;
+  }
+
+  html.dark *::-webkit-scrollbar-thumb {
+    background: #F5F3EE;
+  }
+
+  html.dark *::-webkit-scrollbar-thumb:hover {
+    background: #FFFFFF;
   }
 
   .khaki-landing {
@@ -1991,6 +2056,11 @@ html.dark .khaki-landing [style*="F3EFE3"] {
 
 html.dark .khaki-landing [style*="22, 48, 68"],
 html.dark .khaki-landing [style*="22,48,68"],
+html.dark .khaki-landing .poster-photo-btn {
+  background-color: #E7F1FA !important;
+  color: #163044 !important;
+}
+
 html.dark .khaki-landing [class*="text-[#163044]"],
 html.dark .khaki-landing [class*="text-[#102636]"],
 html.dark .khaki-landing [class*="text-[#2A3F4D]"],
@@ -2474,6 +2544,8 @@ html.dark .team-lead-welcome-body {
 .map-pin-canvas.leaflet-container img.leaflet-tile {
   max-width: none !important;
   max-height: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .map-pin-canvas.leaflet-container.is-compact {

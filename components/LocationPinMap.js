@@ -59,6 +59,7 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
   const mapRef = useRef(null);
   const leafletRef = useRef(null);
   const markersRef = useRef({});
+  const tileRef = useRef(null);
   const activeRef = useRef(slots[0]?.key);
   const pinsRef = useRef(pins);
   const onChangeRef = useRef(onChange);
@@ -111,10 +112,13 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
         const map = L.map(host, {
           zoomControl: true,
           attributionControl: true,
+          fadeAnimation: false,
+          zoomAnimation: false,
         }).setView(center, 14);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        tileRef.current = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
           attribution: "&copy; OpenStreetMap",
+          updateWhenIdle: false,
         }).addTo(map);
         if (L.DomEvent?.disableScrollPropagation) L.DomEvent.disableScrollPropagation(host);
         map.on("click", (e) => {
@@ -144,6 +148,7 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
       mapRef.current?.remove();
       mapRef.current = null;
       markersRef.current = {};
+      tileRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -155,6 +160,28 @@ export default function LocationPinMap({ center, slots, pins, onChange, compact 
     if (!hasPin) map.setView(center, 14);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center[0], center[1], ready]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const host = boxRef.current;
+    if (!map || !host || !ready) return undefined;
+    const reveal = () => {
+      if (host.clientWidth < 20 || host.clientHeight < 20) return;
+      map.invalidateSize({ animate: false, pan: false });
+      tileRef.current?.redraw();
+      host.querySelectorAll(".leaflet-tile").forEach((tile) => {
+        tile.style.opacity = "1";
+      });
+    };
+    const frame = requestAnimationFrame(reveal);
+    const soon = setTimeout(reveal, 60);
+    const later = setTimeout(reveal, 280);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(soon);
+      clearTimeout(later);
+    };
+  }, [ready, compact, slots]);
 
   useEffect(() => {
     const L = leafletRef.current;

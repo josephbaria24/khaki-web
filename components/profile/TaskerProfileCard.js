@@ -200,7 +200,7 @@ export default function TaskerProfileCard({
   const title = isOwn && onSave ? "Edit Khaki Profile" : "Khaki Tasker Profile";
 
   const share = async () => {
-    const url = typeof window !== "undefined" ? window.location.href : "";
+    const url = typeof window !== "undefined" ? `${window.location.origin}/u/${profile.id}` : "";
     try {
       if (navigator.share) {
         await navigator.share({ title: profile.full_name, url });
