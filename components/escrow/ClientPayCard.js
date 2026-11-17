@@ -39,8 +39,8 @@ function FakeQr({ method, amount }) {
   );
 }
 
-export default function ClientPayCard({ task, amount }) {
-  const split = escrowSplit(amount);
+export default function ClientPayCard({ task, amount, rate }) {
+  const split = escrowSplit(amount, rate);
   const [hold, setHold] = useState(null);
   const [agree, setAgree] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -124,7 +124,7 @@ export default function ClientPayCard({ task, amount }) {
   const qrMethods = method === "gcash" || method === "qrph";
 
   return (
-    <section className="mt-4 rounded-xl border border-[#E6D9C4] bg-white p-4 shadow-[0_10px_28px_rgba(42,63,77,0.08)]">
+    <section className="rounded-[1.25rem] border border-[#E6DDD0] bg-white p-4 shadow-[0_6px_20px_rgba(22,48,68,0.06)] dark:border-white/10 dark:bg-[#1A1E27]">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#163044]/50">Escrow payment</p>
         <StatusPill status={status} />
@@ -148,7 +148,7 @@ export default function ClientPayCard({ task, amount }) {
         <p className="mt-3 text-xs font-semibold leading-relaxed text-[#163044]/70">
           {status === "released"
             ? "Released. The tasker payout and the platform fee are recorded."
-            : "On hold. The tasker can start. An admin releases the payout after delivery."}
+            : "On hold. The tasker can start. You release it after you approve the work."}
         </p>
       ) : (
         <>
@@ -216,7 +216,7 @@ export default function ClientPayCard({ task, amount }) {
           </button>
           <label className="mt-3 flex items-start gap-2 text-xs font-semibold text-[#163044]/75">
             <input type="checkbox" className="mt-0.5" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-            I agree to the escrow agreement. Khaki holds this payment until the job is delivered and an admin releases it.
+            I agree to the escrow agreement. Khaki holds this payment until I approve the work, or it releases on its own after the review window.
           </label>
         </>
       )}

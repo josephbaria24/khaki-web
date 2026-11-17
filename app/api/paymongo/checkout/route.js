@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { escrowSplit } from "@/lib/khaki";
+import { flowSettings } from "@/lib/taskFlow";
 import {
   findPaidForEscrow,
   lockEscrow,
@@ -58,7 +59,8 @@ export async function POST(request) {
     if (offerError) return NextResponse.json({ error: offerError.message }, { status: 500 });
     if (!offer) return NextResponse.json({ error: "No accepted bid to pay." }, { status: 400 });
 
-    const split = escrowSplit(offer.amount_php);
+    const { data: flow } = await admin.rpc("task_flow_settings");
+    const split = escrowSplit(offer.amount_php, flowSettings(flow).tasker_fee_rate);
     if (split.total < 1) return NextResponse.json({ error: "Amount is too small to charge." }, { status: 400 });
 
     let { data: hold, error: holdError } = await admin

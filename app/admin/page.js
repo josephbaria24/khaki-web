@@ -21,6 +21,7 @@ import VerificationInbox from "@/components/admin/VerificationInbox";
 import ChatAvatar from "@/components/chat/Avatar";
 import { toast } from "@/lib/toast";
 import EscrowDashboard from "@/components/admin/EscrowDashboard";
+import TaskFlowAdmin from "@/components/admin/TaskFlowAdmin";
 import PostingFees from "@/components/admin/PostingFees";
 
 const TABS = [
@@ -448,6 +449,7 @@ function AdminScreen() {
         {ready && tab === "transactions" && (
           <div className="space-y-3">
             <EscrowDashboard />
+            <TaskFlowAdmin />
             <PostingFees transactions={transactions} />
           </div>
         )}

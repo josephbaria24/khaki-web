@@ -416,6 +416,15 @@
     transform: scale(0.96);
   }
 
+  .qual-stage-ink {
+    color: var(--stage-ink);
+  }
+
+  .qual-stage-badge {
+    background: var(--stage-soft);
+    color: var(--stage-ink);
+  }
+
   .btn-olive-outline {
     @apply inline-flex items-center gap-2 rounded-full border border-[#F7F4EC]/45 px-5 py-2.5 text-xs font-bold text-[#F7F4EC] transition-all duration-200 ease-out;
   }
@@ -2141,6 +2150,20 @@ html.dark .khaki-landing [class*="text-[#2A3F4D]"],
 html.dark .khaki-landing [class*="text-[#2C2A22]"],
 html.dark .khaki-landing [class*="text-[#1F2937]"] {
   color: #F5F3EE !important;
+}
+
+html.dark .khaki-landing .btn-sand {
+  background-color: #E8DCC4 !important;
+  color: #163044 !important;
+}
+
+html.dark .khaki-landing .qual-stage-ink {
+  color: var(--stage-ink-dark) !important;
+}
+
+html.dark .khaki-landing .qual-stage-badge {
+  background: var(--stage-soft-dark) !important;
+  color: var(--stage-ink-dark) !important;
 }
 
 html.dark .khaki-landing .mode-toggle-on,

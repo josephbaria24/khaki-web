@@ -32,8 +32,10 @@ export default function AppFrame({ children }) {
   const [refreshKey, setRefreshKey] = useState(0);
   const showChrome = ready && isAuthenticated && !isPublicPath(pathname);
   const onAdmin = pathname?.startsWith("/admin");
+  const onPost = pathname === "/post" || pathname?.startsWith("/post/");
   const hideNav =
     onAdmin ||
+    onPost ||
     isConversationPath(pathname) ||
     isTrackPath(pathname) ||
     isTaskDetailPath(pathname);

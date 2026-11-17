@@ -10,6 +10,11 @@ import { useAuth } from "@/lib/AuthContext";
 import { cn, formatPHP, timeAgo } from "@/lib/khaki";
 import { api } from "@/lib/store";
 import { PageSkeleton } from "@/components/ui/Skeleton";
+import WithdrawSheet from "@/components/wallet/WithdrawSheet";
+import { DEFAULT_FLOW_SETTINGS } from "@/lib/taskFlow";
+import { toast } from "@/lib/toast";
+
+const WITHDRAW_STATUS = { pending: "Processing", approved: "Sent", rejected: "Declined" };
 
 function firstName(user) {
   const name = String(user?.full_name || "there").trim();
@@ -32,16 +37,27 @@ export default function WalletPage() {
   const [tab, setTab] = useState("balance");
   const [fees, setFees] = useState([]);
   const [payouts, setPayouts] = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [tick, setTick] = useState(0);
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let live = true;
-    Promise.all([api.fees.mine().catch(() => []), api.escrow.minePayouts().catch(() => [])])
-      .then(([feeRows, payoutRows]) => {
+    Promise.all([
+      api.fees.mine().catch(() => []),
+      api.escrow.minePayouts().catch(() => []),
+      api.wallet.withdrawals().catch(() => []),
+      api.wallet.summary().catch(() => null),
+    ])
+      .then(([feeRows, payoutRows, withdrawRows, walletSummary]) => {
         if (!live) return;
         setFees(feeRows || []);
         setPayouts(payoutRows || []);
+        setWithdrawals(withdrawRows || []);
+        setSummary(walletSummary);
       })
       .catch((e) => {
         if (!live) return;
@@ -53,13 +69,32 @@ export default function WalletPage() {
     return () => {
       live = false;
     };
-  }, []);
+  }, [tick]);
 
   const feeTotal = fees.reduce((sum, row) => sum + Number(row.fee_php || 0), 0);
   const released = useMemo(() => payouts.filter((row) => row.status === "released"), [payouts]);
   const onHold = useMemo(() => payouts.filter((row) => row.status === "locked"), [payouts]);
   const releasedTotal = released.reduce((sum, row) => sum + Number(row.tasker_payout || 0), 0);
   const holdTotal = onHold.reduce((sum, row) => sum + Number(row.tasker_payout || 0), 0);
+  const withdrawnTotal = withdrawals
+    .filter((row) => row.status !== "rejected")
+    .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const available = summary ? Number(summary.available || 0) : Math.max(0, releasedTotal - withdrawnTotal);
+  const minimum = Number(summary?.withdraw_min_php ?? DEFAULT_FLOW_SETTINGS.withdraw_min_php);
+  const latestPayout = released[0];
+  const fromLabel = latestPayout
+    ? `${formatPHP(Number(latestPayout.tasker_payout || 0))} from ${latestPayout.task?.title || "your last job"}`
+    : released.length
+      ? `${released.length} paid job${released.length === 1 ? "" : "s"} ready`
+      : "Earnings stay here until you withdraw";
+  const taskerLabel = user?.full_name ? `Tasker · ${firstName(user)}` : "Tasker wallet";
+
+  const requestWithdraw = async (input) => {
+    await api.wallet.withdraw(input);
+    setWithdrawing(false);
+    toast.success("Withdrawal requested");
+    setTick((n) => n + 1);
+  };
 
   const history = useMemo(() => {
     const payoutRows = (payouts || []).map((row) => ({
@@ -84,10 +119,21 @@ export default function WalletPage() {
       taskId: row.task_id || "",
       name: "Fee",
     }));
-    return [...payoutRows, ...feeRows].sort(
+    const withdrawRows = (withdrawals || []).map((row) => ({
+      id: `withdraw-${row.id}`,
+      kind: row.status === "rejected" ? "hold" : "out",
+      title: `Withdrawal · ${String(row.method || "gcash").toUpperCase()}`,
+      sub: WITHDRAW_STATUS[row.status] || row.status,
+      when: row.processed_at || row.created_at,
+      amount: Number(row.amount || 0),
+      href: null,
+      taskId: "",
+      name: "Withdraw",
+    }));
+    return [...payoutRows, ...feeRows, ...withdrawRows].sort(
       (a, b) => new Date(b.when || 0).getTime() - new Date(a.when || 0).getTime()
     );
-  }, [payouts, fees]);
+  }, [payouts, fees, withdrawals]);
 
   useEffect(() => {
     if (!ready || !focusTask) return;
@@ -156,21 +202,29 @@ export default function WalletPage() {
 
           {tab === "balance" ? (
             <>
-              <div className="wallet-balance-card relative mt-5 overflow-hidden rounded-[28px] bg-[#C8F560] px-6 py-7 shadow-[0_18px_40px_rgba(22,48,68,0.12)] dark:shadow-[0_24px_48px_rgba(0,0,0,0.35)]">
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-30"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 20% 20%, rgba(22,48,68,0.18), transparent 45%), radial-gradient(circle at 85% 70%, rgba(22,48,68,0.22), transparent 40%)",
-                  }}
-                />
-                <div className="relative text-[#163044]">
-                  <p className="text-sm font-bold text-[#163044]/70">Total balance</p>
-                  <p className="money mt-2 text-4xl font-black tracking-tight text-[#163044] sm:text-5xl">
-                    {!ready ? "…" : formatPHP(releasedTotal)}
-                  </p>
-                  <p className="mt-2 text-xs font-semibold text-[#163044]/70">
-                    Released payouts · {released.length} job{released.length === 1 ? "" : "s"}
+              <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[#1F9D6A]/25 bg-[#EFFAF4] px-5 py-6 dark:border-[#1F4A36] dark:bg-[#132A20]">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1F9D6A] text-sm font-black text-white">✓</span>
+                  <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#146C43] dark:text-[#7FE0B0]">Available balance</p>
+                </div>
+                <p className="money mt-3 text-4xl font-black tracking-tight text-[#163044] dark:text-[#F5F3EE] sm:text-5xl">
+                  {!ready ? "…" : formatPHP(available)}
+                </p>
+                <p className="mt-2 text-[12px] font-semibold text-[#146C43]/85 dark:text-[#7FE0B0]/85">
+                  {fromLabel}
+                  {taskerLabel ? ` · ${taskerLabel}` : ""}
+                </p>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={!ready || available < minimum}
+                    onClick={() => setWithdrawing(true)}
+                    className="h-11 rounded-2xl bg-[#1F9D6A] px-5 text-sm font-black text-white disabled:opacity-45"
+                  >
+                    Withdraw
+                  </button>
+                  <p className="text-[11px] font-semibold text-[#5F6B76] dark:text-[#A8B3C0]">
+                    Min withdraw {formatPHP(minimum)}
                   </p>
                 </div>
               </div>
@@ -283,6 +337,18 @@ export default function WalletPage() {
           </section>
         </div>
       </div>
+      <WithdrawSheet
+        open={withdrawing}
+        available={available}
+        minimum={minimum}
+        defaultName={user?.full_name || ""}
+        defaultNumber={user?.gcash_number || user?.phone || ""}
+        fromLabel={fromLabel}
+        taskerLabel={taskerLabel}
+        onClose={() => setWithdrawing(false)}
+        onSubmit={requestWithdraw}
+        onViewHistory={() => setTab("activity")}
+      />
     </AppShell>
   );
 }

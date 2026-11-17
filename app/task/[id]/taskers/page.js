@@ -175,24 +175,35 @@ export default function TaskTaskersPage() {
           <p className="mb-3 break-words rounded-2xl bg-destructive/10 px-3 py-2 text-[12px] font-semibold text-destructive">{error}</p>
         ) : null}
 
-        <div className="mb-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="relative flex min-w-0 w-full flex-1 items-center">
-            <Search className="pointer-events-none absolute left-4 h-4 w-4 text-[#163044]/40 dark:text-[#F5F3EE]/40" />
+        <div className="mb-4 flex min-w-0 flex-col gap-3">
+          <label className="relative block min-w-0 w-full">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#163044]/50 dark:text-[#E7F1FA]/50" />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Find a tasker…"
-              className="h-11 w-full min-w-0 rounded-full bg-[#F3EFE3] pl-11 pr-4 text-sm font-semibold text-[#163044] outline-none placeholder:font-medium placeholder:text-[#2A3F4D]/40 dark:bg-[#1A1E27] dark:text-[#F5F3EE] dark:placeholder:text-[#F5F3EE]/40"
+              className="h-11 w-full min-w-0 rounded-2xl border border-[rgba(22,48,68,0.14)] bg-[#E7F1FA] pl-10 pr-4 text-sm font-semibold text-[#163044] outline-none transition placeholder:font-medium placeholder:text-[#2A3F4D]/40 focus:border-[rgba(22,48,68,0.32)] focus:bg-[#DCEAF6] focus:shadow-[0_0_0_3px_rgba(22,48,68,0.1)] dark:border-[rgba(125,168,198,0.28)] dark:bg-[#1E2A36] dark:text-[#E7F1FA] dark:placeholder:text-[#E7F1FA]/40 dark:focus:border-[rgba(125,168,198,0.45)] dark:focus:bg-[#243445]"
             />
           </label>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="h-11 w-full shrink-0 rounded-full bg-[#F3EFE3] px-4 text-sm font-semibold text-[#163044] outline-none sm:w-auto dark:bg-[#1A1E27] dark:text-[#F5F3EE]"
-          >
-            {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-          </select>
+          <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5">
+            {SORTS.map((s) => {
+              const on = sort === s.value;
+              return (
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => setSort(s.value)}
+                  className={cn(
+                    "shrink-0 rounded-full px-3.5 py-2 text-xs font-bold transition",
+                    on ? "chip-active" : "chip-inactive"
+                  )}
+                >
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {sort === "distance" && !task?.is_remote ? (

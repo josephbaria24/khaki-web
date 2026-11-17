@@ -36,6 +36,7 @@ function pinSummary(pins, slots) {
 import { getBarangays, municipalityCoords } from "@/lib/palawanLocations";
 import { canOpenPost, canPostTask } from "@/lib/roles";
 import { api } from "@/lib/store";
+import { cleanPriceRange } from "@/lib/taskFlow";
 import { toast } from "@/lib/toast";
 
 function Field({ label, children }) {
@@ -392,7 +393,10 @@ function PostPage() {
     ? "Remote"
     : [form.location_area, form.barangay, form.location_detail].filter(Boolean).join(" · ") || "—";
   const reviewPins = pinSummary(form.pins, pinSlots);
-  const budgetLabel = `${formatPHP(budgetNum)}${form.extras?.price_type === "per_hour" ? " / hr" : ""}`;
+  const rangeDraft = cleanPriceRange(form.extras?.price_range, budgetNum);
+  const budgetLabel = `${formatPHP(budgetNum)}${form.extras?.price_type === "per_hour" ? " / hr" : ""}${
+    rangeDraft?.range ? ` · range ${formatPHP(rangeDraft.range.min)}–${formatPHP(rangeDraft.range.max)}` : ""
+  }`;
   const reviewRows = [
     ...reviewExtras.map((row) => [row.label, row.value]),
     ["Schedule", reviewSchedule],
@@ -422,6 +426,12 @@ function PostPage() {
       toast.error(msg);
       return;
     }
+    const range = cleanPriceRange(form.extras.price_range, form.budget_php);
+    if (range?.error) {
+      setError(range.error);
+      toast.error(range.error);
+      return;
+    }
     const typeField = template?.fields?.find((field) => field.key === "service_type");
     const typeOption = typeField?.options?.find((option) => option.value === form.extras.service_type);
     const isOtherType = form.extras.service_type === "other";
@@ -446,6 +456,7 @@ function PostPage() {
           ...cleanExtras(template, extras),
           service_key: categoryKey,
           min_qualification: minStage,
+          ...(range?.range ? { price_range: range.range } : {}),
           ...(Object.keys(savedPins).length ? { pins: savedPins } : {}),
         },
       });
@@ -903,7 +914,7 @@ function PostPage() {
                   No hidden fees · what you see is what you pay
                 </p>
                 <p className="mt-1.5 text-[11px] leading-snug text-[#F7F4EC]/55">
-                  Tasker pay is settled directly between you and the tasker.
+                  The task price is paid once a tasker is assigned and held by Khaki until you approve.
                 </p>
                 <button type="submit" className="mt-4 h-11 w-full rounded-full bg-[#FFFFFF] text-sm font-black text-[#11141A]">
                   Confirm Posting · {formatPHP(totalNum)}
@@ -935,8 +946,29 @@ function PostPage() {
                   <span className="text-[11px] font-semibold text-[#F7F4EC]/70">Posting fee {feeRateLabel}</span>
                   <span className="money rounded-full bg-[#C8F0D8] px-2.5 py-0.5 text-[11px] font-black text-[#163044]">{fee}</span>
                 </div>
+                <div className="mt-3 rounded-2xl bg-[#F7F4EC]/10 px-3 py-2.5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#F7F4EC]/55">Price range (optional)</p>
+                  <div className="mt-1.5 grid grid-cols-2 gap-2">
+                    {[["min", "From"], ["max", "Up to"]].map(([key, label]) => (
+                      <label key={key} className="flex h-10 items-center gap-1.5 rounded-xl bg-[#102636] px-3">
+                        <span className="text-[11px] font-bold text-[#C9D6E0]">{label} ₱</span>
+                        <input
+                          className="h-full w-full min-w-0 bg-transparent text-sm font-black text-[#F7F4EC] outline-none"
+                          type="number"
+                          min={15}
+                          value={form.extras.price_range?.[key] ?? ""}
+                          placeholder={String(budgetNum || "")}
+                          onChange={(e) => setExtra("price_range", { ...(form.extras.price_range || {}), [key]: e.target.value })}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  <p className="mt-1.5 text-[11px] leading-snug text-[#F7F4EC]/55">
+                    Taskers accept your price, or propose one inside this range for you to pick.
+                  </p>
+                </div>
                 <p className="mt-2 text-[11px] leading-snug text-[#F7F4EC]/55">
-                  Guide lang — kayo ng tasker ang mag-aayos ng bayad sa work.
+                  You pay once a tasker is assigned. Khaki holds it until you approve the work.
                 </p>
                 <p className="mt-2 rounded-2xl bg-[#F0A8A8]/15 px-3 py-2 text-[11px] font-semibold leading-snug text-[#F3C3C3]">
                   {BUDGET_DISCLAIMER}

@@ -43,15 +43,26 @@ export async function POST(request) {
       return NextResponse.json({ error: "The tasker has not marked this delivered yet." }, { status: 400 });
     }
 
-    const now = new Date().toISOString();
-    const { data: updated, error: updateError } = await admin
-      .from("escrow_holds")
-      .update({ status: "released", released_at: now })
-      .eq("id", hold.id)
-      .eq("status", "locked")
-      .select()
-      .maybeSingle();
-    if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
+    const released = await admin.rpc("release_task_payment", { p_task_id: hold.task_id, p_source: "admin" });
+    if (released.error) {
+      const msg = released.error.message || "";
+      if (!/could not find the function|schema cache/i.test(msg)) {
+        return NextResponse.json({ error: msg }, { status: 500 });
+      }
+      const { error: updateError } = await admin
+        .from("escrow_holds")
+        .update({ status: "released", released_at: new Date().toISOString() })
+        .eq("id", hold.id)
+        .eq("status", "locked");
+      if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
+      if (hold.tasker_id) {
+        await admin.from("notifications").insert({
+          user_id: hold.tasker_id,
+          task_id: hold.task_id,
+          text: `Your payout of ₱${Number(hold.tasker_payout || 0).toLocaleString("en-PH")} for "${task?.title || "a gawain"}" was released.`,
+        });
+      }
+    }
 
     await admin.from("activity_logs").insert({
       actor_id: profile.id,
@@ -60,14 +71,8 @@ export async function POST(request) {
       detail: `Released ₱${hold.tasker_payout} to ${hold.tasker_name || "the tasker"} · platform fee ₱${hold.platform_fee}`,
       target_id: hold.task_id,
     });
-    if (hold.tasker_id) {
-      await admin.from("notifications").insert({
-        user_id: hold.tasker_id,
-        task_id: hold.task_id,
-        text: `Your payout of ₱${Number(hold.tasker_payout || 0).toLocaleString("en-PH")} for "${task?.title || "a gawain"}" was released.`,
-      });
-    }
 
+    const { data: updated } = await admin.from("escrow_holds").select("*").eq("id", hold.id).maybeSingle();
     return NextResponse.json({ hold: updated || hold });
   } catch (error) {
     return NextResponse.json({ error: error.message || "Could not release escrow." }, { status: 500 });
